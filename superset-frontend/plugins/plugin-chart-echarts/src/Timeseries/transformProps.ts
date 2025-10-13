@@ -189,6 +189,7 @@ export default function transformProps(
     yAxisTitleMargin,
     yAxisTitlePosition,
     zoomable,
+    tooltip_header_column,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
   const groupBy = ensureIsArray(groupby);
@@ -613,7 +614,68 @@ export default function transformProps(
           }
           rows.push(totalRow);
         }
-        return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
+
+        let tooltipHeader = tooltipFormatter(xValue);
+
+        if (tooltip_header_column) {
+          const probeParams = Array.isArray(params) ? params : [params];
+
+          const extractCandidateRow = (p: any) => {
+            if (!p) return undefined;
+            // ECharts sometimes stores the full raw object at different keys:
+            if (p.data && typeof p.data === 'object') {
+              // common custom placements
+              if (p.data.__rawData) return p.data.__rawData;
+              if (p.data.__raw) return p.data.__raw;
+              if (p.data.raw) return p.data.raw;
+              if (p.data.origin) return p.data.origin;
+              if (p.data.payload) return p.data.payload;
+              // sometimes p.data is an object representing the raw row
+              return p.data;
+            }
+            // value might be an array [x, y, extraObj]
+            if (Array.isArray(p.value) && p.value.length > 2) {
+              const maybeObj = p.value[2];
+              if (maybeObj && typeof maybeObj === 'object') return maybeObj;
+            }
+            // fallback: some series place original data on `p` itself
+            if (p.__rawData) return p.__rawData;
+            if (p.dataIndex !== undefined && p.series && p.series.data) {
+              const sdata = p.series.data[p.dataIndex];
+              if (sdata && typeof sdata === 'object') {
+                if (sdata.__rawData) return sdata.__rawData;
+                return sdata;
+              }
+            }
+            return undefined;
+          };
+
+          let foundVal: any = undefined;
+          for (const p of probeParams) {
+            const row = extractCandidateRow(p);
+            if (row && typeof row === 'object') {
+              // prefer direct property access
+              if (Object.prototype.hasOwnProperty.call(row, tooltip_header_column)) {
+                foundVal = row[tooltip_header_column];
+                break;
+              }
+              // sometimes verboseMap uses column keys -> label mapping; try inverted key
+              if (row[tooltip_header_column] === undefined) {
+                // try case-insensitive lookup
+                const key = Object.keys(row).find(k => String(k).toLowerCase() === String(tooltip_header_column).toLowerCase());
+                if (key) {
+                  foundVal = row[key];
+                  break;
+                }
+              }
+            }
+          }
+          if (foundVal !== undefined && foundVal !== null) {
+            tooltipHeader = String(foundVal);
+          }
+        }
+
+        return tooltipHtml(rows, tooltipHeader, focusedRow);
       },
     },
     legend: {

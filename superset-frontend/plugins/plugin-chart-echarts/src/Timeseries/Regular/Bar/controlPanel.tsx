@@ -334,6 +334,24 @@ const config: ControlPanelConfig = {
               description: t('Enable data zooming controls'),
             },
           },
+          {
+            name: 'tooltip_header_column',
+            config: {
+              type: 'SelectControl',
+              label: t('Tooltip header column'),
+              description: t(
+                'Select a column whose value will be displayed as the tooltip header',  
+              ),
+              default: null,
+              clearable: true,
+              renderTrigger: true,
+              optionRenderer: (c: any) => c,
+              valueKey: 'column_name',
+              mapStateToProps: ({ datasource }) => ({
+                options: datasource?.columns || [],
+              }),
+            },
+          },
         ],
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
