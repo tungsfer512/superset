@@ -654,22 +654,47 @@ export default function transformProps(
           for (const p of probeParams) {
             const row = extractCandidateRow(p);
             if (row && typeof row === 'object') {
-              // prefer direct property access
-              if (Object.prototype.hasOwnProperty.call(row, tooltip_header_column)) {
+              // prefer direct property access (tooltip_header_column should be the column_name string)
+              if (
+                Object.prototype.hasOwnProperty.call(row, tooltip_header_column)
+              ) {
                 foundVal = row[tooltip_header_column];
                 break;
               }
-              // sometimes verboseMap uses column keys -> label mapping; try inverted key
-              if (row[tooltip_header_column] === undefined) {
-                // try case-insensitive lookup
-                const key = Object.keys(row).find(k => String(k).toLowerCase() === String(tooltip_header_column).toLowerCase());
-                if (key) {
-                  foundVal = row[key];
-                  break;
-                }
+              // if the selected tooltip_header_column is a verbose label, try mapping it back to the column key
+              const candidateKeyFromVerbose = inverted?.[tooltip_header_column];
+              if (
+                candidateKeyFromVerbose &&
+                Object.prototype.hasOwnProperty.call(
+                  row,
+                  candidateKeyFromVerbose,
+                )
+              ) {
+                foundVal = row[candidateKeyFromVerbose];
+                break;
+              }
+              // fallback: case-insensitive search on row keys
+              const key = Object.keys(row).find(
+                k =>
+                  String(k).toLowerCase() ===
+                  String(tooltip_header_column).toLowerCase(),
+              );
+              if (key) {
+                foundVal = row[key];
+                break;
               }
             }
           }
+          console.debug('tooltip_header_column debug', {
+            tooltip_header_column,
+            probeParams: probeParams.map((p: any) => ({
+              // include minimal info to avoid noisy logs
+              data: p?.data ? Object.keys(p.data).slice(0, 10) : undefined,
+              value: Array.isArray(p?.value) ? p.value.slice(0, 3) : p?.value,
+            })),
+            foundVal,
+          });
+          /* eslint-enable no-console */
           if (foundVal !== undefined && foundVal !== null) {
             tooltipHeader = String(foundVal);
           }

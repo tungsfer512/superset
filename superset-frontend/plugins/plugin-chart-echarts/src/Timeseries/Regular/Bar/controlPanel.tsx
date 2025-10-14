@@ -345,11 +345,18 @@ const config: ControlPanelConfig = {
               default: null,
               clearable: true,
               renderTrigger: true,
-              optionRenderer: (c: any) => c,
-              valueKey: 'column_name',
-              mapStateToProps: ({ datasource }) => ({
-                options: datasource?.columns || [],
-              }),
+                  optionRenderer: (c: any) =>
+                    c?.label ?? c?.value ?? String(c),
+                  valueRenderer: (c: any) => c?.label ?? c?.value ?? String(c),
+                  valueKey: 'value',
+                  mapStateToProps: ({ datasource }: { datasource?: any }) => ({
+                    options:
+                      (datasource?.columns || []).map((c: any) => ({
+                        value: c.column_name,
+                        label: c.verbose_name ?? c.column_name,
+                        original: c,
+                      })) || [],
+                  }),
             },
           },
         ],
