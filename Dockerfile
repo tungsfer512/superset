@@ -29,9 +29,9 @@ ARG NPM_BUILD_CMD="build"
 # Somehow we need python3 + build-essential on this side of the house to install node-gyp
 RUN apt-get update -qq \
     && apt-get install \
-        -yqq --no-install-recommends \
-        build-essential \
-        python3
+    -yqq --no-install-recommends \
+    build-essential \
+    python3
 
 ENV BUILD_CMD=${NPM_BUILD_CMD} \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -43,15 +43,17 @@ RUN --mount=type=bind,target=/frontend-mem-nag.sh,src=./docker/frontend-mem-nag.
 WORKDIR /app/superset-frontend
 COPY superset-frontend/package.json ./package.json
 COPY superset-frontend/package-lock.json ./package-lock.json
-RUN npm install
-
+RUN npm install --force
 # Runs the webpack build process
 COPY superset-frontend /app/superset-frontend
 RUN npm run ${BUILD_CMD}
-
 # This copies the .po files needed for translation
 RUN mkdir -p /app/superset/translations
 COPY superset/translations /app/superset/translations
+
+COPY superset-frontend/scripts /app/superset-frontend/scripts
+RUN sed -i 's/\r$//' /app/superset-frontend/scripts/po2json.sh \
+    && chmod +x /app/superset-frontend/scripts/po2json.sh || true
 # Compiles .json files from the .po files, then deletes the .po files
 RUN npm run build-translation
 RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
@@ -74,13 +76,13 @@ ENV LANG=C.UTF-8 \
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info requirements \
     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
     && apt-get update -qq && apt-get install -yqq --no-install-recommends \
-        curl \
-        default-libmysqlclient-dev \
-        libsasl2-dev \
-        libsasl2-modules-gssapi-mit \
-        libpq-dev \
-        libecpg-dev \
-        libldap2-dev \
+    curl \
+    default-libmysqlclient-dev \
+    libsasl2-dev \
+    libsasl2-modules-gssapi-mit \
+    libpq-dev \
+    libecpg-dev \
+    libldap2-dev \
     && touch superset/static/version_info.json \
     && chown -R superset:superset ./* \
     && rm -rf /var/lib/apt/lists/*
@@ -91,7 +93,7 @@ COPY --chown=superset:superset superset-frontend/package.json superset-frontend/
 COPY --chown=superset:superset requirements/base.txt requirements/
 RUN --mount=type=cache,target=/root/.cache/pip \
     apt-get update -qq && apt-get install -yqq --no-install-recommends \
-      build-essential \
+    build-essential \
     && pip install --upgrade setuptools pip \
     && pip install -r requirements/base.txt \
     && apt-get autoremove -yqq --purge build-essential \
@@ -108,12 +110,14 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy the .json translations from the frontend layer
 COPY --chown=superset:superset --from=superset-node /app/superset/translations superset/translations
 
-# Compile translations for the backend - this generates .mo files, then deletes the .po files
-COPY ./scripts/translations/generate_mo_files.sh ./scripts/translations/
-RUN ./scripts/translations/generate_mo_files.sh \
+# Compile translations for the backend - copy the generator with exec perms and run with debug
+COPY --chown=superset:superset --chmod=0755 ./scripts/translations/generate_mo_files.sh ./scripts/translations/generate_mo_files.sh
+RUN set -x \
+    && ls -la ./scripts/translations \
+    && ./scripts/translations/generate_mo_files.sh \
     && chown -R superset:superset superset/translations \
-    && rm superset/translations/messages.pot \
-    && rm superset/translations/*/LC_MESSAGES/*.po
+    && rm -f superset/translations/messages.pot \
+    && rm -f superset/translations/*/LC_MESSAGES/*.po
 
 COPY --chmod=755 ./docker/run-server.sh /usr/bin/
 USER superset
@@ -132,15 +136,15 @@ FROM lean AS dev
 USER root
 RUN apt-get update -qq \
     && apt-get install -yqq --no-install-recommends \
-        libnss3 \
-        libdbus-glib-1-2 \
-        libgtk-3-0 \
-        libx11-xcb1 \
-        libasound2 \
-        libxtst6 \
-        git \
-        pkg-config \
-        && rm -rf /var/lib/apt/lists/*
+    libnss3 \
+    libdbus-glib-1-2 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libasound2 \
+    libxtst6 \
+    git \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install playwright
@@ -163,7 +167,7 @@ RUN apt-get update -qq \
 COPY --chown=superset:superset requirements/development.txt requirements/
 RUN --mount=type=cache,target=/root/.cache/pip \
     apt-get update -qq && apt-get install -yqq --no-install-recommends \
-      build-essential \
+    build-essential \
     && pip install -r requirements/development.txt \
     && apt-get autoremove -yqq --purge build-essential \
     && rm -rf /var/lib/apt/lists/*

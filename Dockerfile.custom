@@ -1,0 +1,17 @@
+# Custom Dockerfile to rebuild frontend inside image and copy built assets
+FROM apache/superset:4.1.2
+USER root
+
+# Copy local frontend source into image
+COPY superset-frontend/ /app/superset-frontend/
+
+# Install and build frontend, then copy generated assets into superset static dir
+RUN cd /app/superset-frontend \
+    && npm ci --silent \
+    && NODE_OPTIONS=--max-old-space-size=8192 npm run build \
+    && mkdir -p /app/superset/static/assets \
+    && cp -r /app/superset-frontend/build/* /app/superset/static/assets/
+
+USER superset
+
+CMD ["/usr/bin/run-server.sh"]

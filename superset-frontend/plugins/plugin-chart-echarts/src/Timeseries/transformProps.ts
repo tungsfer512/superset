@@ -280,7 +280,35 @@ export default function transformProps(
   const array = ensureIsArray(chartProps.rawFormData?.time_compare);
   const inverted = invert(verboseMap);
 
-  const offsetLineWidths = {};
+  const headerLookup = new Map<string, any>();
+  if (tooltip_header_column && Array.isArray(data) && data.length) {
+    for (const row of data) {
+      if (!row || typeof row !== 'object') continue;
+      const xKey =
+        xAxisLabel && Object.prototype.hasOwnProperty.call(row, xAxisLabel)
+          ? String(row[xAxisLabel])
+          : undefined;
+      const tooltipVal = Object.prototype.hasOwnProperty.call(
+        row,
+        tooltip_header_column,
+      )
+        ? row[tooltip_header_column]
+        : undefined;
+      if (!tooltipVal) continue;
+      Object.keys(row).forEach(col => {
+        if (col === xAxisLabel) return;
+        const seriesName = String(col);
+        const mapKey =
+          xKey !== undefined ? `${xKey}||${seriesName}` : `||${seriesName}`;
+        headerLookup.set(mapKey, tooltipVal);
+      });
+      if (xKey !== undefined) {
+        headerLookup.set(`${xKey}||`, tooltipVal);
+      }
+    }
+  }
+
+  const offsetLineWidths: Record<string, number> = {};
 
   rawSeries.forEach(entry => {
     const derivedSeries = isDerivedSeries(entry, chartProps.rawFormData);
@@ -685,16 +713,6 @@ export default function transformProps(
               }
             }
           }
-          console.debug('tooltip_header_column debug', {
-            tooltip_header_column,
-            probeParams: probeParams.map((p: any) => ({
-              // include minimal info to avoid noisy logs
-              data: p?.data ? Object.keys(p.data).slice(0, 10) : undefined,
-              value: Array.isArray(p?.value) ? p.value.slice(0, 3) : p?.value,
-            })),
-            foundVal,
-          });
-          /* eslint-enable no-console */
           if (foundVal !== undefined && foundVal !== null) {
             tooltipHeader = String(foundVal);
           }
