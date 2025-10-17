@@ -104,8 +104,12 @@ COPY --chown=superset:superset --from=superset-node /app/superset/static/assets 
 
 ## Lastly, let's install superset itself
 COPY --chown=superset:superset superset superset
+COPY --chown=superset:superset superset/translations/vi /app/superset/translations/vi
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -e .
+    pip install -e . \
+    && (flask fab babel-compile --target superset/translations || true) \
+    && (pybabel compile -d superset/translations || true) \
+    && chown -R superset:superset superset/translations
 
 # Copy the .json translations from the frontend layer
 COPY --chown=superset:superset --from=superset-node /app/superset/translations superset/translations
