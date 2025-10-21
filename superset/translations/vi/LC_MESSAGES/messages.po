@@ -8798,7 +8798,13 @@ msgid "See query details"
 msgstr "Xem chi tiết truy vấn"
 
 msgid "See table schema"
-msgstr "Xem schema bảng"
+msgstr "Xem bảng schema"
+
+msgid "This may be triggered by"
+msgstr "Lỗi này có thể do"
+
+msgid "User"
+msgstr "Người dùng"
 
 msgid "Select"
 msgstr "Chọn"
@@ -13550,32 +13556,62 @@ msgstr "Đăng nhập"
 msgid "minutes ago"
 msgstr "phút trước"
 
+msgid " minutes ago "
+msgstr " phút trước "
+
 msgid "minute ago"
+msgstr "phút trước" 
+
+msgid " minute ago "
 msgstr "phút trước" 
 
 msgid "hours ago"
 msgstr "giờ trước" 
 
+msgid " hours ago "
+msgstr " giờ trước " 
+
 msgid "hour ago"
 msgstr "giờ trước" 
+
+msgid " hour ago "
+msgstr " giờ trước " 
 
 msgid "years ago"
 msgstr "năm trước"
 
+msgid " years ago "
+msgstr " năm trước "
+
 msgid "year ago"
 msgstr "năm trước"
 
+msgid " year ago "
+msgstr " năm trước "
+
 msgid "days ago"
+msgstr "ngày trước"
+
+msgid " days ago "
 msgstr "ngày trước"
 
 msgid "day ago"
 msgstr "ngày trước"
 
+msgid " day ago "
+msgstr "ngày trước"
+
 msgid "weeks ago"
+msgstr "tuần trước
+
+msgid " weeks ago "
 msgstr "tuần trước
 
 msgid "week ago"
 msgstr "tuần trước"
+
+msgid " week ago "
+msgstr " tuần trước "
 
 msgid "List Users"
 msgstr "Danh sách người dùng"
@@ -13672,3 +13708,9 @@ msgstr "Chu kỳ mùa theo năm"
 
 msgid "WEEKLY SEASONALITY"
 msgstr "Chu kỳ mùa theo tuần"
+
+msgid "List Roles"
+msgstr "Danh sách vai trò"
+
+msgid "a second ago"
+msgstr "một giây trước"
