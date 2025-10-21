@@ -3362,10 +3362,10 @@ msgid "Dashboards"
 msgstr "Các bảng điều khiển"
 
 msgid "Dashboards could not be created."
-msgstr "Không thể tạo các bảng điều khiển."
+msgstr "Không thể tạo bảng điều khiển."
 
 msgid "Dashboards do not exist"
-msgstr "Các bảng điều khiển không tồn tại"
+msgstr "Bảng điều khiển không tồn tại"
 
 msgid "Dashed"
 msgstr "Nét đứt"
@@ -13540,3 +13540,39 @@ msgstr "Năm"
 
 msgid "zoom area"
 msgstr "Khu vực phóng to"
+
+msgid "Enter your login and password below:"
+msgstr "Nhập thông tin đăng nhập bên dưới:"
+
+msgid "Sign In"
+msgstr "Đăng nhập"
+
+msgid "minutes ago"
+msgstr "phút trước"
+
+msgid "minute ago"
+msgstr "phút trước" 
+
+msgid "hours ago"
+msgstr "giờ trước" 
+
+msgid "hour ago"
+msgstr "giờ trước" 
+
+msgid "years ago"
+msgstr "năm trước"
+
+msgid "year ago"
+msgstr "năm trước"
+
+msgid "days ago"
+msgstr "ngày trước"
+
+msgid "day ago"
+msgstr "ngày trước"
+
+msgid "weeks ago"
+msgstr "tuần trước
+
+msgid "week ago"
+msgstr "tuần trước
