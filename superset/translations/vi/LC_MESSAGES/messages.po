@@ -13575,4 +13575,16 @@ msgid "weeks ago"
 msgstr "tuần trước
 
 msgid "week ago"
-msgstr "tuần trước
+msgstr "tuần trước"
+
+msgid "List Users"
+msgstr "Danh sách người dùng"
+
+msgid "First Name"
+msgstr "Tên"
+
+msgid "Last Name"
+msgstr "Họ" 
+
+msgid "Is Active"
+msgstr "Hoạt động"
