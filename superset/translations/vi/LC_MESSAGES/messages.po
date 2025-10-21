@@ -13588,3 +13588,87 @@ msgstr "Họ"
 
 msgid "Is Active"
 msgstr "Hoạt động"
+
+msgid "Show record"
+msgstr "Xem bản ghi"
+
+msgid "Edit record"
+msgstr "Chỉnh sửa bản ghi"
+
+msgid "Delete record"
+msgstr "Xóa bản ghi"
+
+msgid "Personal Info"
+msgstr "Thông tin cá nhân"
+
+msgid "Audit Info"
+msgstr "Thông tin kiểm toán"
+
+msgid "RESET PASSWORD"
+msgstr "ĐẶT LẠI MẬT KHẨU"
+
+msgid "Write the user last name"
+msgstr "Nhập họ của người dùng"
+
+msgid "Write the user first name or names"
+msgstr "Nhập tên của người dùng"
+
+msgid "Username valid for authentication on DB or LDAP, unused for OID auth"
+msgstr "Tên người dùng hợp lệ để xác thực trên DB hoặc LDAP, không sử dụng cho xác thực OID"
+
+msgid "The user's email, this will also be used for OID auth"
+msgstr "Email của người dùng, sử dụng cho xác thực OID"
+
+msgid "The user role on the application, this will associate with a list of permissions"
+msgstr "Vai trò người dùng trên ứng dụng, sẽ liên kết với danh sách quyền hạn"
+
+msgid "Add a new record"
+msgstr "Thêm bản ghi mới"
+
+msgid "FAILED LOGIN COUNT"
+msgstr "SỐ LẦN ĐĂNG NHẬP THẤT BẠI"
+
+msgid "LOGIN COUNT"
+msgstr "SỐ LẦN ĐĂNG NHẬP"
+
+msgid "CHANGED ON"
+msgstr "NGÀY CHỈNH SỬA"
+
+msgid "LAST LOGIN"
+msgstr "LẦN ĐĂNG NHẬP CUỐI"
+
+msgid "PERMISSIONS"
+msgstr "QUYỀN HẠN"  
+
+msgid "X-AXIS"
+msgstr "TRỤC X"
+
+msgid "TIME GRAIN"
+msgstr "MỨC THỜI GIAN"
+
+msgid "This section contains options that allow for advanced analytical post processing of query results"
+msgstr "Phần này chứa các tùy chọn cho phép xử lý hậu kỳ phân tích nâng cao của kết quả truy vấn"  
+
+msgid "This metric is used to define row selection criteria (how the rows are sorted) if a series or row limit is present. If not defined, it reverts to the first metric (where appropriate)."
+msgstr "Chỉ số này được sử dụng để xác định tiêu chí chọn hàng (cách sắp xếp các hàng) nếu có giới hạn chuỗi hoặc giới hạn hàng. Nếu không được xác định, chỉ số này sẽ trở về chỉ số đầu tiên (nếu phù hợp)."
+
+msgid "TRUNCATE METRIC"
+msgstr "RÚT GỌN CHỈ SỐ"
+
+msgid "Whether to truncate metrics"
+msgstr "Rút gọn chỉ số hay không"
+
+msgid "Width of the confidence interval. Should be between 0 and 1"
+msgstr "Độ rộng của khoảng tin cậy. Phải nằm trong khoảng từ 0 đến 1"
+
+msgid "default"
+msgstr "Mặc định"
+
+msgid "Yes"
+msgstr "Có"
+
+msgid "YEARLY SEASONALITY"
+msgstr "Chu kỳ mùa theo năm"
+
+msgid "WEEKLY SEASONALITY"
+msgstr "Chu kỳ mùa theo tuần"
