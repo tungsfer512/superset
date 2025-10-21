@@ -13714,3 +13714,6 @@ msgstr "Danh sách vai trò"
 
 msgid "a second ago"
 msgstr "một giây trước"
+
+msgid "TYPE"
+msgstr "DẠNG"
