@@ -50,19 +50,19 @@ export const TIMESERIES_CONSTANTS = {
 };
 
 export const LABEL_POSITION: [LabelPositionEnum, string][] = [
-  [LabelPositionEnum.Top, 'Top'],
-  [LabelPositionEnum.Left, 'Left'],
-  [LabelPositionEnum.Right, 'Right'],
-  [LabelPositionEnum.Bottom, 'Bottom'],
-  [LabelPositionEnum.Inside, 'Inside'],
-  [LabelPositionEnum.InsideLeft, 'Inside left'],
-  [LabelPositionEnum.InsideRight, 'Inside right'],
-  [LabelPositionEnum.InsideTop, 'Inside top'],
-  [LabelPositionEnum.InsideBottom, 'Inside bottom'],
-  [LabelPositionEnum.InsideTopLeft, 'Inside top left'],
-  [LabelPositionEnum.InsideBottomLeft, 'Inside bottom left'],
-  [LabelPositionEnum.InsideTopRight, 'Inside top right'],
-  [LabelPositionEnum.InsideBottomRight, 'Inside bottom right'],
+  [LabelPositionEnum.Top, t('Top')],
+  [LabelPositionEnum.Left, t('Left')],
+  [LabelPositionEnum.Right, t('Right')],
+  [LabelPositionEnum.Bottom, t('Bottom')],
+  [LabelPositionEnum.Inside, t('Inside')],
+  [LabelPositionEnum.InsideLeft, t('Inside left')],
+  [LabelPositionEnum.InsideRight, t('Inside right')],
+  [LabelPositionEnum.InsideTop, t('Inside top')],
+  [LabelPositionEnum.InsideBottom, t('Inside bottom')],
+  [LabelPositionEnum.InsideTopLeft, t('Inside top left')],
+  [LabelPositionEnum.InsideBottomLeft, t('Inside bottom left')],
+  [LabelPositionEnum.InsideTopRight, t('Inside top right')],
+  [LabelPositionEnum.InsideBottomRight, t('Inside bottom right')],
 ];
 
 export enum OpacityEnum {

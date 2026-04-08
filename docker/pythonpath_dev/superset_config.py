@@ -99,7 +99,17 @@ class CeleryConfig:
 
 CELERY_CONFIG = CeleryConfig
 
-FEATURE_FLAGS = {"ALERT_REPORTS": True}
+FEATURE_FLAGS = {
+    "ALERT_REPORTS": True,
+    "EMBEDDED_SUPERSET": True,
+    "GUEST_TOKEN": True,
+    "ENABLE_TEMPLATE_PROCESSING": True,
+    "DASHBOARD_NATIVE_FILTERS": True,
+    "DASHBOARD_NATIVE_FILTERS_SET": True,
+    "DASHBOARD_NATIVE_FILTERS_USE_CACHE": False,
+    "DASHBOARD_CROSS_FILTERS": True,
+    "DASHBOARD_RBAC": True,
+}
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
 WEBDRIVER_BASEURL = f"http://superset_app{os.environ.get('SUPERSET_APP_ROOT', '/')}/"  # When using docker compose baseurl should be http://superset_nginx{ENV{BASEPATH}}/  # noqa: E501
 # The base URL for the email report hyperlinks.
@@ -122,6 +132,102 @@ if os.getenv("CYPRESS_CONFIG") == "true":
     from superset_test_config import *  # noqa
 
     sys.path.pop(0)
+
+
+APP_NAME = os.getenv("APP_NAME", "Dashboard")
+
+# Allow HTML, CSS and Handlebars templates in markdown components
+# Must set HTML_SANITIZATION = False to allow CSS Styles box to work
+# But still use HTML_SANITIZATION_SCHEMA_EXTENSIONS for controlled sanitization
+HTML_SANITIZATION = False
+HTML_SANITIZATION_SCHEMA_EXTENSIONS = {
+    "attributes": {
+        "*": ["style", "class", "className", "id"],
+    },
+    "tagNames": [
+        "style",
+        "div",
+        "span",
+        "ul",
+        "li",
+        "p",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+    ],
+    "strip": False,
+}
+
+BABEL_DEFAULT_LOCALE = os.getenv("BABEL_DEFAULT_LOCALE", "vi")
+BABEL_DEFAULT_TIMEZONE = os.getenv("BABEL_DEFAULT_TIMEZONE", "Asia/Ho_Chi_Minh")
+
+LANGUAGES = {
+    "vi": {"flag": "vn", "name": "Tiếng Việt"},
+    "en": {"flag": "us", "name": "English"},
+    "fr": {"flag": "fr", "name": "French"},
+    "pt_BR": {"flag": "br", "name": "Brazilian Portuguese"},
+    "es": {"flag": "es", "name": "Spanish"},
+    "it": {"flag": "it", "name": "Italian"},
+    "zh": {"flag": "cn", "name": "Chinese"},
+    "ja": {"flag": "jp", "name": "Japanese"},
+    "de": {"flag": "de", "name": "German"},
+    "pt": {"flag": "pt", "name": "Portuguese"},
+    "ru": {"flag": "ru", "name": "Russian"},
+    "ko": {"flag": "kr", "name": "Korean"},
+    "sl": {"flag": "si", "name": "Slovenian"},
+}
+
+PUBLIC_ROLE_LIKE = os.getenv("PUBLIC_ROLE_LIKE", "Gamma")
+
+BABEL_TRANSLATION_DIRS = "/app/superset/translations"
+
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "your-super-secret-key-here-please-change-in-production"
+)
+
+WTF_CSRF_ENABLED = False
+
+TALISMAN_ENABLED = False
+
+ALLOWED_EMBEDDED_DOMAINS_ENV = os.environ.get("ALLOWED_EMBEDDED_DOMAINS", "").strip()
+if ALLOWED_EMBEDDED_DOMAINS_ENV == "*":
+    ALLOWED_EMBEDDED_DOMAINS = ["*"]
+else:
+    ALLOWED_EMBEDDED_DOMAINS = [
+        d.strip() for d in ALLOWED_EMBEDDED_DOMAINS_ENV.split(",") if d.strip()
+    ]
+    if not ALLOWED_EMBEDDED_DOMAINS:
+        ALLOWED_EMBEDDED_DOMAINS = ["*"]
+
+
+OVERRIDE_HTTP_HEADERS = {
+    "Content-Security-Policy": "frame-ancestors *;",
+}
+ENABLE_PROXY_FIX = True
+
+
+ENABLE_CORS = True
+CORS_OPTIONS = {
+    "supports_credentials": False,
+    "origins": "*",
+    "allow_headers": ["*"],
+    "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    "expose_headers": ["*"],
+}
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = False
+
+GUEST_ROLE_NAME = "Gamma"
+GUEST_TOKEN_JWT_PUBLIC_KEY = ""
+
+SQLLAB_ASYNC_TIME_LIMIT_SEC = 60 * 60 * 6  # 6 hours
+SQLALCHEMY_POOL_SIZE = 15
+SQLALCHEMY_MAX_OVERFLOW = 20
+SQLALCHEMY_POOL_TIMEOUT = 180
 
 #
 # Optionally import superset_config_docker.py (which will have been included on

@@ -93,9 +93,9 @@ COPY superset/translations /app/superset/translations
 # Build translations if enabled, then cleanup localization files
 RUN if [ "$BUILD_TRANSLATIONS" = "true" ]; then \
         npm run build-translation; \
-    fi; \
-    rm -rf /app/superset/translations/*/*/*.po; \
-    rm -rf /app/superset/translations/*/*/*.mo;
+    fi;
+    # rm -rf /app/superset/translations/*/*/*.po; \
+    # rm -rf /app/superset/translations/*/*/*.mo;
 
 
 ######################################################################
@@ -136,9 +136,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY superset/translations/ /app/translations_mo/
 RUN if [ "$BUILD_TRANSLATIONS" = "true" ]; then \
         pybabel compile -d /app/translations_mo | true; \
-    fi; \
-    rm -f /app/translations_mo/*/*/*.po; \
-    rm -f /app/translations_mo/*/*/*.json;
+    fi;
+    # rm -f /app/translations_mo/*/*/*.po; \
+    # rm -f /app/translations_mo/*/*/*.json;
 
 ######################################################################
 # Python APP common layer
@@ -202,7 +202,7 @@ COPY --from=superset-node /app/superset/static/assets superset/static/assets
 # TODO, when the next version comes out, use --exclude superset/translations
 COPY superset superset
 # TODO in the meantime, remove the .po files
-RUN rm superset/translations/*/*/*.po
+# RUN rm superset/translations/*/*/*.po
 
 # Merging translations from backend and frontend stages
 COPY --from=superset-node /app/superset/translations superset/translations

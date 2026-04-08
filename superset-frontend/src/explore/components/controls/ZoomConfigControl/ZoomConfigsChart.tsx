@@ -77,7 +77,7 @@ export const ZoomConfigsChart: FC<ZoomConfigsChartProps> = ({
       series: [
         {
           id: 'width',
-          name: 'width',
+          name: t('width'),
           type: 'bar',
           animation: false,
           showBackground: true,
@@ -94,7 +94,7 @@ export const ZoomConfigsChart: FC<ZoomConfigsChartProps> = ({
         },
         {
           id: 'height',
-          name: 'height',
+          name: t('height'),
           type: 'bar',
           animation: false,
           showBackground: true,

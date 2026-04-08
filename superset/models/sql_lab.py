@@ -28,8 +28,8 @@ import sqlalchemy as sqla
 from flask import current_app as app
 from flask_appbuilder import Model
 from flask_appbuilder.models.decorators import renders
-from flask_babel import gettext as __
-from humanize import naturaltime
+from flask_babel import get_locale, gettext as __
+import humanize
 from jinja2.exceptions import TemplateError
 from markupsafe import Markup
 from sqlalchemy import (
@@ -465,13 +465,28 @@ class SavedQuery(
     def url(self) -> str:
         return f"/sqllab?savedQueryId={self.id}"
 
+    def _format_time_humanized(self, timestamp: datetime) -> str:
+        locale = str(get_locale())
+        time_diff = datetime.now() - timestamp
+        # Skip activation for 'en' locale as it's humanize's default locale
+        if locale == "en":
+            return humanize.naturaltime(time_diff)
+        try:
+            humanize.i18n.activate(locale)
+            result = humanize.naturaltime(time_diff)
+            humanize.i18n.deactivate()
+            return result
+        except Exception as e:
+            logger.warning(f"Locale '{locale}' is not supported in humanize: {e}")
+            return humanize.naturaltime(time_diff)
+
     @property
     def last_run_humanized(self) -> str:
-        return naturaltime(datetime.now() - self.changed_on)
+        return self._format_time_humanized(datetime.now() - self.changed_on)
 
     @property
     def _last_run_delta_humanized(self) -> str:
-        return naturaltime(datetime.now() - self.changed_on)
+        return self._format_time_humanized(datetime.now() - self.changed_on)
 
     @renders("changed_on")
     def last_run_delta_humanized(self) -> str:
