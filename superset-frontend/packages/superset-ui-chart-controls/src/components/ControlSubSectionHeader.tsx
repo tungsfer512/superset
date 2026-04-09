@@ -16,12 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { styled, css } from '@superset-ui/core';
+import { ReactNode } from 'react';
+import { styled, css, t } from '@superset-ui/core';
 
-export const ControlSubSectionHeader = styled.div`
+const ControlSubSectionHeaderRoot = styled.div`
   ${({ theme }) => css`
     font-weight: ${theme.fontWeightStrong};
     margin-bottom: ${theme.sizeUnit}px;
     font-size: ${theme.fontSizeSM}px;
   `}
 `;
+
+type Props = {
+  children?: ReactNode;
+};
+
+export const ControlSubSectionHeader = ({ children }: Props) => (
+  <ControlSubSectionHeaderRoot>
+    {typeof children === 'string' ? t(children) : children}
+  </ControlSubSectionHeaderRoot>
+);

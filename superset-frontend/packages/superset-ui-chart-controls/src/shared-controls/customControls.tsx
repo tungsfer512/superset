@@ -92,7 +92,7 @@ export const contributionModeControl = {
   name: 'contributionMode',
   config: {
     type: 'SelectControl',
-    label: t('Contribution Mode'),
+    label: () => t('Contribution Mode'),
     default: null,
     choices: [
       [null, t('None')],
@@ -112,7 +112,7 @@ export const aggregationControl = {
   name: 'aggregation',
   config: {
     type: 'SelectControl',
-    label: t('Aggregation Method'),
+    label: () => t('Aggregation Method'),
     default: 'LAST_VALUE',
     clearable: false,
     renderTrigger: false,

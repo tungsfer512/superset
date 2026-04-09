@@ -1,3 +1,8 @@
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { ExplorePageState } from 'src/explore/types';
+import { Locale } from 'antd/es/locale';
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,9 +23,7 @@
  */
 
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { ExplorePageState } from 'src/explore/types';
+
 import 'dayjs/locale/en';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/es';
@@ -35,9 +38,9 @@ import 'dayjs/locale/ko';
 import 'dayjs/locale/sk';
 import 'dayjs/locale/sl';
 import 'dayjs/locale/nl';
+import 'dayjs/locale/vi';
 
 /* eslint-disable no-restricted-imports */
-import { Locale } from 'antd/es/locale';
 
 export const LOCALE_MAPPING = {
   en: () => import('antd/locale/en_US'),
@@ -54,6 +57,7 @@ export const LOCALE_MAPPING = {
   sk: () => import('antd/locale/sk_SK'),
   sl: () => import('antd/locale/sl_SI'),
   nl: () => import('antd/locale/nl_NL'),
+  vi: () => import('antd/locale/vi_VN'),
 };
 /* eslint-enable no-restricted-imports */
 

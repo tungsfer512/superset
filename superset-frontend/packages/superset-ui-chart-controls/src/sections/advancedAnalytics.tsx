@@ -23,7 +23,7 @@ import { ControlPanelSectionConfig } from '../types';
 import { formatSelectOptions, displayTimeRelatedControls } from '../utils';
 
 export const advancedAnalyticsControls: ControlPanelSectionConfig = {
-  label: t('Advanced analytics'),
+  label: () => t('Advanced analytics'),
   tabOverride: 'data',
   description: t(
     'This section contains options ' +
@@ -38,7 +38,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
         name: 'rolling_type',
         config: {
           type: 'SelectControl',
-          label: t('Rolling function'),
+          label: () => t('Rolling function'),
           default: null,
           choices: [[null, t('None')]].concat(
             formatSelectOptions(Object.values(RollingType)),
@@ -55,7 +55,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
         name: 'rolling_periods',
         config: {
           type: 'TextControl',
-          label: t('Periods'),
+          label: () => t('Periods'),
           isInt: true,
           description: t(
             'Defines the size of the rolling window function, ' +
@@ -79,7 +79,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
         name: 'min_periods',
         config: {
           type: 'TextControl',
-          label: t('Min periods'),
+          label: () => t('Min periods'),
           isInt: true,
           description: t(
             'The minimum number of rolling periods required to show ' +
@@ -109,7 +109,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
           type: 'SelectControl',
           multi: true,
           freeForm: true,
-          label: t('Time shift'),
+          label: () => t('Time shift'),
           choices: [
             ['1 day ago', t('1 day ago')],
             ['1 week ago', t('1 week ago')],
@@ -136,7 +136,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
         name: 'comparison_type',
         config: {
           type: 'SelectControl',
-          label: t('Calculation type'),
+          label: () => t('Calculation type'),
           default: 'values',
           choices: [
             [ComparisonType.Values, t('Actual values')],
@@ -159,7 +159,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
         config: {
           type: 'SelectControl',
           freeForm: true,
-          label: t('Rule'),
+          label: () => t('Rule'),
           default: null,
           choices: [
             ['1T', t('1 minutely frequency')],
@@ -180,7 +180,7 @@ export const advancedAnalyticsControls: ControlPanelSectionConfig = {
         name: 'resample_method',
         config: {
           type: 'SelectControl',
-          label: t('Fill method'),
+          label: () => t('Fill method'),
           default: null,
           choices: [
             ['asfreq', t('Null imputation')],

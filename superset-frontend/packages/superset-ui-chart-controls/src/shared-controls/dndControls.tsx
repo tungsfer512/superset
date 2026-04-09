@@ -75,7 +75,7 @@ export const dndGroupByControl: SharedControlConfig<
   ColumnMeta
 > = {
   type: 'DndColumnSelect',
-  label: t('Dimensions'),
+  label: () => t('Dimensions'),
   multi: true,
   freeForm: true,
   clearable: true,
@@ -125,13 +125,13 @@ export const dndGroupByControl: SharedControlConfig<
 
 export const dndColumnsControl: typeof dndGroupByControl = {
   ...dndGroupByControl,
-  label: t('Columns'),
+  label: () => t('Columns'),
   description: t('Add dataset columns here to group the pivot table columns.'),
 };
 
 export const dndSeriesControl: typeof dndGroupByControl = {
   ...dndGroupByControl,
-  label: t('Dimension'),
+  label: () => t('Dimension'),
   multi: false,
   default: null,
   description: t(
@@ -142,7 +142,7 @@ export const dndSeriesControl: typeof dndGroupByControl = {
 
 export const dndEntityControl: typeof dndGroupByControl = {
   ...dndGroupByControl,
-  label: t('Entity'),
+  label: () => t('Entity'),
   default: null,
   multi: false,
   validators: [validateNonEmpty],
@@ -153,7 +153,7 @@ export const dndAdhocFilterControl: SharedControlConfig<
   'DndFilterSelect' | 'AdhocFilterControl'
 > = {
   type: 'DndFilterSelect',
-  label: t('Filters'),
+  label: () => t('Filters'),
   default: [],
   description: '',
   mapStateToProps: ({ datasource, form_data }) => ({
@@ -175,7 +175,7 @@ export const dndAdhocMetricsControl: SharedControlConfig<
 > = {
   type: 'DndMetricSelect',
   multi: true,
-  label: t('Metrics'),
+  label: () => t('Metrics'),
   validators: [validateNonEmpty],
   mapStateToProps: ({ datasource }) => ({
     columns: datasource?.columns || [],
@@ -193,7 +193,7 @@ export const dndAdhocMetricsControl: SharedControlConfig<
 export const dndAdhocMetricControl: typeof dndAdhocMetricsControl = {
   ...dndAdhocMetricsControl,
   multi: false,
-  label: t('Metric'),
+  label: () => t('Metric'),
   description: t(
     'Select a metric to display. ' +
       'You can use an aggregation function on a column ' +
@@ -203,20 +203,20 @@ export const dndAdhocMetricControl: typeof dndAdhocMetricsControl = {
 
 export const dndTooltipColumnsControl: typeof dndColumnsControl = {
   ...dndColumnsControl,
-  label: t('Tooltip (columns)'),
+  label: () => t('Tooltip (columns)'),
   description: t('Columns to show in the tooltip.'),
 };
 
 export const dndTooltipMetricsControl: typeof dndAdhocMetricsControl = {
   ...dndAdhocMetricsControl,
-  label: t('Tooltip (metrics)'),
+  label: () => t('Tooltip (metrics)'),
   description: t('Metrics to show in the tooltip.'),
   validators: [],
 };
 
 export const dndAdhocMetricControl2: typeof dndAdhocMetricControl = {
   ...dndAdhocMetricControl,
-  label: t('Right Axis Metric'),
+  label: () => t('Right Axis Metric'),
   clearable: true,
   description: t('Select a metric to display on the right axis'),
 };
@@ -225,7 +225,7 @@ export const dndSortByControl: SharedControlConfig<
   'DndMetricSelect' | 'MetricsControl'
 > = {
   type: 'DndMetricSelect',
-  label: t('Sort query by'),
+  label: () => t('Sort query by'),
   default: null,
   description: t(
     'Orders the query result that generates the source data for this chart. ' +
@@ -242,14 +242,14 @@ export const dndSortByControl: SharedControlConfig<
 
 export const dndSizeControl: typeof dndAdhocMetricControl = {
   ...dndAdhocMetricControl,
-  label: t('Bubble Size'),
+  label: () => t('Bubble Size'),
   description: t('Metric used to calculate bubble size'),
   default: null,
 };
 
 export const dndXControl: typeof dndAdhocMetricControl = {
   ...dndAdhocMetricControl,
-  label: t('X Axis'),
+  label: () => t('X Axis'),
   description: t(
     "The dataset column/metric that returns the values on your chart's x-axis.",
   ),
@@ -258,7 +258,7 @@ export const dndXControl: typeof dndAdhocMetricControl = {
 
 export const dndYControl: typeof dndAdhocMetricControl = {
   ...dndAdhocMetricControl,
-  label: t('Y Axis'),
+  label: () => t('Y Axis'),
   description: t(
     "The dataset column/metric that returns the values on your chart's y-axis.",
   ),
@@ -267,7 +267,7 @@ export const dndYControl: typeof dndAdhocMetricControl = {
 
 export const dndSecondaryMetricControl: typeof dndAdhocMetricControl = {
   ...dndAdhocMetricControl,
-  label: t('Color Metric'),
+  label: () => t('Color Metric'),
   default: null,
   validators: [],
   description: t('A metric to use for color'),

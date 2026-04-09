@@ -39,13 +39,13 @@ const controlsWithoutXAxis: ControlSetRow[] = [
 ];
 
 export const echartsTimeSeriesQuery: ControlPanelSectionConfig = {
-  label: t('Query'),
+  label: () => t('Query'),
   expanded: true,
   controlSetRows: [['x_axis'], ['time_grain_sqla'], ...controlsWithoutXAxis],
 };
 
 export const echartsTimeSeriesQueryWithXAxisSort: ControlPanelSectionConfig = {
-  label: t('Query'),
+  label: () => t('Query'),
   expanded: true,
   controlSetRows: [
     ['x_axis'],

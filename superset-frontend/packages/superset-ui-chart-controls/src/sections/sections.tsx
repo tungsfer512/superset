@@ -23,7 +23,7 @@ import { ControlPanelSectionConfig } from '../types';
 // Not recommended for use in third-party plugins.
 
 const baseTimeSection = {
-  label: t('Time'),
+  label: () => t('Time'),
   expanded: true,
   description: t('Time related form attributes'),
 };
@@ -39,7 +39,7 @@ export const legacyTimeseriesTime: ControlPanelSectionConfig = {
 };
 
 export const datasourceAndVizType: ControlPanelSectionConfig = {
-  label: t('Datasource & Chart Type'),
+  label: () => t('Datasource & Chart Type'),
   expanded: true,
   controlSetRows: [
     ['datasource'],
@@ -49,7 +49,7 @@ export const datasourceAndVizType: ControlPanelSectionConfig = {
         name: 'slice_id',
         config: {
           type: 'HiddenControl',
-          label: t('Chart ID'),
+          label: () => t('Chart ID'),
           hidden: true,
           description: t('The id of the active chart'),
         },
@@ -58,7 +58,7 @@ export const datasourceAndVizType: ControlPanelSectionConfig = {
         name: 'cache_timeout',
         config: {
           type: 'HiddenControl',
-          label: t('Cache Timeout (seconds)'),
+          label: () => t('Cache Timeout (seconds)'),
           hidden: true,
           description: t('The number of seconds before expiring the cache'),
         },
@@ -67,7 +67,7 @@ export const datasourceAndVizType: ControlPanelSectionConfig = {
         name: 'url_params',
         config: {
           type: 'HiddenControl',
-          label: t('URL Parameters'),
+          label: () => t('URL Parameters'),
           hidden: true,
           description: t(
             'Extra url parameters for use in Jinja templated queries',
@@ -78,7 +78,7 @@ export const datasourceAndVizType: ControlPanelSectionConfig = {
         name: 'custom_params',
         config: {
           type: 'HiddenControl',
-          label: t('Extra Parameters'),
+          label: () => t('Extra Parameters'),
           hidden: true,
           description: t(
             'Extra parameters that any plugins can choose to set for use in Jinja templated queries',
@@ -90,12 +90,12 @@ export const datasourceAndVizType: ControlPanelSectionConfig = {
 };
 
 export const colorScheme: ControlPanelSectionConfig = {
-  label: t('Color Scheme'),
+  label: () => t('Color Scheme'),
   controlSetRows: [['color_scheme']],
 };
 
 export const annotations: ControlPanelSectionConfig = {
-  label: t('Annotations and Layers'),
+  label: () => t('Annotations and Layers'),
   tabOverride: 'data',
   expanded: true,
   controlSetRows: [

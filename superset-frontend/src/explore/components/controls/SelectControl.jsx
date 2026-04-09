@@ -127,12 +127,16 @@ export const getSortComparator = (
 
 export const innerGetOptions = props => {
   const { choices, optionRenderer, valueKey } = props;
+  const translateIfString = label =>
+    typeof label === 'string' ? t(label) : label;
   let options = [];
   if (props.options) {
     options = props.options.map(o => ({
       ...o,
       value: o[valueKey],
-      label: optionRenderer ? optionRenderer(o) : o.label || o[valueKey],
+      label: optionRenderer
+        ? optionRenderer(o)
+        : translateIfString(o.label || o[valueKey]),
     }));
   } else if (choices) {
     // Accepts different formats of input
@@ -141,17 +145,17 @@ export const innerGetOptions = props => {
         const [value, label] = c.length > 1 ? c : [c[0], c[0]];
         return {
           value,
-          label,
+          label: translateIfString(label),
         };
       }
       if (Object.is(c)) {
         return {
           ...c,
           value: c[valueKey],
-          label: c.label || c[valueKey],
+          label: translateIfString(c.label || c[valueKey]),
         };
       }
-      return { value: c, label: c };
+      return { value: c, label: translateIfString(c) };
     });
   }
   return options;

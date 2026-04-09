@@ -67,7 +67,7 @@ export const timeComparisonControls: ({
   showCalculationType = true,
   showFullChoices = true,
 }) => ({
-  label: t('Time Comparison'),
+  label: () => t('Time Comparison'),
   tabOverride: 'data',
   description: t('Compare results with other time periods.'),
   controlSetRows: [
@@ -79,7 +79,7 @@ export const timeComparisonControls: ({
           multi,
           freeForm: true,
           placeholder: t('Select or type a custom value...'),
-          label: t('Time shift'),
+          label: () => t('Time shift'),
           choices: showFullChoices ? fullChoices : reducedChoices,
           description: t(
             'Overlay results from a relative time period. ' +
@@ -99,7 +99,7 @@ export const timeComparisonControls: ({
         name: 'start_date_offset',
         config: {
           type: 'TimeOffsetControl',
-          label: t('Shift start date'),
+          label: () => t('Shift start date'),
           visibility: ({ controls }) =>
             controls?.time_compare.value === 'custom',
           mapStateToProps: (
@@ -129,7 +129,7 @@ export const timeComparisonControls: ({
         name: 'comparison_type',
         config: {
           type: 'SelectControl',
-          label: t('Calculation type'),
+          label: () => t('Calculation type'),
           default: 'values',
           choices: [
             [ComparisonType.Values, t('Actual values')],

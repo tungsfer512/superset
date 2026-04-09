@@ -14883,3 +14883,36 @@ msgstr "Sửa người dùng"
 
 msgid "Edit User Information"
 msgstr "Chỉnh sửa thông tin người dùng"
+
+msgid "Percentage metric calculation"
+msgstr "Tính tỷ lệ phần trăm"
+
+msgid "Aggregation Method"
+msgstr "Phương pháp tổng hợp dữ liệu"
+
+msgid "Last Value"
+msgstr "Giá trị cuối"
+
+msgid "Tooltip (columns)"
+msgstr "Chú giải (cột)"
+
+msgid "Tooltip (metrics)"
+msgstr "Chú giải (chỉ số)"
+
+msgid "Columns to show in the tooltip."
+msgstr "Các cột hiển thị trong chú giải."
+
+msgid "Metrics to show in the tooltip."
+msgstr "Các chỉ số hiển thị trong chú giải."
+
+msgid "Group remaining as \"Others\""
+msgstr "Nhóm phần còn lại thành \"Khác\""
+
+msgid "Match time shift color with original series"
+msgstr "Khớp màu dịch chuyển thời gian với chuỗi gốc"
+
+msgid "A date is required when using custom date shift"
+msgstr "Cần chọn ngày khi dùng dịch chuyển ngày tùy chỉnh"
+
+msgid "X Axis Label Interval"
+msgstr "Khoảng cách nhãn trục X"

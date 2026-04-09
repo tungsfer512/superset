@@ -107,7 +107,7 @@ type SelectDefaultOption = {
 
 const datasourceControl: SharedControlConfig<'DatasourceControl'> = {
   type: 'DatasourceControl',
-  label: t('Datasource'),
+  label: () => t('Datasource'),
   default: null,
   description: null,
   mapStateToProps: ({ datasource, form_data }) => ({
@@ -119,14 +119,14 @@ const datasourceControl: SharedControlConfig<'DatasourceControl'> = {
 
 const viz_type: SharedControlConfig<'VizTypeControl'> = {
   type: 'VizTypeControl',
-  label: t('Visualization Type'),
+  label: () => t('Visualization Type'),
   default: 'table',
   description: t('The type of visualization to display'),
 };
 
 const color_picker: SharedControlConfig<'ColorPickerControl'> = {
   type: 'ColorPickerControl',
-  label: t('Fixed Color'),
+  label: () => t('Fixed Color'),
   description: t('Use this to define a static color for all circles'),
   default: PRIMARY_COLOR,
   renderTrigger: true,
@@ -134,7 +134,7 @@ const color_picker: SharedControlConfig<'ColorPickerControl'> = {
 
 const linear_color_scheme: SharedControlConfig<'ColorSchemeControl'> = {
   type: 'ColorSchemeControl',
-  label: t('Linear Color Scheme'),
+  label: () => t('Linear Color Scheme'),
   choices: () =>
     (sequentialSchemeRegistry.values() as SequentialScheme[]).map(value => [
       value.id,
@@ -226,7 +226,7 @@ const time_range: SharedControlConfig<'DateFilterControl'> = {
 const row_limit: SharedControlConfig<'SelectControl'> = {
   type: 'SelectControl',
   freeForm: true,
-  label: t('Row limit'),
+  label: () => t('Row limit'),
   clearable: false,
   mapStateToProps: state => ({ maxValue: state?.common?.conf?.SQL_MAX_ROW }),
   validators: [
@@ -242,7 +242,7 @@ const row_limit: SharedControlConfig<'SelectControl'> = {
 
 const order_desc: SharedControlConfig<'CheckboxControl'> = {
   type: 'CheckboxControl',
-  label: t('Sort Descending'),
+  label: () => t('Sort Descending'),
   default: true,
   description: t(
     'If enabled, this control sorts the results/values descending, otherwise it sorts the results ascending.',
@@ -257,7 +257,7 @@ const order_desc: SharedControlConfig<'CheckboxControl'> = {
 const limit: SharedControlConfig<'SelectControl'> = {
   type: 'SelectControl',
   freeForm: true,
-  label: t('Series limit'),
+  label: () => t('Series limit'),
   placeholder: t('None'),
   validators: [legacyValidateInteger],
   choices: formatSelectOptions(SERIES_LIMITS),
@@ -273,7 +273,7 @@ const limit: SharedControlConfig<'SelectControl'> = {
 const series_limit: SharedControlConfig<'SelectControl'> = {
   type: 'SelectControl',
   freeForm: true,
-  label: t('Series limit'),
+  label: () => t('Series limit'),
   placeholder: t('None'),
   validators: [legacyValidateInteger],
   choices: formatSelectOptions(SERIES_LIMITS),
@@ -288,7 +288,7 @@ const series_limit: SharedControlConfig<'SelectControl'> = {
 const group_others_when_limit_reached: SharedControlConfig<'CheckboxControl'> =
   {
     type: 'CheckboxControl',
-    label: t('Group remaining as "Others"'),
+    label: () => t('Group remaining as "Others"'),
     default: false,
     description: t(
       'Groups remaining series into an "Others" category when series limit is reached. ' +
@@ -302,7 +302,7 @@ const y_axis_format: SharedControlConfig<'SelectControl', SelectDefaultOption> =
   {
     type: 'SelectControl',
     freeForm: true,
-    label: t('Y Axis Format'),
+    label: () => t('Y Axis Format'),
     renderTrigger: true,
     default: DEFAULT_NUMBER_FORMAT,
     choices: D3_FORMAT_OPTIONS,
@@ -323,7 +323,7 @@ const y_axis_format: SharedControlConfig<'SelectControl', SelectDefaultOption> =
 
 const currency_format: SharedControlConfig<'CurrencyControl'> = {
   type: 'CurrencyControl',
-  label: t('Currency format'),
+  label: () => t('Currency format'),
   renderTrigger: true,
 };
 
@@ -333,7 +333,7 @@ const x_axis_time_format: SharedControlConfig<
 > = {
   type: 'SelectControl',
   freeForm: true,
-  label: t('Time format'),
+  label: () => t('Time format'),
   renderTrigger: true,
   default: DEFAULT_TIME_FORMAT,
   choices: D3_TIME_FORMAT_OPTIONS,
@@ -344,7 +344,7 @@ const x_axis_time_format: SharedControlConfig<
 
 const color_scheme: SharedControlConfig<'ColorSchemeControl'> = {
   type: 'ColorSchemeControl',
-  label: t('Color Scheme'),
+  label: () => t('Color Scheme'),
   default: categoricalSchemeRegistry.getDefaultKey(),
   renderTrigger: true,
   choices: () => categoricalSchemeRegistry.keys().map(s => [s, s]),
@@ -355,7 +355,7 @@ const color_scheme: SharedControlConfig<'ColorSchemeControl'> = {
 
 const time_shift_color: SharedControlConfig<'CheckboxControl'> = {
   type: 'CheckboxControl',
-  label: t('Match time shift color with original series'),
+  label: () => t('Match time shift color with original series'),
   default: true,
   renderTrigger: true,
   description: t(
@@ -369,14 +369,14 @@ const time_shift_color: SharedControlConfig<'CheckboxControl'> = {
 
 const truncate_metric: SharedControlConfig<'CheckboxControl'> = {
   type: 'CheckboxControl',
-  label: t('Truncate Metric'),
+  label: () => t('Truncate Metric'),
   default: true,
   description: t('Whether to truncate metrics'),
 };
 
 const show_empty_columns: SharedControlConfig<'CheckboxControl'> = {
   type: 'CheckboxControl',
-  label: t('Show empty columns'),
+  label: () => t('Show empty columns'),
   default: true,
   description: t('Show empty columns'),
 };
@@ -393,7 +393,7 @@ const temporal_columns_lookup: SharedControlConfig<'HiddenControl'> = {
 
 const zoomable: SharedControlConfig<'CheckboxControl'> = {
   type: 'CheckboxControl',
-  label: t('Data Zoom'),
+  label: () => t('Data Zoom'),
   default: false,
   renderTrigger: true,
   description: t('Enable data zooming controls'),
@@ -401,7 +401,7 @@ const zoomable: SharedControlConfig<'CheckboxControl'> = {
 
 const sort_by_metric: SharedControlConfig<'CheckboxControl'> = {
   type: 'CheckboxControl',
-  label: t('Sort by metric'),
+  label: () => t('Sort by metric'),
   description: t(
     'Whether to sort results by the selected metric in descending order.',
   ),
@@ -409,7 +409,7 @@ const sort_by_metric: SharedControlConfig<'CheckboxControl'> = {
 
 const order_by_cols: SharedControlConfig<'SelectControl'> = {
   type: 'SelectControl',
-  label: t('Ordering'),
+  label: () => t('Ordering'),
   description: t('Order results by selected columns'),
   multi: true,
   default: [],

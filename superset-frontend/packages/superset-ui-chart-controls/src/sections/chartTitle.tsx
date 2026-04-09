@@ -31,7 +31,7 @@ export const TITLE_POSITION_OPTIONS: [string, string][] = [
 ];
 
 export const titleControls: ControlPanelSectionConfig = {
-  label: t('Chart Title'),
+  label: () => t('Chart Title'),
   tabOverride: 'customize',
   expanded: true,
   controlSetRows: [
@@ -41,7 +41,7 @@ export const titleControls: ControlPanelSectionConfig = {
         name: 'x_axis_title',
         config: {
           type: 'TextControl',
-          label: t('X Axis Title'),
+          label: () => t('X Axis Title'),
           renderTrigger: true,
           default: '',
         },
@@ -54,7 +54,7 @@ export const titleControls: ControlPanelSectionConfig = {
           type: 'SelectControl',
           freeForm: true,
           clearable: true,
-          label: t('X Axis Title Margin'),
+          label: () => t('X Axis Title Margin'),
           renderTrigger: true,
           default: TITLE_MARGIN_OPTIONS[0],
           choices: formatSelectOptions(TITLE_MARGIN_OPTIONS),
@@ -67,7 +67,7 @@ export const titleControls: ControlPanelSectionConfig = {
         name: 'y_axis_title',
         config: {
           type: 'TextControl',
-          label: t('Y Axis Title'),
+          label: () => t('Y Axis Title'),
           renderTrigger: true,
           default: '',
         },
@@ -80,7 +80,7 @@ export const titleControls: ControlPanelSectionConfig = {
           type: 'SelectControl',
           freeForm: true,
           clearable: true,
-          label: t('Y Axis Title Margin'),
+          label: () => t('Y Axis Title Margin'),
           renderTrigger: true,
           default: TITLE_MARGIN_OPTIONS[1],
           choices: formatSelectOptions(TITLE_MARGIN_OPTIONS),
@@ -94,7 +94,7 @@ export const titleControls: ControlPanelSectionConfig = {
           type: 'SelectControl',
           freeForm: true,
           clearable: false,
-          label: t('Y Axis Title Position'),
+          label: () => t('Y Axis Title Position'),
           renderTrigger: true,
           default: TITLE_POSITION_OPTIONS[0][0],
           choices: TITLE_POSITION_OPTIONS,

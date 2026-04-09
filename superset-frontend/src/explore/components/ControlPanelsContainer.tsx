@@ -454,11 +454,14 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
       typeof baseLabel === 'function'
         ? baseLabel(exploreState, controls[name], chart)
         : baseLabel;
+    const translatedLabel = typeof label === 'string' ? t(label) : label;
 
     const description =
       typeof baseDescription === 'function'
         ? baseDescription(exploreState, controls[name], chart)
         : baseDescription;
+    const translatedDescription =
+      typeof description === 'string' ? t(description) : description;
 
     if (name.includes('adhoc_filters')) {
       restProps.canDelete = (
@@ -505,8 +508,8 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
         <Control
           key={`control-${name}`}
           name={name}
-          label={label}
-          description={description}
+          label={translatedLabel}
+          description={translatedDescription}
           validationErrors={validationErrors}
           actions={props.actions}
           isVisible={isVisible}

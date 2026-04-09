@@ -34,7 +34,7 @@ export const FORECAST_DEFAULT_DATA = {
 };
 
 export const forecastIntervalControls: ControlPanelSectionConfig = {
-  label: t('Predictive Analytics'),
+  label: () => t('Predictive Analytics'),
   expanded: false,
   visibility: displayTimeRelatedControls,
   controlSetRows: [
@@ -43,7 +43,7 @@ export const forecastIntervalControls: ControlPanelSectionConfig = {
         name: 'forecastEnabled',
         config: {
           type: 'CheckboxControl',
-          label: t('Enable forecast'),
+          label: () => t('Enable forecast'),
           renderTrigger: false,
           default: FORECAST_DEFAULT_DATA.forecastEnabled,
           description: t('Enable forecasting'),
@@ -55,7 +55,7 @@ export const forecastIntervalControls: ControlPanelSectionConfig = {
         name: 'forecastPeriods',
         config: {
           type: 'TextControl',
-          label: t('Forecast periods'),
+          label: () => t('Forecast periods'),
           validators: [legacyValidateInteger],
           default: FORECAST_DEFAULT_DATA.forecastPeriods,
           description: t(
@@ -69,7 +69,7 @@ export const forecastIntervalControls: ControlPanelSectionConfig = {
         name: 'forecastInterval',
         config: {
           type: 'TextControl',
-          label: t('Confidence interval'),
+          label: () => t('Confidence interval'),
           validators: [legacyValidateNumber],
           default: FORECAST_DEFAULT_DATA.forecastInterval,
           description: t(
@@ -84,7 +84,7 @@ export const forecastIntervalControls: ControlPanelSectionConfig = {
         config: {
           type: 'SelectControl',
           freeForm: true,
-          label: t('Yearly seasonality'),
+          label: () => t('Yearly seasonality'),
           choices: [
             [null, t('default')],
             [true, t('Yes')],
@@ -103,7 +103,7 @@ export const forecastIntervalControls: ControlPanelSectionConfig = {
         config: {
           type: 'SelectControl',
           freeForm: true,
-          label: t('Weekly seasonality'),
+          label: () => t('Weekly seasonality'),
           choices: [
             [null, t('default')],
             [true, t('Yes')],
@@ -122,7 +122,7 @@ export const forecastIntervalControls: ControlPanelSectionConfig = {
         config: {
           type: 'SelectControl',
           freeForm: true,
-          label: t('Daily seasonality'),
+          label: () => t('Daily seasonality'),
           choices: [
             [null, t('default')],
             [true, t('Yes')],

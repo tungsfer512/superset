@@ -22,7 +22,7 @@ import { ControlPanelSectionConfig } from '../types';
 export const annotationLayers = [];
 
 export const annotationsAndLayersControls: ControlPanelSectionConfig = {
-  label: t('Annotations and Layers'),
+  label: () => t('Annotations and Layers'),
   expanded: false,
   tabOverride: 'data',
   controlSetRows: [
