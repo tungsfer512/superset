@@ -51,17 +51,6 @@ enum ModalType {
   EDIT = 'edit',
 }
 
-const isActiveOptions = [
-  {
-    label: 'Yes',
-    value: true,
-  },
-  {
-    label: 'No',
-    value: false,
-  },
-];
-
 function UsersList({ user }: UsersListProps) {
   const { addDangerToast, addSuccessToast } = useToasts();
   const {
@@ -117,6 +106,14 @@ function UsersList({ user }: UsersListProps) {
   }, [users]);
 
   const isAdmin = useMemo(() => isUserAdmin(user), [user]);
+
+  const isActiveOptions = useMemo(
+    () => [
+      { label: t('Yes'), value: true },
+      { label: t('No'), value: false },
+    ],
+    [t],
+  );
 
   const fetchRoles = useCallback(() => {
     fetchPaginatedData({
@@ -239,7 +236,7 @@ function UsersList({ user }: UsersListProps) {
           row: {
             original: { active },
           },
-        }: any) => <span>{active ? 'Yes' : 'No'}</span>,
+        }: any) => <span>{active ? t('Yes') : t('No')}</span>,
       },
       {
         accessor: 'roles',
@@ -364,7 +361,7 @@ function UsersList({ user }: UsersListProps) {
         size: 'xl',
       },
     ],
-    [isAdmin],
+    [isAdmin, t],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];
@@ -505,6 +502,7 @@ function UsersList({ user }: UsersListProps) {
       loadingState.groups,
       loginCountStats,
       failLoginCountStats,
+      isActiveOptions,
     ],
   );
 

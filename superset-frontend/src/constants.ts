@@ -194,3 +194,6 @@ export enum Actions {
   CREATE = 'create',
   UPDATE = 'update',
 }
+
+/** Fired on `window` after async Jed language pack is applied (non-English locales). */
+export const LANGUAGE_PACK_LOADED_EVENT = 'superset:language-pack-loaded';

@@ -83,6 +83,7 @@ export type Url = string;
 
 export interface RequestBase {
   body?: Body;
+  cache?: Cache;
   credentials?: Credentials;
   fetchRetryOptions?: FetchRetryOptions;
   headers?: Headers;
@@ -100,7 +101,6 @@ export interface RequestBase {
 
 export interface CallApi extends RequestBase {
   url: Url;
-  cache?: Cache;
   redirect?: Redirect;
 }
 

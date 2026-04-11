@@ -20,6 +20,7 @@ import 'src/public-path';
 
 // Menu App. Used in views that do not already include the Menu component in the layout.
 // eg, backend rendered views
+import { useEffect, useReducer } from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { Route, BrowserRouter } from 'react-router-dom';
@@ -29,6 +30,7 @@ import createCache from '@emotion/cache';
 import { ThemeProvider, theme } from '@superset-ui/core';
 import Menu from 'src/features/home/Menu';
 import getBootstrapData from 'src/utils/getBootstrapData';
+import { LANGUAGE_PACK_LOADED_EVENT } from 'src/constants';
 import { setupStore } from './store';
 
 // Disable connecting to redux debugger so that the React app injected
@@ -41,6 +43,20 @@ const emotionCache = createCache({
   key: 'menu',
 });
 
+function MenuWithI18nRefresh() {
+  const [, refreshAfterI18n] = useReducer((i: number) => i + 1, 0);
+  useEffect(() => {
+    const onLanguagePackLoaded = () => refreshAfterI18n();
+    window.addEventListener(LANGUAGE_PACK_LOADED_EVENT, onLanguagePackLoaded);
+    return () =>
+      window.removeEventListener(
+        LANGUAGE_PACK_LOADED_EVENT,
+        onLanguagePackLoaded,
+      );
+  }, []);
+  return <Menu data={menu} />;
+}
+
 const app = (
   // @ts-ignore: emotion types defs are incompatible between core and cache
   <CacheProvider value={emotionCache}>
@@ -51,7 +67,7 @@ const app = (
             ReactRouterRoute={Route}
             stringifyOptions={{ encode: false }}
           >
-            <Menu data={menu} />
+            <MenuWithI18nRefresh />
           </QueryParamProvider>
         </BrowserRouter>
       </Provider>

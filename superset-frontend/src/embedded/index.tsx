@@ -18,7 +18,7 @@
  */
 import 'src/public-path';
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useReducer } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import {
@@ -29,6 +29,7 @@ import {
 } from '@superset-ui/core';
 import Switchboard from '@superset-ui/switchboard';
 import getBootstrapData, { applicationRoot } from 'src/utils/getBootstrapData';
+import { LANGUAGE_PACK_LOADED_EVENT } from 'src/constants';
 import setupClient from 'src/setup/setupClient';
 import setupPlugins from 'src/setup/setupPlugins';
 import { useUiConfig } from 'src/components/UiConfigContext';
@@ -99,13 +100,26 @@ const EmbeddedRoute = () => (
   </EmbeddedContextProviders>
 );
 
-const EmbeddedApp = () => (
-  <Router basename={applicationRoot()}>
-    {/* todo (embedded) remove this line after uuids are deployed */}
-    <Route path="/dashboard/:idOrSlug/embedded/" component={EmbeddedRoute} />
-    <Route path="/embedded/:uuid/" component={EmbeddedRoute} />
-  </Router>
-);
+const EmbeddedApp = () => {
+  const [, refreshAfterI18n] = useReducer((i: number) => i + 1, 0);
+  useEffect(() => {
+    const onLanguagePackLoaded = () => refreshAfterI18n();
+    window.addEventListener(LANGUAGE_PACK_LOADED_EVENT, onLanguagePackLoaded);
+    return () =>
+      window.removeEventListener(
+        LANGUAGE_PACK_LOADED_EVENT,
+        onLanguagePackLoaded,
+      );
+  }, []);
+
+  return (
+    <Router basename={applicationRoot()}>
+      {/* todo (embedded) remove this line after uuids are deployed */}
+      <Route path="/dashboard/:idOrSlug/embedded/" component={EmbeddedRoute} />
+      <Route path="/embedded/:uuid/" component={EmbeddedRoute} />
+    </Router>
+  );
+};
 
 const appMountPoint = document.getElementById('app')!;
 

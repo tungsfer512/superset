@@ -36,7 +36,7 @@ import withToasts from 'src/components/MessageToasts/withToasts';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { Popover, Label, Tooltip } from '@superset-ui/core/components';
-import { commonMenuData } from 'src/features/home/commonMenuData';
+import { getCommonSqlMenuData } from 'src/features/home/commonMenuData';
 import {
   ListView,
   ListViewFilterOperator as FilterOperator,
@@ -148,7 +148,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
 
   const menuData: SubMenuProps = {
     activeChild: 'Query history',
-    ...commonMenuData,
+    ...getCommonSqlMenuData(),
   };
 
   const initialSort = [{ id: QueryObjectColumns.StartTime, desc: true }];

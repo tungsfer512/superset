@@ -32,6 +32,7 @@ import setupFormatters from './setup/setupFormatters';
 import setupDashboardComponents from './setup/setupDashboardComponents';
 import { User } from './types/bootstrapTypes';
 import getBootstrapData, { applicationRoot } from './utils/getBootstrapData';
+import { LANGUAGE_PACK_LOADED_EVENT } from './constants';
 import './hooks/useLocale';
 
 configure();
@@ -60,6 +61,8 @@ setupClient({ appRoot: applicationRoot() });
       // Second call to configure to set the language pack
       const { json } = await SupersetClient.get({
         endpoint: `/superset/language_pack/${lang}/`,
+        // Avoid stale translations: HTTPS uses Cache API + ETag for GETs by default
+        cache: 'no-store',
       });
       configure({ languagePack: json as LanguagePack });
       dayjs.locale(lang);
@@ -71,6 +74,8 @@ setupClient({ appRoot: applicationRoot() });
       configure();
       dayjs.locale('en');
     }
+    // React may have mounted before Jed was configured; refresh translated UI
+    window.dispatchEvent(new Event(LANGUAGE_PACK_LOADED_EVENT));
   }
 
   // Continue with rest of setup

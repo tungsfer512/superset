@@ -185,6 +185,10 @@ function ChartList(props: ChartListProps) {
     refreshData,
   } = useListViewResource<Chart>('chart', t('chart'), addDangerToast);
 
+  const locale = useSelector(
+    (state: { common?: { locale?: string } }) => state?.common?.locale,
+  );
+
   const chartIds = useMemo(() => charts.map(c => c.id), [charts]);
   const { roles } = useSelector<any, UserWithPermissionsAndRoles>(
     state => state.user,
@@ -587,7 +591,7 @@ function ChartList(props: ChartListProps) {
         { label: t('No'), value: false },
       ],
     }),
-    [],
+    [locale, loading],
   );
 
   const filters: ListViewFilters = useMemo(() => {
@@ -720,7 +724,15 @@ function ChartList(props: ChartListProps) {
       },
     ] as ListViewFilters;
     return filters_list;
-  }, [addDangerToast, favoritesFilter, props.user]);
+  }, [
+    addDangerToast,
+    favoritesFilter,
+    props.user,
+    canReadTag,
+    locale,
+    loading,
+    userId,
+  ]);
 
   const sortTypes = [
     {

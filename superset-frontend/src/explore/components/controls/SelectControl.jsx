@@ -174,7 +174,8 @@ export default class SelectControl extends PureComponent {
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (
       !isEqualArray(nextProps.choices, this.props.choices) ||
-      !isEqualArray(nextProps.options, this.props.options)
+      !isEqualArray(nextProps.options, this.props.options) ||
+      nextProps.placeholder !== this.props.placeholder
     ) {
       const options = this.getOptions(nextProps);
       this.setState({ options });

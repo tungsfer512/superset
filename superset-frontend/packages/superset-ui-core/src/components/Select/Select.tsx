@@ -751,7 +751,9 @@ const Select = forwardRef(
           maxTagCount={actualMaxTagCount}
           maxTagPlaceholder={customMaxTagPlaceholder}
           mode={mappedMode}
-          notFoundContent={isLoading ? t('Loading...') : notFoundContent}
+          notFoundContent={
+            isLoading ? t('Loading...') : (notFoundContent ?? t('No data'))
+          }
           onBlur={handleOnBlur}
           onDeselect={handleOnDeselect}
           onOpenChange={handleOnDropdownVisibleChange}

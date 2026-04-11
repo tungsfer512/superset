@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useEffect, useState, FunctionComponent } from 'react';
+import { useEffect, useMemo, useState, FunctionComponent } from 'react';
 
 import { t, styled, css, useTheme } from '@superset-ui/core';
 import dayjs from 'dayjs';
@@ -25,17 +25,6 @@ import { Icons } from '../Icons';
 import type { LastUpdatedProps } from './types';
 
 const REFRESH_INTERVAL = 60000; // every minute
-
-extendedDayjs.updateLocale('en', {
-  calendar: {
-    lastDay: '[Yesterday at] LTS',
-    sameDay: '[Today at] LTS',
-    nextDay: '[Tomorrow at] LTS',
-    lastWeek: '[last] dddd [at] LTS',
-    nextWeek: 'dddd [at] LTS',
-    sameElse: 'L',
-  },
-});
 
 const TextStyles = styled.span`
   color: ${({ theme }) => theme.colorText};
@@ -48,6 +37,18 @@ export const LastUpdated: FunctionComponent<LastUpdatedProps> = ({
   const theme = useTheme();
   const [timeSince, setTimeSince] = useState<dayjs.Dayjs>(
     extendedDayjs(updatedAt),
+  );
+
+  const calendarFormats = useMemo(
+    () => ({
+      lastDay: `[${t('Yesterday at')}] LTS`,
+      sameDay: `[${t('Today at')}] LTS`,
+      nextDay: `[${t('Tomorrow at')}] LTS`,
+      lastWeek: '[last] dddd [at] LTS',
+      nextWeek: 'dddd [at] LTS',
+      sameElse: 'L',
+    }),
+    [t],
   );
 
   useEffect(() => {
@@ -63,7 +64,12 @@ export const LastUpdated: FunctionComponent<LastUpdatedProps> = ({
 
   return (
     <TextStyles>
-      {t('Last Updated %s', timeSince.isValid() ? timeSince.calendar() : '--')}
+      {t(
+        'Last Updated %s',
+        timeSince.isValid()
+          ? timeSince.calendar(undefined, calendarFormats)
+          : '--',
+      )}
       {update && (
         <Icons.SyncOutlined
           css={css`

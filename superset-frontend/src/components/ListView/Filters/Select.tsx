@@ -90,7 +90,7 @@ function SelectFilter(
     },
     [fetchSelects],
   );
-  const placeholder = t('Choose...');
+  const placeholder = t('Select ...');
   return (
     <FilterContainer
       data-test="select-filter-container"

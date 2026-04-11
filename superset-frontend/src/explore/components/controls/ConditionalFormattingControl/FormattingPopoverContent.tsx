@@ -246,7 +246,16 @@ export const FormattingPopoverContent = ({
             <Select
               onChange={event => handleChange(event)}
               ariaLabel={t('Color scheme')}
-              options={[...colorScheme, ...extraColorChoices]}
+              options={[
+                ...colorScheme,
+                ...extraColorChoices.map(choice => ({
+                  ...choice,
+                  label:
+                    typeof choice.label === 'string'
+                      ? t(choice.label)
+                      : choice.label,
+                })),
+              ]}
             />
           </FormItem>
         </Col>

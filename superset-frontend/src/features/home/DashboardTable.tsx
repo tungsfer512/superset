@@ -169,7 +169,7 @@ function DashboardTable({
   if (otherTabData) {
     menuTabs.push({
       name: TableTab.Other,
-      label: otherTabTitle,
+      label: t(otherTabTitle),
       onClick: () => {
         setActiveTab(TableTab.Other);
         setItem(LocalStorageKeys.HomepageDashboardFilter, TableTab.Other);

@@ -2884,9 +2884,8 @@ msgstr ""
 "Cột được sử dụng làm chỉ mục cho dataframe. Nếu không có, nhãn chỉ mục sẽ"
 " được sử dụng."
 
-#, fuzzy
 msgid "Column type"
-msgstr "Kiểu dữ liệu của cột"
+msgstr "Kiểu cột"
 
 msgid "Columnar Upload"
 msgstr "Tải lên theo dạng cột"
@@ -9856,6 +9855,11 @@ msgstr ""
 "càng cao thì chỉ số càng gần mục tiêu."
 
 #, python-format
+msgid "Showing %s of %s items"
+msgstr "Đang hiển thị %s trong tổng số %s mục"
+
+
+#, python-format
 msgid "Showing %s of %s"
 msgstr "Đang hiển thị %s trong tổng số %s"
 
@@ -12406,6 +12410,10 @@ msgstr "Tập dữ liệu chưa có tiêu đề"
 msgid "Untitled Query"
 msgstr "Truy vấn chưa có tiêu đề"
 
+#, python-format
+msgid "Untitled Query %s"
+msgstr "Truy vấn chưa có tiêu đề %s"
+
 msgid "Untitled query"
 msgstr "Truy vấn chưa có tiêu đề"
 
@@ -14605,6 +14613,12 @@ msgstr "Bộ nhớ theo byte - hệ thập phân (1024B => 1,024kB)"
 msgid "Memory in bytes - binary (1024B => 1KiB)"
 msgstr "Bộ nhớ theo byte - hệ nhị phân (1024B => 1KiB)"
 
+msgid "Memory transfer rate in bytes - binary (1024B => 1KiB/s)"
+msgstr "Tốc độ truyền bộ nhớ theo byte – nhị phân (1024 B => 1 KiB/s)"
+
+msgid "Memory transfer rate in bytes - decimal (1024B => 1.024kB/s)"
+msgstr "Tốc độ truyền bộ nhớ theo byte – thập phân (1024 B => 1,024 kB/s)"
+
 msgid "X Axis Title Margin"
 msgstr "Lề tiêu đề trục X"
 
@@ -14872,6 +14886,9 @@ msgstr "Thông tin người dùng của bạn"
 msgid "User info"
 msgstr "Thông tin người dùng"
 
+msgid "Personal info"
+msgstr "Thông tin cá nhân"
+
 msgid "Personal Info"
 msgstr "Thông tin cá nhân"
 
@@ -14916,3 +14933,995 @@ msgstr "Cần chọn ngày khi dùng dịch chuyển ngày tùy chỉnh"
 
 msgid "X Axis Label Interval"
 msgstr "Khoảng cách nhãn trục X"
+
+msgid "Choose..."
+msgstr "Chọn..."
+
+msgid "If you don't save, changes will be lost."
+msgstr "Nếu không lưu sẽ mất các thay đổi."
+
+msgid "Save changes to your chart?"
+msgstr "Lưu thay đổi?"
+
+msgid "List"
+msgstr "Danh sách"
+
+msgid "Axis title margin"
+msgstr "Lề tiêu đề trục"
+
+msgid "Axis title position"
+msgstr "Vị trí tiêu đề trục"
+
+msgid "Start (inclusive)"
+msgstr "Bắt đầu (bao gồm)"
+
+msgid "End (exclusive)"
+msgstr "Kết thúc (không bao gồm)"
+
+msgid "Range type"
+msgstr "Loại khoảng"
+
+msgid "Subtitle"
+msgstr "Phụ đề"
+
+msgid "Subtitle Font Size"
+msgstr "Cỡ chữ phụ đề"
+
+msgid "Show Metric Name"
+msgstr "Hiển thị tên chỉ số"
+
+msgid "Metric Name Font Size"
+msgstr "Cỡ chữ tên chỉ số"
+
+msgid "Average (Mean)"
+msgstr "Trung bình (trung bình cộng)"
+
+msgid "Overall value"
+msgstr "Giá trị tổng thể"
+
+msgid "Total (Sum)"
+msgstr "Tổng (tổng cộng)"
+
+msgid "10/90 percentiles"
+msgstr "Khoảng phân vị 10–90"
+
+msgid "5/95 percentiles"
+msgstr "Khoảng phân vị 5–95"
+
+msgid "X axis title margin"
+msgstr "Lề tiêu đề trục X"
+
+msgid "Y axis title margin"
+msgstr "Lề tiêu đề trục Y"
+
+msgid "Start Time"
+msgstr "Thời gian bắt đầu"
+
+msgid "End Time"
+msgstr "Thời gian kết thúc"
+
+msgid "Select all"
+msgstr "Chọn tất cả"
+
+msgid "Border color"
+msgstr "Màu viền"
+
+msgid "Border width"
+msgstr "Độ dày viền"
+
+msgid "X-scale interval"
+msgstr "Khoảng cách thang trục X"
+
+msgid "Y-scale interval"
+msgstr "Khoảng cách thang trục Y"
+
+msgid "Add colors to cell bars for +/-"
+msgstr "Tô màu thanh ô theo dương/âm (+/-)"
+
+msgid "Custom conditional formatting"
+msgstr "Định dạng có điều kiện tùy chỉnh"
+
+msgid "Extent"
+msgstr "Phạm vi"
+
+msgid "FIT DATA"
+msgstr "KHỚP THEO DỮ LIỆU"
+
+msgid "CUSTOM"
+msgstr "TÙY CHỈNH"
+
+msgid "Click to add new layer"
+msgstr "Nhấn để thêm lớp mới"
+
+msgid "Layers"
+msgstr "Lớp bản đồ"
+
+msgid "Add Layer"
+msgstr "Thêm lớp"
+
+msgid "Layer"
+msgstr "Lớp"
+
+msgid "Layer URL"
+msgstr "URL lớp"
+
+msgid "Insert Layer URL"
+msgstr "Nhập URL lớp"
+
+msgid "The service url of the layer"
+msgstr "Địa chỉ dịch vụ của lớp"
+
+msgid "Layer type"
+msgstr "Loại lớp"
+
+msgid "The type of the layer"
+msgstr "Kiểu của lớp"
+
+msgid "Service version"
+msgstr "Phiên bản dịch vụ"
+
+msgid "The version of the service"
+msgstr "Phiên bản của dịch vụ"
+
+msgid "Layer Name"
+msgstr "Tên lớp"
+
+msgid "The name of the layer as described in GetCapabilities"
+msgstr "Tên lớp theo mô tả trong GetCapabilities"
+
+msgid "Layer title"
+msgstr "Tiêu đề lớp"
+
+msgid "Attribution"
+msgstr "Ghi công nguồn"
+
+msgid "The visible title of the layer"
+msgstr "Tiêu đề hiển thị của lớp"
+
+msgid "Insert Layer title"
+msgstr "Nhập tiêu đề lớp"
+
+msgid "The layer attribution"
+msgstr "Ghi công/bản quyền lớp bản đồ"
+
+msgid "© Layer attribution"
+msgstr "© Ghi công lớp"
+
+msgid "WMS"
+msgstr "WMS"
+
+msgid "WFS"
+msgstr "WFS"
+
+msgid "XYZ"
+msgstr "XYZ"
+
+msgid "Use current extent"
+msgstr "Dùng phạm vi hiện tại"
+
+msgid "The configuration for the map layers"
+msgstr "Cấu hình các lớp bản đồ"
+
+msgid "Max. features"
+msgstr "Số đối tượng tối đa"
+
+msgid "Maximum number of features to fetch from service"
+msgstr "Số đối tượng tối đa lấy từ dịch vụ"
+
+msgid ""
+"The extent of the map on application start. FIT DATA automatically sets "
+"the extent so that all data points are included in the viewport. CUSTOM "
+"allows users to define the extent manually."
+msgstr ""
+"Phạm vi bản đồ khi mở. KHỚP THEO DỮ LIỆU tự đặt phạm vi để mọi điểm dữ "
+"liệu nằm trong khung nhìn. TÙY CHỈNH cho phép người dùng đặt phạm vi thủ "
+"công."
+
+msgid ""
+"Select shape for computing values. \"FIXED\" sets all zoom levels to the "
+"same size. \"LINEAR\" increases sizes linearly based on specified slope. "
+"\"EXP\" increases sizes exponentially based on specified exponent"
+msgstr ""
+"Chọn dạng tính giá trị. \"CỐ ĐỊNH\" đặt mọi mức zoom cùng kích thước. "
+"\"TUYẾN TÍNH\" tăng kích thước tuyến tính theo độ dốc. \"MŨ\" tăng theo "
+"hàm mũ với số mũ đã chọn."
+
+msgid "Current Zoom"
+msgstr "Mức thu phóng hiện tại"
+
+msgid "Streets (OSM)"
+msgstr "Đường phố (OSM)"
+
+msgid "Topography (OSM)"
+msgstr "Địa hình (OSM)"
+
+msgid "Streets (Mapbox)"
+msgstr "Đường phố (Mapbox)"
+
+msgid "Dark (Mapbox)"
+msgstr "Tối (Mapbox)"
+
+msgid "Light (Mapbox)"
+msgstr "Sáng (Mapbox)"
+
+msgid "Satellite Streets (Mapbox)"
+msgstr "Vệ tinh và đường phố (Mapbox)"
+
+msgid "Satellite (Mapbox)"
+msgstr "Vệ tinh (Mapbox)"
+
+msgid "Outdoors (Mapbox)"
+msgstr "Ngoài trời (Mapbox)"
+
+msgid "Color Scheme Type"
+msgstr "Loại bảng màu"
+
+msgid "Categorical palette"
+msgstr "Bảng màu phân loại"
+
+msgid "Edit javascript in modal"
+msgstr "Chỉnh sửa javascript trong hộp thoại"
+
+msgid "Linear palette"
+msgstr "Bảng màu tuyến tính"
+
+msgid "Color breakpoints"
+msgstr "Điểm ngắt màu"
+
+msgid "Theme"
+msgstr "Giao diện"
+
+msgid "Match system"
+msgstr "Theo hệ thống"
+
+msgid "This theme is set locally"
+msgstr "Giao diện này được đặt cục bộ trên trình duyệt"
+
+msgid "Clear local theme"
+msgstr "Xóa giao diện cục bộ"
+
+msgid "Create and explore dataset"
+msgstr "Tạo và khám phá tập dữ liệu"
+
+#, python-format
+msgid "Columns (%s)"
+msgstr "Cột (%s)"
+
+#, python-format
+msgid "Indexes (%s)"
+msgstr "Chỉ mục (%s)"
+
+msgid "Keys"
+msgstr "Khóa"
+
+msgid "Comment"
+msgstr "Chú thích"
+
+msgid "Role Name"
+msgstr "Tên vai trò"
+
+msgid "Error while fetching permissions"
+msgstr "Lỗi khi tải danh sách quyền"
+
+msgid "all database access"
+msgstr "Toàn bộ quyền trên cơ sở dữ liệu"
+
+msgid "all datasource access"
+msgstr "Toàn bộ quyền trên nguồn dữ liệu"
+
+msgid "all query access"
+msgstr "Toàn bộ quyền trên truy vấn"
+
+msgid "can activate"
+msgstr "Kích hoạt"
+
+msgid "can add"
+msgstr "Thêm mới"
+
+msgid "can csv"
+msgstr "Xuất CSV (cũ)"
+
+msgid "can delete"
+msgstr "Xóa"
+
+msgid "can delete query"
+msgstr "Xóa truy vấn"
+
+msgid "can download"
+msgstr "Tải xuống"
+
+msgid "can drill"
+msgstr "Khoan sâu (drill)"
+
+msgid "can duplicate"
+msgstr "Nhân bản"
+
+msgid "can edit"
+msgstr "Chỉnh sửa"
+
+msgid "can estimate query cost"
+msgstr "Ước tính chi phí truy vấn"
+
+msgid "can execute sql query"
+msgstr "Thực thi truy vấn SQL"
+
+msgid "can expanded"
+msgstr "Mở rộng (schema bảng)"
+
+msgid "can export"
+msgstr "Xuất"
+
+msgid "can export csv"
+msgstr "Xuất CSV"
+
+msgid "can external metadata"
+msgstr "Metadata bên ngoài"
+
+msgid "can external metadata by name"
+msgstr "Metadata bên ngoài theo tên"
+
+msgid "can format sql"
+msgstr "Định dạng SQL"
+
+msgid "can get"
+msgstr "Lấy dữ liệu"
+
+msgid "can get drill info"
+msgstr "Thông tin drill"
+
+msgid "can get results"
+msgstr "Lấy kết quả truy vấn"
+
+msgid "can list"
+msgstr "Liệt kê"
+
+msgid "can migrate query"
+msgstr "Chuyển truy vấn"
+
+msgid "can post"
+msgstr "Gửi / tạo (POST)"
+
+msgid "can put"
+msgstr "Cập nhật (PUT)"
+
+msgid "can read"
+msgstr "Đọc"
+
+msgid "can recent activity"
+msgstr "Hoạt động gần đây"
+
+msgid "can share chart"
+msgstr "Chia sẻ biểu đồ"
+
+msgid "can share dashboard"
+msgstr "Chia sẻ dashboard"
+
+msgid "can show"
+msgstr "Xem chi tiết"
+
+msgid "can sqllab"
+msgstr "Dùng SQL Lab"
+
+msgid "can sqllab history"
+msgstr "Lịch sử SQL Lab"
+
+msgid "can tag"
+msgstr "Gắn thẻ"
+
+msgid "can test conn"
+msgstr "Kiểm tra kết nối"
+
+msgid "can userinfo"
+msgstr "Thông tin người dùng"
+
+msgid "can view chart as table"
+msgstr "Xem biểu đồ dạng bảng"
+
+msgid "can view query"
+msgstr "Xem truy vấn"
+
+msgid "can write"
+msgstr "Ghi"
+
+msgid "catalog access"
+msgstr "Truy cập catalog"
+
+msgid "database access"
+msgstr "Truy cập cơ sở dữ liệu (theo DB)"
+
+msgid "datasource access"
+msgstr "Truy cập nguồn dữ liệu (theo dataset)"
+
+msgid "menu access"
+msgstr "Truy cập menu"
+
+msgid "muldelete"
+msgstr "Xóa hàng loạt"
+
+msgid "resetmypassword"
+msgstr "Đặt lại mật khẩu của tôi"
+
+msgid "schema access"
+msgstr "Truy cập schema"
+
+msgid "CssTemplateModelView"
+msgstr "Mẫu CSS"
+
+msgid "DynamicPlugin"
+msgstr "Plugin động"
+
+msgid "LogModelView"
+msgstr "Nhật ký"
+
+msgid "PermissionModelView"
+msgstr "Quyền hệ thống"
+
+msgid "PermissionViewModelView"
+msgstr "Quyền trên màn hình"
+
+msgid "RoleModelView"
+msgstr "Vai trò (FAB)"
+
+msgid "SavedQuery"
+msgstr "Truy vấn đã lưu"
+
+msgid "SliceModelView"
+msgstr "Biểu đồ (slice)"
+
+msgid "SQLLab"
+msgstr "SQL Lab"
+
+msgid "SqlLabPermalinkRestApi"
+msgstr "Permalink SQL Lab"
+
+msgid "TabStateView"
+msgstr "Trạng thái tab SQL Lab"
+
+msgid "TableSchemaView"
+msgstr "Schema bảng (SQL Lab)"
+
+msgid "TagModelView"
+msgstr "Thẻ"
+
+msgid "ThemeModelView"
+msgstr "Giao diện (theme)"
+
+msgid "UserDBModelView"
+msgstr "Người dùng"
+
+msgid "UserLDAPModelView"
+msgstr "Người dùng LDAP"
+
+msgid "UserOAuthModelView"
+msgstr "Người dùng OAuth"
+
+msgid "UserRegistrationsView"
+msgstr "Đăng ký người dùng"
+
+msgid "ViewMenuModelView"
+msgstr "Menu màn hình"
+
+msgid "TaggedObjectsModelView"
+msgstr "Đối tượng có gắn thẻ"
+
+msgid "DynamicPluginsView"
+msgstr "Plugin động (quản trị)"
+
+msgid "can add role permissions Role"
+msgstr "Thêm quyền cho vai trò — Role"
+
+msgid "can grant guest token"
+msgstr "Cấp token khách"
+
+msgid "can read guest token"
+msgstr "Đọc token khách"
+
+msgid "can upload"
+msgstr "Tải lên"
+
+msgid "can approve"
+msgstr "Phê duyệt"
+
+msgid "can deny"
+msgstr "Từ chối"
+
+msgid "can info"
+msgstr "Thông tin (info)"
+
+msgid "can this form get"
+msgstr "Truy cập biểu mẫu (GET)"
+
+msgid "can this form post"
+msgstr "Gửi biểu mẫu (POST)"
+
+msgid "can user registration"
+msgstr "Đăng ký người dùng"
+
+msgid "can favstar"
+msgstr "Đánh dấu yêu thích"
+
+msgid "can invalidate cache"
+msgstr "Xóa cache"
+
+msgid "can warm up cache"
+msgstr "Làm nóng cache"
+
+msgid "can cache dashboard screenshot"
+msgstr "Cache ảnh chụp dashboard"
+
+msgid "can read on Application"
+msgstr "Đọc ứng dụng"
+
+msgid "can manage on Application"
+msgstr "Quản lý ứng dụng"
+
+msgid "can create on Databases"
+msgstr "Tạo cơ sở dữ liệu"
+
+msgid "can upload on Database"
+msgstr "Tải lên vào cơ sở dữ liệu"
+
+msgid "can validate sql on SQLLab"
+msgstr "Kiểm tra SQL trong SQL Lab"
+
+msgid "can fetch fields on Datasource"
+msgstr "Lấy trường từ nguồn dữ liệu"
+
+msgid "can samples on Datasource"
+msgstr "Lấy mẫu dữ liệu"
+
+msgid "can save on Datasource"
+msgstr "Lưu nguồn dữ liệu"
+
+msgid "can duplicate on Dataset"
+msgstr "Nhân bản tập dữ liệu"
+
+msgid "can get or create dataset on Dataset"
+msgstr "Lấy hoặc tạo tập dữ liệu"
+
+msgid "can get column values on Dataset"
+msgstr "Lấy giá trị cột (dataset)"
+
+msgid "can import on Dataset"
+msgstr "Nhập tập dữ liệu"
+
+msgid "can export csv on Dataset"
+msgstr "Xuất CSV tập dữ liệu"
+
+msgid "can export parquet on Dataset"
+msgstr "Xuất Parquet tập dữ liệu"
+
+msgid "can write on Dataset"
+msgstr "Ghi tập dữ liệu"
+
+msgid "can delete on Dataset"
+msgstr "Xóa tập dữ liệu"
+
+msgid "can read on Dataset"
+msgstr "Đọc tập dữ liệu"
+
+msgid "can time range on Api"
+msgstr "Khoảng thời gian (API)"
+
+msgid "can query on Api"
+msgstr "Truy vấn (API)"
+
+msgid "can query form data on Api"
+msgstr "Truy vấn form data (API)"
+
+msgid "can chart data on Api"
+msgstr "Dữ liệu biểu đồ (API)"
+
+msgid "can log on Api"
+msgstr "Ghi log (API)"
+
+msgid "can explore json on Superset"
+msgstr "Khám phá JSON (Superset)"
+
+msgid "can profile json on Superset"
+msgstr "Profile JSON (Superset)"
+
+msgid "can schemas access for on Database"
+msgstr "Truy cập schema trên database"
+
+msgid "can tables database on Database"
+msgstr "Bảng trên database"
+
+msgid "can function names database on Database"
+msgstr "Tên hàm trên database"
+
+msgid "can extra table metadata database on Database"
+msgstr "Metadata bảng bổ sung"
+
+msgid "can select star on Database"
+msgstr "SELECT * trên database"
+
+msgid "can estimate query cost on Database"
+msgstr "Ước tính chi phí truy vấn (DB)"
+
+msgid "can validate sql on Database"
+msgstr "Kiểm tra SQL (DB)"
+
+msgid "can csv upload on Database"
+msgstr "Tải CSV lên database"
+
+msgid "can read on Database"
+msgstr "Đọc database"
+
+msgid "can write on Database"
+msgstr "Ghi database"
+
+msgid "can delete on Database"
+msgstr "Xóa database"
+
+msgid "can add on Database"
+msgstr "Thêm database"
+
+msgid "can edit on Database"
+msgstr "Sửa database"
+
+msgid "can list on Database"
+msgstr "Liệt kê database"
+
+msgid "can show on Database"
+msgstr "Xem database"
+
+msgid "can read on Dashboard"
+msgstr "Đọc dashboard"
+
+msgid "can write on Dashboard"
+msgstr "Ghi dashboard"
+
+msgid "can delete on Dashboard"
+msgstr "Xóa dashboard"
+
+msgid "can add on Dashboard"
+msgstr "Thêm dashboard"
+
+msgid "can edit on Dashboard"
+msgstr "Sửa dashboard"
+
+msgid "can list on Dashboard"
+msgstr "Liệt kê dashboard"
+
+msgid "can show on Dashboard"
+msgstr "Xem dashboard"
+
+msgid "can read on Chart"
+msgstr "Đọc biểu đồ"
+
+msgid "can write on Chart"
+msgstr "Ghi biểu đồ"
+
+msgid "can delete on Chart"
+msgstr "Xóa biểu đồ"
+
+msgid "can add on Chart"
+msgstr "Thêm biểu đồ"
+
+msgid "can edit on Chart"
+msgstr "Sửa biểu đồ"
+
+msgid "can list on Chart"
+msgstr "Liệt kê biểu đồ"
+
+msgid "can show on Chart"
+msgstr "Xem biểu đồ"
+
+msgid "can read on Query"
+msgstr "Đọc truy vấn"
+
+msgid "can list on Query"
+msgstr "Liệt kê truy vấn"
+
+msgid "can show on Query"
+msgstr "Xem truy vấn"
+
+msgid "can read on SavedQuery"
+msgstr "Đọc truy vấn đã lưu"
+
+msgid "can write on SavedQuery"
+msgstr "Ghi truy vấn đã lưu"
+
+msgid "can delete on SavedQuery"
+msgstr "Xóa truy vấn đã lưu"
+
+msgid "can export on SavedQuery"
+msgstr "Xuất truy vấn đã lưu"
+
+msgid "can read on SQLLab"
+msgstr "Đọc SQL Lab"
+
+msgid "can export csv on SQLLab"
+msgstr "Xuất CSV SQL Lab"
+
+msgid "can read on Superset"
+msgstr "Đọc Superset"
+
+msgid "can write on Superset"
+msgstr "Ghi Superset"
+
+msgid "can delete on Superset"
+msgstr "Xóa Superset"
+
+msgid "can add on Superset"
+msgstr "Thêm Superset"
+
+msgid "can edit on Superset"
+msgstr "Sửa Superset"
+
+msgid "can list on Superset"
+msgstr "Liệt kê Superset"
+
+msgid "can show on Superset"
+msgstr "Xem Superset"
+
+msgid "can read on SecurityRestApi"
+msgstr "Đọc API bảo mật"
+
+msgid "can list on SecurityRestApi"
+msgstr "Liệt kê API bảo mật"
+
+msgid "can show on SecurityRestApi"
+msgstr "Xem API bảo mật"
+
+msgid "can grant on GuestToken"
+msgstr "Cấp token khách"
+
+msgid "can read on GuestToken"
+msgstr "Đọc token khách"
+
+msgid "SecurityRestApi"
+msgstr "API bảo mật"
+
+msgid "GuestToken"
+msgstr "Token khách"
+
+msgid "Api"
+msgstr "API"
+
+msgid "SQL Editor"
+msgstr "Trình soạn SQL"
+
+msgid "Query Search"
+msgstr "Tìm kiếm truy vấn"
+
+msgid "Annotations"
+msgstr "Chú thích (annotation)"
+
+msgid "AnnotationLayerModelView"
+msgstr "Lớp chú thích"
+
+msgid "AsyncEventsModelView"
+msgstr "Sự kiện bất đồng bộ"
+
+msgid "CacheRestApi"
+msgstr "API cache"
+
+msgid "ColumnarToDatabaseView"
+msgstr "Tải dạng cột lên DB"
+
+msgid "CsvToDatabaseView"
+msgstr "Tải CSV lên DB"
+
+msgid "ExcelToDatabaseView"
+msgstr "Tải Excel lên DB"
+
+msgid "DatabaseView"
+msgstr "Màn hình database"
+
+msgid "DatabaseTablesAsync"
+msgstr "Bảng database (bất đồng bộ)"
+
+msgid "Row Level Security Filters"
+msgstr "Bộ lọc bảo mật cấp hàng"
+
+msgid "Alerts & Report"
+msgstr "Cảnh báo & báo cáo"
+
+msgid "List Groups"
+msgstr "Danh sách nhóm"
+
+msgid "GroupsList"
+msgstr "Nhóm người dùng"
+
+msgid "can bulk create Tag"
+msgstr "Tạo thẻ hàng loạt"
+
+msgid "can dashboard permalink Superset"
+msgstr "Permalink dashboard (Superset)"
+
+msgid "can dashboard Superset"
+msgstr "Xem dashboard (Superset)"
+
+msgid "can delete embedded Dashboard"
+msgstr "Xóa cấu hình nhúng dashboard"
+
+msgid "can explore json Superset"
+msgstr "Khám phá JSON (Superset)"
+
+msgid "can explore Superset"
+msgstr "Khám phá (Explore) trên Superset"
+
+msgid "can fetch datasource metadata Superset"
+msgstr "Lấy metadata nguồn dữ liệu (Superset)"
+
+msgid "can get embedded Dashboard"
+msgstr "Xem cấu hình nhúng dashboard"
+
+msgid "can import ImportExportRestApi"
+msgstr "Nhập tài sản (bundle ZIP/JSON)"
+
+msgid "can language pack Superset"
+msgstr "Tải gói ngôn ngữ (Superset)"
+
+msgid "can list role permissions Role"
+msgstr "Liệt kê quyền của vai trò"
+
+msgid "can list roles RoleRestAPI"
+msgstr "Liệt kê vai trò (API)"
+
+msgid "can log Superset"
+msgstr "Ghi nhật ký client (Superset)"
+
+msgid "can set embedded Dashboard"
+msgstr "Thiết lập cấu hình nhúng dashboard"
+
+msgid "can slice Superset"
+msgstr "Mở biểu đồ (slice) trên Superset"
+
+msgid "can tags TagView"
+msgstr "Lấy danh sách thẻ (API)"
+
+msgid "can update role groups Role"
+msgstr "Cập nhật nhóm của vai trò"
+
+msgid "can update role users Role"
+msgstr "Cập nhật người dùng của vai trò"
+
+msgid "Edit role"
+msgstr "Chỉnh sửa vai trò"
+
+msgid "Duplicate role"
+msgstr "Sao chép vai trò"
+
+msgid "Delete role"
+msgstr "Xóa vai trò"
+
+msgid "First name"
+msgstr "Tên"
+
+msgid "Last name"
+msgstr "Họ"
+
+msgid "Is active?"
+msgstr "Đang hoạt động?"
+
+msgid "Fail login count"
+msgstr "Số lần đăng nhập thất bại"
+
+msgid "Value greater than"
+msgstr "Giá trị lớn hơn"
+
+msgid "Value less than"
+msgstr "Giá trị nhỏ hơn"
+
+msgid "Edit user"
+msgstr "Chỉnh sửa người dùng"
+
+msgid "Delete user"
+msgstr "Xóa người dùng"
+
+msgid "Enter the user's first name"
+msgstr "Nhập tên người dùng"
+
+msgid "Enter the user's last name"
+msgstr "Nhập họ người dùng"
+
+msgid "Enter the user's username"
+msgstr "Nhập tên đăng nhập"
+
+msgid "Enter the user's email"
+msgstr "Nhập email"
+
+msgid "Select roles"
+msgstr "Chọn vai trò"
+
+msgid "Select groups"
+msgstr "Chọn nhóm"
+
+msgid "Enter the user's password"
+msgstr "Nhập mật khẩu"
+
+msgid "Confirm the user's password"
+msgstr "Nhập lại mật khẩu để xác nhận"
+
+msgid "No groups yet"
+msgstr "Chưa có nhóm nào"
+
+msgid "Group"
+msgstr "Nhóm"
+
+msgid "Enter the group's name"
+msgstr "Nhập tên nhóm"
+
+msgid "Enter the group's label"
+msgstr "Nhập nhãn nhóm"
+
+msgid "Enter the group's description"
+msgstr "Nhập mô tả nhóm"
+
+msgid "Select users"
+msgstr "Chọn người dùng"
+
+msgid "Regular"
+msgstr "Bộ lọc thông thường"
+
+msgid "Base"
+msgstr "Bộ lọc cơ sở"
+
+msgid "Impersonate logged in user (Presto, Trino, Drill, Hive, and Google Sheets)"
+msgstr ""
+"Giả lập người dùng đã đăng nhập (Presto, Trino, Drill, Hive và Google "
+"Sheets)"
+
+msgid "System"
+msgstr "Hệ thống"
+
+msgid "Defined through system configuration."
+msgstr "Được định nghĩa qua cấu hình hệ thống."
+
+msgid "Set local theme for testing"
+msgstr "Đặt giao diện cục bộ để thử"
+
+msgid "Set as default light theme"
+msgstr "Đặt làm giao diện sáng mặc định"
+
+msgid "Set as default dark theme"
+msgstr "Đặt làm giao diện tối mặc định"
+
+msgid "Add theme"
+msgstr "Thêm chủ đề"
+
+msgid "Local"
+msgstr "Nội bộ"
+
+msgid "Enter theme name"
+msgstr "Nhập tên chủ đề"
+
+msgid "JSON Configuration"
+msgstr "Cấu hình JSON"
+
+msgid "Design with"
+msgstr "Thiết kế với"
+
+msgid "Ant Design Theme Editor"
+msgstr "Ant Design Theme Editor"
+
+msgid ", then paste the JSON below. See our"
+msgstr ", sau đó dán JSON bên dưới. Xem"
+
+msgid "documentation"
+msgstr "tài liệu"
+
+msgid " for details."
+msgstr " để biết thêm chi tiết."
+
+msgid "Import themes"
+msgstr "Nhập chủ đề"
+
+msgid "Themes"
+msgstr "Chủ đề"
+
+msgid "Yesterday at"
+msgstr "Hôm qua lúc"
+
+msgid "Today at"
+msgstr "Hôm nay lúc"
+
+msgid "Tomorrow at"
+msgstr "Ngày mai lúc"
+
+msgid "Reset password"
+msgstr "Đặt lại mật khẩu"
+

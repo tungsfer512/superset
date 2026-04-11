@@ -65,9 +65,10 @@ const legendTypeControl: ControlSetItem = {
     type: 'SelectControl',
     freeForm: false,
     label: t('Type'),
+    // Labels are gettext msgids; translated at render in ControlPanelsContainer (not at import).
     choices: [
-      ['scroll', t('Scroll')],
-      ['plain', t('List')],
+      ['scroll', 'Scroll'],
+      ['plain', 'List'],
     ],
     default: legendType,
     renderTrigger: true,

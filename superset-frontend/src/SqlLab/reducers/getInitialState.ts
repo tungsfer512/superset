@@ -18,6 +18,7 @@
  */
 import { t } from '@superset-ui/core';
 import { nanoid } from 'nanoid';
+import { formatUntitledQueryTabName } from 'src/SqlLab/utils/newQueryTabName';
 import type { BootstrapData } from 'src/types/bootstrapTypes';
 import type { InitialState } from 'src/hooks/apiResources/sqlLab';
 import {
@@ -58,7 +59,7 @@ export default function getInitialState({
     version: LatestQueryEditorVersion,
     immutableId: nanoid(11),
     loaded: true,
-    name: t('Untitled query'),
+    name: formatUntitledQueryTabName(1),
     sql: '',
     latestQueryId: null,
     autorun: false,

@@ -56,7 +56,7 @@ import {
 } from 'src/components';
 import handleResourceExport from 'src/utils/export';
 import SubMenu, { ButtonProps, SubMenuProps } from 'src/features/home/SubMenu';
-import { commonMenuData } from 'src/features/home/commonMenuData';
+import { getCommonSqlMenuData } from 'src/features/home/commonMenuData';
 import { QueryObjectColumns, SavedQueryObject } from 'src/views/CRUD/types';
 import { TagTypeEnum } from 'src/components/Tag/TagType';
 import { loadTags } from 'src/components/Tag/utils';
@@ -187,7 +187,7 @@ function SavedQueryList({
 
   const menuData: SubMenuProps = {
     activeChild: 'Saved queries',
-    ...commonMenuData,
+    ...getCommonSqlMenuData(),
   };
 
   const subMenuButtons: Array<ButtonProps> = [];

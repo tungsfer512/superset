@@ -20,30 +20,58 @@
 import { t } from '@superset-ui/core';
 import { QueryEditor } from '../types';
 
-const untitledQueryRegex = /^Untitled Query (\d+)$/; // Literal notation isn't recompiled
-const untitledQuery = 'Untitled Query ';
+/** Canonical English prefix (persisted tabs / tests / legacy state). */
+const UNTITLED_QUERY_ENGLISH = 'Untitled Query';
+
+function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Localized default SQL Lab tab title, e.g. "Untitled Query 3". */
+export function formatUntitledQueryTabName(n: number): string {
+  return t('Untitled Query %s', String(n));
+}
+
+function parseUntitledTabNumber(
+  name: string | undefined,
+  localizedBase: string,
+): number | null {
+  if (!name) return null;
+  const englishMatch = name.match(
+    new RegExp(`^${escapeRegExp(UNTITLED_QUERY_ENGLISH)} (\\d+)$`),
+  );
+  if (englishMatch) {
+    return parseInt(englishMatch[1], 10);
+  }
+  if (localizedBase !== UNTITLED_QUERY_ENGLISH) {
+    const localizedMatch = name.match(
+      new RegExp(`^${escapeRegExp(localizedBase)} (\\d+)$`),
+    );
+    if (localizedMatch) {
+      return parseInt(localizedMatch[1], 10);
+    }
+  }
+  return null;
+}
 
 export const newQueryTabName = (
   queryEditors: QueryEditor[],
-  initialTitle = `${untitledQuery}1`,
+  initialTitle?: string,
 ): string => {
-  const resultTitle = t(initialTitle);
+  const localizedBase = t('Untitled Query');
+  const defaultTitle = formatUntitledQueryTabName(1);
 
   if (queryEditors.length > 0) {
-    const mappedUntitled = queryEditors.filter(qe =>
-      qe.name?.match(untitledQueryRegex),
-    );
-    const untitledQueryNumbers = mappedUntitled.map(
-      qe => +qe.name.replace(untitledQuery, ''),
-    );
-    if (untitledQueryNumbers.length > 0) {
-      // When there are query tabs open, and at least one is called "Untitled Query #"
-      // Where # is a valid number
-      const largestNumber: number = Math.max(...untitledQueryNumbers);
-      return t('%s%s', untitledQuery, largestNumber + 1);
+    const numbers = queryEditors
+      .map(qe => parseUntitledTabNumber(qe.name, localizedBase))
+      .filter((n): n is number => n !== null);
+    if (numbers.length > 0) {
+      return formatUntitledQueryTabName(Math.max(...numbers) + 1);
     }
-    return resultTitle;
   }
 
-  return resultTitle;
+  if (initialTitle !== undefined) {
+    return t(initialTitle);
+  }
+  return defaultTitle;
 };

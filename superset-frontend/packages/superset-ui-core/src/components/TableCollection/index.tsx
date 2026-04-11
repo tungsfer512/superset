@@ -25,7 +25,7 @@ import {
   TableBodyPropGetter,
   TablePropGetter,
 } from 'react-table';
-import { styled } from '@superset-ui/core';
+import { styled, t } from '@superset-ui/core';
 import { Table, TableSize } from '@superset-ui/core/components/Table';
 import { TableRowSelection, SorterResult } from 'antd/es/table/interface';
 import { mapColumns, mapRows } from './utils';
@@ -223,8 +223,8 @@ function TableCollection<T extends object>({
 
   const showTotalFunc = useCallback(
     (total: number, range: [number, number]) =>
-      `${range[0]}-${range[1]} of ${total}`,
-    [],
+      t('%s-%s of %s', range[0], range[1], total),
+    [t],
   );
 
   const handleTableChange = useCallback(

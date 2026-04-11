@@ -35,6 +35,7 @@ import {
   type ListViewFilters,
 } from 'src/components';
 import { FormattedPermission, UserObject } from 'src/features/roles/types';
+import { translatePermissionPairLabel } from 'src/features/roles/permissionLabel';
 import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { fetchPaginatedData } from 'src/utils/fetchOptions';
@@ -116,9 +117,12 @@ function RolesList({ addDangerToast, addSuccessToast, user }: RolesListProps) {
       setLoadingState,
       loadingKey: 'permissions',
       addDangerToast,
-      errorMessage: 'Error while fetching permissions',
+      errorMessage: t('Error while fetching permissions'),
       mapResult: ({ permission, view_menu, id }) => ({
-        label: `${permission.name.replace(/_/g, ' ')} ${view_menu.name.replace(/_/g, ' ')}`,
+        label: translatePermissionPairLabel(
+          permission.name,
+          view_menu.name,
+        ),
         value: `${permission.name}__${view_menu.name}`,
         id,
       }),

@@ -27,6 +27,9 @@
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
   - ./docker:/app/docker
+  # Only override Jed JSON for vi. Do NOT mount the whole translations dir: the repo has .po but no .mo, and
+  # Flask/FAB menu labels need messages.mo from the image; a full mount would drop .mo and revert navbar to English.
+  - ./superset/translations/vi/LC_MESSAGES/messages.json:/app/superset/translations/vi/LC_MESSAGES/messages.json:ro
   - superset_home:/app/superset_home
 
 x-common-build: &common-build

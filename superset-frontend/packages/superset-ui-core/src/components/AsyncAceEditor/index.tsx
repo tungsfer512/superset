@@ -124,21 +124,39 @@ export function AsyncAceEditor(
     const cssWorkerUrlPromise = import(
       'ace-builds/src-min-noconflict/worker-css'
     );
+    const javascriptWorkerUrlPromise = import(
+      'ace-builds/src-min-noconflict/worker-javascript'
+    );
+    const jsonWorkerUrlPromise = import(
+      'ace-builds/src-min-noconflict/worker-json'
+    );
+    const htmlWorkerUrlPromise = import(
+      'ace-builds/src-min-noconflict/worker-html'
+    );
     const acequirePromise = import('ace-builds/src-min-noconflict/ace');
 
     const [
       { default: ReactAceEditor },
       { config },
       { default: cssWorkerUrl },
+      { default: javascriptWorkerUrl },
+      { default: jsonWorkerUrl },
+      { default: htmlWorkerUrl },
       { require: acequire },
     ] = await Promise.all([
       reactAcePromise,
       aceBuildsConfigPromise,
       cssWorkerUrlPromise,
+      javascriptWorkerUrlPromise,
+      jsonWorkerUrlPromise,
+      htmlWorkerUrlPromise,
       acequirePromise,
     ]);
 
     config.setModuleUrl('ace/mode/css_worker', cssWorkerUrl);
+    config.setModuleUrl('ace/mode/javascript_worker', javascriptWorkerUrl);
+    config.setModuleUrl('ace/mode/json_worker', jsonWorkerUrl);
+    config.setModuleUrl('ace/mode/html_worker', htmlWorkerUrl);
 
     await Promise.all(aceModules.map(x => aceModuleLoaders[x]()));
 

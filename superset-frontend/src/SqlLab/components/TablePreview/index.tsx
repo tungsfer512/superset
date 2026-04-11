@@ -186,6 +186,18 @@ const TablePreview: FC<Props> = ({ dbId, catalog, schema, tableName }) => {
     ...tableMetadata,
     ...tableExtendedMetadata,
   };
+
+  const previewColumnHeaderLabels = useMemo(
+    () => ({
+      column_name: t('Column name'),
+      column_type: t('Column type'),
+      keys: t('Keys'),
+      comment: t('Comment'),
+      name: t('Name'),
+      value: t('Value'),
+    }),
+    [],
+  );
   const refreshTableMetadata = () => {
     dispatch(
       tableApiUtil.invalidateTags([{ type: 'TableMetadatas', id: tableName }]),
@@ -354,6 +366,7 @@ const TablePreview: FC<Props> = ({ dbId, catalog, schema, tableName }) => {
                       height={height - TAB_HEADER_HEIGHT}
                       data={data}
                       orderedColumnKeys={columns}
+                      columnHeaderLabels={previewColumnHeaderLabels}
                     />
                   ),
                 });
@@ -405,6 +418,7 @@ const TablePreview: FC<Props> = ({ dbId, catalog, schema, tableName }) => {
                           }),
                         )}
                         orderedColumnKeys={['name', 'value']}
+                        columnHeaderLabels={previewColumnHeaderLabels}
                       />
                     ),
                   });

@@ -65,7 +65,6 @@ export const ZoomConfigControl: FC<ZoomConfigsControlProps> = ({
   };
 
   const onBaseWidthChange = (width: number) => {
-    console.log('now in onbasewidthcahnge');
     setBaseWidth(width);
     if (!value) {
       return;
@@ -180,9 +179,9 @@ export const ZoomConfigControl: FC<ZoomConfigsControlProps> = ({
           label={shapeLabel}
           description={shapeDescription}
           options={[
-            ['FIXED', 'FIXED'],
-            ['LINEAR', 'LINEAR'],
-            ['EXP', 'EXP'],
+            ['FIXED', t('FIXED')],
+            ['LINEAR', t('LINEAR')],
+            ['EXP', t('EXP')],
           ]}
           value={value ? value.type : undefined}
           name="shape"

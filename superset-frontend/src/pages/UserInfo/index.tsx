@@ -155,11 +155,11 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
 
   return (
     <StyledLayout>
-      <StyledHeader>Your user information</StyledHeader>
+      <StyledHeader>{t('Your user information')}</StyledHeader>
       <DescriptionsContainer>
         <Collapse defaultActiveKey={['userInfo', 'personalInfo']} ghost>
           <Collapse.Panel
-            header={<DescriptionTitle>User info</DescriptionTitle>}
+            header={<DescriptionTitle>{t('User info')}</DescriptionTitle>}
             key="userInfo"
           >
             <Descriptions
@@ -168,22 +168,26 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
               column={1}
               labelStyle={{ width: '120px' }}
             >
-              <Descriptions.Item label="User Name">
+              <Descriptions.Item label={t('User Name')}>
                 {user.username}
               </Descriptions.Item>
-              <Descriptions.Item label="Is Active?">
-                {user.isActive ? 'Yes' : 'No'}
+              <Descriptions.Item label={t('Is Active?')}>
+                {user.isActive ? t('Yes') : t('No')}
               </Descriptions.Item>
-              <Descriptions.Item label="Role">
-                {user.roles ? Object.keys(user.roles).join(', ') : 'None'}
+              <Descriptions.Item label={t('Role')}>
+                {user.roles
+                  ? Object.keys(user.roles).join(', ')
+                  : t('None')}
               </Descriptions.Item>
-              <Descriptions.Item label="Login count">
+              <Descriptions.Item label={t('Login count')}>
                 {user.loginCount}
               </Descriptions.Item>
             </Descriptions>
           </Collapse.Panel>
           <Collapse.Panel
-            header={<DescriptionTitle>Personal info</DescriptionTitle>}
+            header={
+              <DescriptionTitle>{t('Personal info')}</DescriptionTitle>
+            }
             key="personalInfo"
           >
             <Descriptions
@@ -192,13 +196,13 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
               column={1}
               labelStyle={{ width: '120px' }}
             >
-              <Descriptions.Item label="First Name">
+              <Descriptions.Item label={t('First Name')}>
                 {userDetails.firstName}
               </Descriptions.Item>
-              <Descriptions.Item label="Last Name">
+              <Descriptions.Item label={t('Last Name')}>
                 {userDetails.lastName}
               </Descriptions.Item>
-              <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
+              <Descriptions.Item label={t('Email')}>{user.email}</Descriptions.Item>
             </Descriptions>
           </Collapse.Panel>
         </Collapse>

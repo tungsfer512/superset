@@ -161,7 +161,7 @@ function ChartTable({
   if (otherTabData) {
     menuTabs.push({
       name: TableTab.Other,
-      label: otherTabTitle,
+      label: t(otherTabTitle),
       onClick: () => {
         setActiveTab(TableTab.Other);
         setItem(LocalStorageKeys.HomepageChartFilter, TableTab.Other);

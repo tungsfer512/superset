@@ -191,13 +191,13 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
       ? lastTab
       : [undefined, undefined];
     if (customTitle && customFilter) {
-      return [t(customTitle), customFilter];
+      return [customTitle, customFilter];
     }
     if (lastTab === 'all') {
-      return [t('All'), []];
+      return ['All', []];
     }
     return [
-      t('Examples'),
+      'Examples',
       [
         {
           col: 'created_by',

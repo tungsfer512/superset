@@ -149,6 +149,10 @@ function DashboardList(props: DashboardListProps) {
   );
   const canReadTag = findPermission('can_read', 'Tag', roles);
 
+  const locale = useSelector(
+    (state: { common?: { locale?: string } }) => state?.common?.locale,
+  );
+
   const {
     state: {
       loading,
@@ -533,7 +537,7 @@ function DashboardList(props: DashboardListProps) {
         { label: t('No'), value: false },
       ],
     }),
-    [],
+    [locale, loading],
   );
 
   const filters: ListViewFilters = useMemo(() => {
@@ -630,7 +634,15 @@ function DashboardList(props: DashboardListProps) {
       },
     ] as ListViewFilters;
     return filters_list;
-  }, [addDangerToast, favoritesFilter, props.user]);
+  }, [
+    addDangerToast,
+    favoritesFilter,
+    props.user,
+    user,
+    canReadTag,
+    locale,
+    loading,
+  ]);
 
   const sortTypes = [
     {

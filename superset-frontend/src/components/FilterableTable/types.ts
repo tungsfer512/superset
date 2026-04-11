@@ -21,6 +21,8 @@ export type Datum = Record<string, CellDataType>;
 
 export interface FilterableTableProps {
   orderedColumnKeys: string[];
+  /** When set, replaces raw field keys in column headers (row data keys stay unchanged). */
+  columnHeaderLabels?: Record<string, string>;
   data: Record<string, unknown>[];
   height: number;
   filterText?: string;

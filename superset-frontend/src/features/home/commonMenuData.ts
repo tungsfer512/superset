@@ -23,20 +23,23 @@ import { t } from '@superset-ui/core';
  */
 export const NAVBAR_MENU_POPUP_OFFSET: [number, number] = [0, -8];
 
-export const commonMenuData = {
-  name: t('SQL'),
-  tabs: [
-    {
-      name: 'Saved queries',
-      label: t('Saved queries'),
-      url: '/savedqueryview/list/',
-      usesRouter: true,
-    },
-    {
-      name: 'Query history',
-      label: t('Query history'),
-      url: '/sqllab/history/',
-      usesRouter: true,
-    },
-  ],
-};
+/** SQL submenu under the top nav; call during render so `t()` runs after i18n is configured. */
+export function getCommonSqlMenuData() {
+  return {
+    name: t('SQL'),
+    tabs: [
+      {
+        name: 'Saved queries',
+        label: t('Saved queries'),
+        url: '/savedqueryview/list/',
+        usesRouter: true,
+      },
+      {
+        name: 'Query history',
+        label: t('Query history'),
+        url: '/sqllab/history/',
+        usesRouter: true,
+      },
+    ],
+  };
+}

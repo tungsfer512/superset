@@ -69,12 +69,71 @@ import { ExploreActions } from 'src/explore/actions/exploreActions';
 import { ChartState, ExplorePageState } from 'src/explore/types';
 import { Icons } from '@superset-ui/core/components/Icons';
 import ControlRow from './ControlRow';
-import Control from './Control';
+import Control, { type ControlProps } from './Control';
 import { ExploreAlert } from './ExploreAlert';
 import { RunQueryButton } from './RunQueryButton';
 import { Operators } from '../constants';
 import { Clauses } from './controls/FilterControl/types';
 import StashFormDataContainer from './StashFormDataContainer';
+
+/**
+ * Datasource sort choices use labels like `year [asc]` from the API. Jed only has msgids
+ * `[asc]` / `[desc]` (see Python __("[asc]")), so translate the suffix here.
+ */
+function translateChoiceDisplayLabel(lbl: string): string {
+  if (lbl.endsWith(' [asc]')) {
+    return `${lbl.slice(0, -' [asc]'.length)} ${t('[asc]')}`;
+  }
+  if (lbl.endsWith(' [desc]')) {
+    return `${lbl.slice(0, -' [desc]'.length)} ${t('[desc]')}`;
+  }
+  return t(lbl);
+}
+
+/** Re-apply gettext: shared control configs often call t() at module load (before language pack). */
+function translateControlTupleLabels(rows: unknown): unknown {
+  if (!Array.isArray(rows)) return rows;
+  return rows.map(row => {
+    if (Array.isArray(row) && row.length >= 2) {
+      const [value, lbl] = row;
+      if (typeof lbl === 'string') {
+        return [value, translateChoiceDisplayLabel(lbl)];
+      }
+    }
+    return row;
+  });
+}
+
+/** SelectControl `options` as { label, value, description }[] (e.g. partition time_series_option). */
+function translateControlObjectOptions(
+  options: Record<string, unknown>[],
+): Record<string, unknown>[] {
+  return options.map(item => ({
+    ...item,
+    ...(typeof item.label === 'string' && {
+      label: translateChoiceDisplayLabel(item.label),
+    }),
+    ...(typeof item.description === 'string' && {
+      description: t(item.description),
+    }),
+  }));
+}
+
+function translateControlOptions(options: unknown): unknown {
+  if (!Array.isArray(options) || options.length === 0) {
+    return options;
+  }
+  const head = options[0];
+  const isObjectStyle =
+    head !== null &&
+    typeof head === 'object' &&
+    !Array.isArray(head) &&
+    'label' in (head as object);
+  if (isObjectStyle) {
+    return translateControlObjectOptions(options as Record<string, unknown>[]);
+  }
+  return translateControlTupleLabels(options);
+}
 
 const { confirm } = Modal;
 
@@ -436,10 +495,22 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
       validationErrors,
       label: baseLabel,
       description: baseDescription,
+      choices,
+      options,
+      placeholder,
       ...restProps
     } = controlData as ControlState & {
       validationErrors?: any[];
     };
+
+    const translatedChoices = translateControlTupleLabels(choices);
+    const translatedOptions = translateControlOptions(options);
+    const translatedPlaceholder =
+      placeholder === undefined || placeholder === null
+        ? placeholder
+        : typeof placeholder === 'string'
+          ? t(placeholder)
+          : placeholder;
 
     const isVisible = visibility
       ? visibility.call(config, props, controlData)
@@ -507,14 +578,21 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
       >
         <Control
           key={`control-${name}`}
-          name={name}
-          label={translatedLabel}
-          description={translatedDescription}
-          validationErrors={validationErrors}
-          actions={props.actions}
-          isVisible={isVisible}
-          hidden={isHidden}
-          {...restProps}
+          {...({
+            name,
+            label: translatedLabel,
+            description: translatedDescription,
+            validationErrors,
+            actions: props.actions,
+            isVisible,
+            hidden: isHidden,
+            ...restProps,
+            choices: translatedChoices,
+            ...(translatedOptions !== undefined
+              ? { options: translatedOptions }
+              : {}),
+            placeholder: translatedPlaceholder,
+          } as unknown as ControlProps)}
         />
       </StashFormDataContainer>
     );
@@ -535,6 +613,10 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
     // have a string ID. Using forced type conversion for now,
     // should probably add a `id` field to sections in the future.
     const sectionId = String(label);
+    // Plugin control panels often call t() at import time (before language pack).
+    const displayLabel = typeof label === 'string' ? t(label) : label;
+    const displayDescription =
+      typeof description === 'string' ? t(description) : description;
     const isVisible = visibility?.call(this, props, controls) !== false;
     const hasErrors = section.controlSetRows.some(rows =>
       rows.some(item => {
@@ -565,10 +647,10 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
             line-height: 1.3;
           `}
         >
-          {label}
+          {displayLabel}
         </span>{' '}
-        {description && (
-          <Tooltip id={sectionId} title={description}>
+        {displayDescription && (
+          <Tooltip id={sectionId} title={displayDescription}>
             <Icons.InfoCircleOutlined css={iconStyles} />
           </Tooltip>
         )}

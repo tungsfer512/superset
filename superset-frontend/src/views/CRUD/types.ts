@@ -48,6 +48,7 @@ export interface DashboardTableProps {
   showThumbnails?: boolean;
   otherTabData: Array<Dashboard>;
   otherTabFilters: Filter[];
+  /** gettext msgid; translated where rendered (e.g. t(otherTabTitle)) */
   otherTabTitle: string;
 }
 

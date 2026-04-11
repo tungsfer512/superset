@@ -59,6 +59,7 @@ const sortResults = (valueA: string | number, valueB: string | number) => {
 
 export const FilterableTable = ({
   orderedColumnKeys,
+  columnHeaderLabels,
   data,
   height,
   filterText = '',
@@ -92,21 +93,25 @@ export const FilterableTable = ({
 
   const columns = useMemo(
     () =>
-      orderedColumnKeys.map(key => ({
-        key,
-        label: key,
-        fieldName: key,
-        headerName: key,
-        comparator: sortResults,
-        render: ({ value, colDef }: { value: CellDataType; colDef: ColDef }) =>
-          renderResultCell({
-            cellData: value,
-            columnKey: colDef.field,
-            allowHTML,
-            getCellContent,
-          }),
-      })),
-    [orderedColumnKeys, allowHTML, getCellContent],
+      orderedColumnKeys.map(key => {
+        const headerLabel = columnHeaderLabels?.[key] ?? key;
+        return {
+          key,
+          // GridTable maps `label` to ag-grid `field` (row data key); use `headerName` for display.
+          label: key,
+          fieldName: key,
+          headerName: headerLabel,
+          comparator: sortResults,
+          render: ({ value, colDef }: { value: CellDataType; colDef: ColDef }) =>
+            renderResultCell({
+              cellData: value,
+              columnKey: colDef.field,
+              allowHTML,
+              getCellContent,
+            }),
+        };
+      }),
+    [orderedColumnKeys, columnHeaderLabels, allowHTML, getCellContent],
   );
 
   const keyword = useRef<string | undefined>(filterText);
