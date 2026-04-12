@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@superset-ui/core';
 import { nanoid } from 'nanoid';
 import { formatUntitledQueryTabName } from 'src/SqlLab/utils/newQueryTabName';
 import type { BootstrapData } from 'src/types/bootstrapTypes';

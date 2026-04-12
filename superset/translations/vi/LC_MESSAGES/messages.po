@@ -96,6 +96,12 @@ msgid ""
 "            <p><b><a href=\"%(url)s\">%(call_to_action)s</a></b></p>\n"
 "            "
 msgstr ""
+"\n"
+"            <p>Báo cáo/cảnh báo của bạn không thể được tạo ra vì lỗi sau: "
+"%(text)s</p>\n"
+"            <p>Vui lòng kiểm tra dashboard/biểu đồ của bạn để tìm lỗi.</p>\n"
+"            <p><b><a href=\"%(url)s\">%(call_to_action)s</a></b></p>\n"
+"             "
 
 msgid " (excluded)"
 msgstr "bị loại trừ"
@@ -115,14 +121,14 @@ msgstr "một cái mới"
 
 #, python-format
 msgid " at line %(line)d"
-msgstr ""
+msgstr " tại dòng %(line)d"
 
 msgid " expression which needs to adhere to the "
 msgstr "biểu thức cần phải tuân thủ"
 
 #, python-format
 msgid " near '%(highlight)s'"
-msgstr ""
+msgstr "gần '%(highlight)s'"
 
 msgid " source code of Superset's sandboxed parser"
 msgstr ""
@@ -244,6 +250,8 @@ msgid ""
 "schedule with a minimum interval of %(minimum_interval)d minutes per "
 "execution."
 msgstr ""
+"%(report_type)s tần suất lập lịch vượt quá giới hạn. Vui lòng cấu hình một "
+"lịch trình với khoảng thời gian tối thiểu là %(minimum_interval)d phút cho mỗi lần thực thi."
 
 #, python-format
 msgid "%(rows)d rows returned"
@@ -279,6 +287,9 @@ msgid ""
 "Please recheck your query.\n"
 "Exception: %(ex)s"
 msgstr ""
+"%(validator)s không thể kiểm tra truy vấn của bạn.\n"
+"Vui lòng kiểm tra lại truy vấn của bạn.\n"
+"Exception: %(ex)s"
 
 #, python-format
 msgid "%s Error"
@@ -630,9 +641,8 @@ msgstr "90 ngày"
 msgid ":"
 msgstr ":"
 
-#, fuzzy, python-format
 msgid ":%(column)d"
-msgstr "cột"
+msgstr ":%(column)d"
 
 msgid "< (Smaller than)"
 msgstr "< (Nhỏ hơn)"
@@ -1279,10 +1289,10 @@ msgid "Allow Csv Upload"
 msgstr "Cho phép tải lên CSV"
 
 msgid "Allow DDL and DML"
-msgstr ""
+msgstr "Cho phép DDL và DML"
 
 msgid "Allow DDL/DML"
-msgstr ""
+msgstr "Cho phép DDL/DML"
 
 msgid "Allow changing catalogs"
 msgstr "Cho phép thay đổi danh mục"
@@ -1327,6 +1337,8 @@ msgid ""
 "TRUNCATE, etc.) and DML (Data Modification Language: INSERT, UPDATE, "
 "DELETE, etc)"
 msgstr ""
+"Cho phép thực thi DDL (Ngôn ngữ định nghĩa dữ liệu: CREATE, DROP, "
+"TRUNCATE, v.v.) và DML (Ngôn ngữ thao tác dữ liệu: INSERT, UPDATE, DELETE, v.v)"
 
 msgid "Allow this database to be explored"
 msgstr "Cho phép khám phá cơ sở dữ liệu này"
@@ -4671,9 +4683,8 @@ msgstr "Mã nhúng"
 msgid "Embed dashboard"
 msgstr "Nhúng dashboard"
 
-#, fuzzy
 msgid "Embedded dashboard could not be deleted."
-msgstr "Không thể xóa dashboard."
+msgstr "Không thể xóa dashboard đã nhúng."
 
 msgid "Embedding deactivated."
 msgstr "Chức năng nhúng đã bị vô hiệu hóa."
@@ -4833,7 +4844,7 @@ msgstr "Lỗi khi lấy đối tượng có thẻ"
 
 #, fuzzy
 msgid "Error faving chart"
-msgstr "Lỗi khi lưu bộ dữ liệu"
+msgstr "Lỗi khi thêm biểu đồ vào mục yêu thích"
 
 #, python-format
 msgid "Error in jinja expression in HAVING clause: %(msg)s"
@@ -4859,7 +4870,7 @@ msgstr "Thông báo lỗi"
 
 #, fuzzy
 msgid "Error parsing"
-msgstr "lỗi tối"
+msgstr "Lỗi khi phân tích cú pháp"
 
 msgid "Error reading CSV file"
 msgstr "Lỗi khi đọc file CSV"
@@ -4875,7 +4886,7 @@ msgstr "Lỗi khi lưu bộ dữ liệu"
 
 #, fuzzy
 msgid "Error unfaving chart"
-msgstr "Lỗi khi lưu bộ dữ liệu"
+msgstr "Lỗi khi bỏ biểu đồ khỏi mục yêu thích"
 
 msgid "Error while fetching charts"
 msgstr "Lỗi khi lấy biểu đồ"
@@ -7722,7 +7733,7 @@ msgstr ""
 
 #, fuzzy
 msgid "PDF download failed, please refresh and try again."
-msgstr "Tải ảnh không thành công, vui lòng làm mới và thử lại."
+msgstr "Tải PDF không thành công, vui lòng làm mới và thử lại."
 
 msgid "Page length"
 msgstr "Số dòng mỗi trang"
@@ -8426,7 +8437,7 @@ msgstr "Đã lưu khoảng thời gian làm mới"
 
 #, fuzzy
 msgid "Refresh table schema"
-msgstr "Xem lược đồ bảng"
+msgstr "Làm mới lược đồ bảng"
 
 msgid "Refresh the default values"
 msgstr "Làm mới các giá trị mặc định"
@@ -8655,7 +8666,7 @@ msgstr "Backend kết quả cần cho truy vấn bất đồng bộ chưa đư�
 
 #, fuzzy
 msgid "Retry fetching results"
-msgstr "Lấy lại kết quả"
+msgstr "Thử lấy lại kết quả"
 
 msgid "Return to specific datetime."
 msgstr "Quay lại thời điểm cụ thể."
@@ -8677,15 +8688,15 @@ msgstr "Phải"
 
 #, fuzzy
 msgid "Right Axis Format"
-msgstr "Định dạng trục y chính"
+msgstr "Định dạng trục bên phải"
 
 #, fuzzy
 msgid "Right Axis Metric"
-msgstr "Sắp xếp theo chỉ số"
+msgstr "Chỉ số trục bên phải"
 
 #, fuzzy
 msgid "Right axis metric"
-msgstr "Sắp xếp theo chỉ số"
+msgstr "Chỉ số trục bên phải"
 
 
 msgid "Right to Left"
@@ -8693,10 +8704,10 @@ msgstr "Từ phải sang trái"
 
 #, fuzzy
 msgid "Right value"
-msgstr "Giá trị mục tiêu"
+msgstr "Giá trị bên phải"
 
 msgid "Right-click on a dimension value to drill to detail by that value."
-msgstr ""
+msgstr "Nhấp chuột phải vào một giá trị chiều để khoan sâu vào chi tiết theo giá trị đó."
 
 
 msgid "Role"
@@ -8711,13 +8722,14 @@ msgid ""
 "access to a dashboard will bypass dataset level checks. If no roles are "
 "defined, regular access permissions apply."
 msgstr ""
+"Roles là một danh sách xác định quyền truy cập vào dashboard. Cấp quyền truy cập cho một vai trò sẽ bỏ qua các kiểm tra cấp độ tập dữ liệu. Nếu không có vai trò nào được định nghĩa, các quyền truy cập thông thường sẽ được áp dụng."
 
 msgid ""
 "Roles is a list which defines access to the dashboard. Granting a role "
 "access to a dashboard will bypass dataset level checks.If no roles are "
 "defined, regular access permissions apply."
 msgstr ""
-
+"Roles là một danh sách xác định quyền truy cập vào dashboard. Cấp quyền truy cập cho một vai trò sẽ bỏ qua các kiểm tra cấp độ tập dữ liệu. Nếu không có vai trò nào được định nghĩa, các quyền truy cập thông thường sẽ được áp dụng."
 
 msgid "Rolling Function"
 msgstr "Hàm trượt"
@@ -8727,7 +8739,7 @@ msgstr "Cửa sổ trượt"
 
 #, fuzzy
 msgid "Rolling function"
-msgstr "Kết nối"
+msgstr "Hàm trượt"
 
 msgid "Rolling window"
 msgstr "Cửa sổ trượt"
@@ -8742,7 +8754,7 @@ msgstr "ID nút gốc"
 
 #, fuzzy
 msgid "Rose Type"
-msgstr "loại nội dung"
+msgstr "Loại cánh hoa"
 
 msgid "Rotate x axis label"
 msgstr "Xoay tiêu đề trục X"
@@ -8752,7 +8764,7 @@ msgid "Rotate y axis label"
 msgstr "Xoay tiêu đề trục Y"
 
 msgid "Rotation to apply to words in the cloud"
-msgstr ""
+msgstr "Góc xoay áp dụng cho các từ trong đám mây từ"
 
 
 msgid "Round cap"
@@ -8770,6 +8782,7 @@ msgid ""
 "Row containing the headers to use as column names (0 is first line of "
 "data)."
 msgstr ""
+"Hàng chứa tiêu đề được sử dụng làm tên cột (0 là dòng đầu tiên của dữ liệu)."
 
 
 msgid "Row limit"
@@ -8780,19 +8793,19 @@ msgid "Rows"
 msgstr "Hàng"
 
 msgid "Rows per page, 0 means no pagination"
-msgstr ""
+msgstr "Số hàng trên mỗi trang, 0 có nghĩa là không phân trang"
 
 #, fuzzy
 msgid "Rows subtotal position"
-msgstr "Vị trí tổng phụ của các cột"
+msgstr "Vị trí tổng phụ của các hàng"
 
 #, fuzzy
 msgid "Rows to Read"
-msgstr "đã được tạo"
+msgstr "Số hàng cần đọc"
 
 #, fuzzy
 msgid "Rows to read"
-msgstr "đã được tạo"
+msgstr "Số hàng cần đọc"
 
 
 msgid "Rule"
@@ -8819,26 +8832,26 @@ msgid "Run current query"
 msgstr "Chạy truy vấn hiện tại"
 
 msgid "Run in SQL Lab"
-msgstr "Chạy trông SQL Lab"
+msgstr "Chạy trong SQL Lab"
 
 #, fuzzy
 msgid "Run query"
-msgstr "Truy vấn của người dùng"
+msgstr "Chạy truy vấn"
 
 msgid "Run query (Ctrl + Return)"
-msgstr ""
+msgstr "Chạy truy vấn (Ctrl + Return)"
 
 
 msgid "Run query in a new tab"
-msgstr "Truy vấn trong tab mới"
+msgstr "Chạy truy vấn trong tab mới"
 
 #, fuzzy
 msgid "Run selection"
-msgstr "Chọn ngược lại"
+msgstr "Chạy lựa chọn"
 
 #, fuzzy
 msgid "Running"
-msgstr "đang chạy"
+msgstr "Đang chạy"
 
 #, fuzzy, python-format
 msgid "Running statement %(statement_num)s out of %(statement_count)s"
@@ -8846,17 +8859,17 @@ msgstr "Câu lệnh %(statement_num)s trong tổng số %(statement_count)s"
 
 #, fuzzy
 msgid "SAT"
-msgstr "tại"
+msgstr "SAT"
 
 #, fuzzy
 msgid "SECOND"
 msgstr "giây"
 
 msgid "SEP"
-msgstr ""
+msgstr "SEP"
 
 msgid "SHA"
-msgstr ""
+msgstr "SHA"
 
 #, fuzzy
 msgid "SQL"
@@ -8864,11 +8877,11 @@ msgstr "SQL"
 
 #, fuzzy
 msgid "SQL Copied!"
-msgstr "Đã sao chép liên kết!"
+msgstr "Đã sao chép SQL!"
 
 #, fuzzy
 msgid "SQL Expression"
-msgstr "Biểu thức CRON"
+msgstr "Biểu thức SQL"
 
 #, fuzzy
 msgid "SQL Lab"
@@ -8887,31 +8900,36 @@ msgid ""
 "delete the tab.\n"
 "Note that you will need to close other SQL Lab windows before you do this."
 msgstr ""
+"SQL Lab sử dụng bộ nhớ cục bộ của trình duyệt để lưu trữ các truy vấn và kết quả.\n"
+"Hiện tại, bạn đang sử dụng %(currentUsage)s KB trong tổng số %(maxStorage)d KB dung lượng lưu trữ.\n"
+"Để tránh SQL Lab bị treo, vui lòng xóa một số tab truy vấn.\n"
+"Bạn có thể truy cập lại các truy vấn này bằng cách sử dụng tính năng Lưu trước khi xóa tab.\n"
+"Lưu ý rằng bạn sẽ cần đóng các cửa sổ SQL Lab khác trước khi thực hiện việc này."
 
 #, fuzzy
 msgid "SQL Query"
-msgstr "Truy vấn của người dùng"
+msgstr "Truy vấn"
 
 #, fuzzy
 msgid "SQL expression"
-msgstr "Biểu thức CRON"
+msgstr "Biểu thức SQL"
 
 
 msgid "SQL query"
-msgstr "Truy vấn của người dùng"
+msgstr "Truy vấn SQL"
 
 msgid "SQLAlchemy URI"
-msgstr ""
+msgstr "URI SQLAlchemy"
 
 msgid "SSH Host"
-msgstr ""
+msgstr "Máy chủ SSH"
 
 
 msgid "SSH Password"
 msgstr "Mật khẩu SSH"
 
 msgid "SSH Port"
-msgstr ""
+msgstr "Cổng SSH"
 
 msgid "SSH Tunnel"
 msgstr "Đường hầm SSH"
@@ -8948,7 +8966,7 @@ msgid "STRING"
 msgstr "CHUỖI"
 
 msgid "SUN"
-msgstr "CN"
+msgstr "SUN"
 
 msgid "Sample Standard Deviation"
 msgstr "Độ lệch chuẩn mẫu"
@@ -9564,7 +9582,7 @@ msgid "Set filter mapping"
 msgstr "Thiết lập ánh xạ bộ lọc"
 
 msgid "Set header rows and the number of rows to read or skip."
-msgstr ""
+msgstr "Thiết lập số hàng tiêu đề và số hàng để đọc hoặc bỏ qua."
 
 msgid "Set up an email report"
 msgstr "Thiết lập báo cáo qua email"
@@ -9691,7 +9709,7 @@ msgid "Show Tooltip Labels"
 msgstr "Hiển thị Nhãn chú giải"
 
 msgid "Show Total"
-msgstr "Hiển thị Tổng cộng"
+msgstr "Hiển thị tổng"
 
 msgid "Show Trend Line"
 msgstr "Hiển thị Đường xu hướng"
@@ -9806,7 +9824,7 @@ msgstr "Hiển thị giá trị trên đầu cột"
 
 
 msgid "Show total"
-msgstr "Hiển thị Tổng cộng"
+msgstr "Hiển thị tổng"
 
 msgid ""
 "Show total aggregations of selected metrics. Note that row limit does not"
@@ -10345,10 +10363,10 @@ msgstr ""
 "phân tán và cột. Loại trực quan này có nhiều tùy chọn tùy chỉnh."
 
 msgid "Switch to the next tab"
-msgstr ""
+msgstr "Chuyển sang tab tiếp theo"
 
 msgid "Switch to the previous tab"
-msgstr ""
+msgstr "Chuyển sang tab trước"
 
 msgid "Symbol"
 msgstr "Ký hiệu"
@@ -10671,8 +10689,9 @@ msgid ""
 "the related dashboard.\n"
 "    Check the JSON metadata in the Advanced settings."
 msgstr ""
-"Lược đồ màu này đang bị ghi đè bởi các màu nhãn tùy chỉnh.\n"
-"    Kiểm tra siêu dữ liệu JSON trong phần Cài đặt nâng cao"
+"Màu của biểu đồ này có thể bị ghi đè bởi màu nhãn tùy chỉnh của dashboard "
+"liên quan.\n"
+"    Hãy kiểm tra metadata JSON trong phần Cài đặt nâng cao."
 
 msgid "The column header label"
 msgstr "Nhãn tiêu đề cột"
@@ -11084,6 +11103,9 @@ msgid ""
 "the database configuration are not present in explore files and should be"
 " added manually after the import if they are needed."
 msgstr ""
+"Cần có mật khẩu cho các cơ sở dữ liệu dưới đây để nhập chúng. Lưu ý rằng"
+" các phần \"Secure Extra\" và \"Certificate\" trong cấu hình cơ sở dữ liệu không"
+" có trong tệp khám phá và cần được thêm thủ công sau khi nhập nếu cần."
 
 msgid "The pattern of timestamp format. For strings use "
 msgstr "Mẫu định dạng dấu thời gian. Với chuỗi, hãy sử dụng "
@@ -11141,6 +11163,8 @@ msgid ""
 "The query estimation was killed after %(sqllab_timeout)s seconds. It "
 "might be too complex, or the database might be under heavy load."
 msgstr ""
+"Ước lượng truy vấn đã bị chấm dứt sau %(sqllab_timeout)s giây. Nó có thể quá "
+"phức tạp, hoặc cơ sở dữ liệu có thể đang chịu tải nặng."
 
 msgid "The query has a syntax error."
 msgstr "Truy vấn có lỗi cú pháp."
@@ -11153,6 +11177,8 @@ msgid ""
 "The query was killed after %(sqllab_timeout)s seconds. It might be too "
 "complex, or the database might be under heavy load."
 msgstr ""
+"Truy vấn đã bị chấm dứt sau %(sqllab_timeout)s giây. Nó có thể quá phức tạp, "
+"hoặc cơ sở dữ liệu có thể đang chịu tải nặng."
 
 msgid ""
 "The radius (in pixels) the algorithm uses to define a cluster. Choose 0 "
@@ -11225,7 +11251,7 @@ msgstr "Không thể tải ảnh chụp màn hình. Vui lòng thử lại sau."
 
 #, fuzzy
 msgid "The screenshot has been downloaded."
-msgstr "Ảnh chụp màn hình hiện đang được tải xuống."
+msgstr "Ảnh chụp màn hình đã được tải xuống."
 
 msgid "The screenshot is being generated. Please, do not leave the page."
 msgstr "Ảnh chụp màn hình đang được tạo. Vui lòng không rời khỏi trang."
@@ -11691,6 +11717,9 @@ msgid ""
 "parsed to confirm it is a read-only query. Please contact your "
 "administrator for more assistance."
 msgstr ""
+"Cơ sở dữ liệu này không cho phép DDL/DML, và truy vấn không thể được phân"
+" tích để xác nhận rằng đó là một truy vấn chỉ đọc. Vui lòng liên hệ với "
+"quản trị viên của bạn để được hỗ trợ thêm."
 
 msgid "This database is managed externally, and can't be edited in Superset"
 msgstr ""
@@ -13179,7 +13208,7 @@ msgstr "Có hiển thị nhãn trong chú giải (tooltip) hay không."
 
 #, fuzzy
 msgid "Whether to display the total value in the tooltip"
-msgstr "Có hiển thị các giá trị số trong các ô hay không"
+msgstr "Có hiển thị tổng giá trị trong chú giải (tooltip) hay không"
 
 msgid "Whether to display the trend line"
 msgstr "Có hiển thị đường xu hướng hay không"
@@ -13489,6 +13518,9 @@ msgid ""
 "across multiple charts.\n"
 "        The color scheme selection is disabled."
 msgstr ""
+"Bạn đang xem biểu đồ này trong bối cảnh của một dashboard với các nhãn được "
+"chia sẻ giữa nhiều biểu đồ.\n"
+"        Việc lựa chọn bảng màu bị vô hiệu hóa."
 
 msgid ""
 "You are viewing this chart in the context of a dashboard that is directly"
@@ -13496,6 +13528,9 @@ msgid ""
 "        To edit the color scheme, open this chart outside of the "
 "dashboard."
 msgstr ""
+"Bạn đang xem biểu đồ này trong bối cảnh của một dashboard có ảnh hưởng trực tiếp"
+" đến màu sắc của nó.\n"
+"        Để chỉnh sửa bảng màu, hãy mở biểu đồ này bên ngoài dashboard."
 
 msgid "You can"
 msgstr "Bạn có thể"
