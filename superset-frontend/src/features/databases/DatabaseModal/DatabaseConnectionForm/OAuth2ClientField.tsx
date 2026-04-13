@@ -19,6 +19,7 @@
 
 import { useState } from 'react';
 import { Input, Collapse, FormItem } from '@superset-ui/core/components';
+import { t } from '@superset-ui/core';
 import { CustomParametersChangeType, FieldPropTypes } from '../../types';
 
 const LABELS = {
@@ -81,17 +82,17 @@ export const OAuth2ClientField = ({
       items={[
         {
           key: 'oauth2-client-information',
-          label: 'OAuth2 client information',
+          label: t('OAuth2 client information'),
           children: (
             <>
-              <FormItem label={LABELS.CLIENT_ID}>
+              <FormItem label={t(LABELS.CLIENT_ID)}>
                 <Input
                   data-test="client-id"
                   value={oauth2ClientInfo.id}
                   onChange={handleChange('id')}
                 />
               </FormItem>
-              <FormItem label={LABELS.SECRET}>
+              <FormItem label={t(LABELS.SECRET)}>
                 <Input
                   data-test="client-secret"
                   type="password"
@@ -99,7 +100,7 @@ export const OAuth2ClientField = ({
                   onChange={handleChange('secret')}
                 />
               </FormItem>
-              <FormItem label={LABELS.AUTH_URI}>
+              <FormItem label={t(LABELS.AUTH_URI)}>
                 <Input
                   data-test="client-authorization-request-uri"
                   placeholder="https://"
@@ -107,7 +108,7 @@ export const OAuth2ClientField = ({
                   onChange={handleChange('authorization_request_uri')}
                 />
               </FormItem>
-              <FormItem label={LABELS.TOKEN_URI}>
+              <FormItem label={t(LABELS.TOKEN_URI)}>
                 <Input
                   data-test="client-token-request-uri"
                   placeholder="https://"
@@ -115,7 +116,7 @@ export const OAuth2ClientField = ({
                   onChange={handleChange('token_request_uri')}
                 />
               </FormItem>
-              <FormItem label={LABELS.SCOPE}>
+              <FormItem label={t(LABELS.SCOPE)}>
                 <Input
                   data-test="client-scope"
                   value={oauth2ClientInfo.scope}

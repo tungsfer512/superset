@@ -16,23 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@superset-ui/core';
 import { SMALL_HEADER, MEDIUM_HEADER, LARGE_HEADER } from './constants';
 
 export default [
   {
     value: SMALL_HEADER,
-    label: t('Small'),
+    label: 'Small',
     className: 'header-style-option header-small',
   },
   {
     value: MEDIUM_HEADER,
-    label: t('Medium'),
+    label: 'Medium',
     className: 'header-style-option header-medium',
   },
   {
     value: LARGE_HEADER,
-    label: t('Large'),
+    label: 'Large',
     className: 'header-style-option header-large',
   },
 ];

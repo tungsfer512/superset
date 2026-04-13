@@ -38,37 +38,40 @@ import {
   GRID_COLUMN_COUNT,
 } from './constants';
 
-const typeToDefaultMetaData = {
-  [CHART_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
-  [COLUMN_TYPE]: {
-    width: GRID_DEFAULT_CHART_WIDTH,
-    background: BACKGROUND_TRANSPARENT,
-  },
-  [DIVIDER_TYPE]: null,
-  [HEADER_TYPE]: {
-    text: t('New header'),
-    headerSize: MEDIUM_HEADER,
-    background: BACKGROUND_TRANSPARENT,
-  },
-  [MARKDOWN_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
-  [ROW_TYPE]: { background: BACKGROUND_TRANSPARENT },
-  [TABS_TYPE]: null,
-  [TAB_TYPE]: {
-    text: '',
-    defaultText: t('Tab title'),
-    placeholder: t('Tab title'),
-  },
-  [DYNAMIC_TYPE]: {
-    width: GRID_COLUMN_COUNT,
-    background: BACKGROUND_TRANSPARENT,
-  },
-};
+function getTypeToDefaultMetaData() {
+  return {
+    [CHART_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
+    [COLUMN_TYPE]: {
+      width: GRID_DEFAULT_CHART_WIDTH,
+      background: BACKGROUND_TRANSPARENT,
+    },
+    [DIVIDER_TYPE]: null,
+    [HEADER_TYPE]: {
+      text: t('New header'),
+      headerSize: MEDIUM_HEADER,
+      background: BACKGROUND_TRANSPARENT,
+    },
+    [MARKDOWN_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
+    [ROW_TYPE]: { background: BACKGROUND_TRANSPARENT },
+    [TABS_TYPE]: null,
+    [TAB_TYPE]: {
+      text: '',
+      defaultText: t('Tab title'),
+      placeholder: t('Tab title'),
+    },
+    [DYNAMIC_TYPE]: {
+      width: GRID_COLUMN_COUNT,
+      background: BACKGROUND_TRANSPARENT,
+    },
+  };
+}
 
 function uuid(type) {
   return `${type}-${nanoid()}`;
 }
 
 export default function entityFactory(type, meta, parents = []) {
+  const typeToDefaultMetaData = getTypeToDefaultMetaData();
   return {
     type,
     id: uuid(type),

@@ -70,21 +70,23 @@ const BackgroundStyleOption = styled.div`
 
 function renderButton(option: OptionProps) {
   const BACKGROUND_TEXT = t('background');
+  const translatedLabel = t(option.label);
   return (
     <BackgroundStyleOption
       className={cx('background-style-option', option.className)}
     >
-      {`${option.label} ${BACKGROUND_TEXT}`}
+      {`${translatedLabel} ${BACKGROUND_TEXT}`}
     </BackgroundStyleOption>
   );
 }
 
 function renderOption(option: OptionProps) {
+  const translatedLabel = t(option.label);
   return (
     <BackgroundStyleOption
       className={cx('background-style-option', option.className)}
     >
-      {option.label}
+      {translatedLabel}
     </BackgroundStyleOption>
   );
 }

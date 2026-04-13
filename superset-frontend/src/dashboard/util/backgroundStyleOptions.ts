@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@superset-ui/core';
 import { BACKGROUND_TRANSPARENT, BACKGROUND_WHITE } from './constants';
 
 export default [
   {
     value: BACKGROUND_TRANSPARENT,
-    label: t('Transparent'),
+    label: 'Transparent',
     className: 'background--transparent',
   },
   {
     value: BACKGROUND_WHITE,
-    label: t('Solid'),
+    label: 'Solid',
     className: 'background--white',
   },
 ];

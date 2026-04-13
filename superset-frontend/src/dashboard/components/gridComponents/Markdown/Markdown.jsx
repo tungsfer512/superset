@@ -73,14 +73,17 @@ const propTypes = {
 
 const defaultProps = {};
 
-// TODO: localize
-const MARKDOWN_PLACE_HOLDER = `# ✨Header 1
-## ✨Header 2
-### ✨Header 3
+const MARKDOWN_DOCS_LINK = 'https://bit.ly/1dQOfRK';
+
+const getMarkdownPlaceholder = () => `# ✨${t('Header')} 1
+## ✨${t('Header')} 2
+### ✨${t('Header')} 3
 
 <br />
 
-Click here to learn more about [markdown formatting](https://bit.ly/1dQOfRK)`;
+${t('Click here to learn more about [markdown formatting](%(markdownDocsLink)s)', {
+  markdownDocsLink: MARKDOWN_DOCS_LINK,
+})}`;
 
 const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
 
@@ -292,7 +295,7 @@ class Markdown extends PureComponent {
           // this allows "select all => delete" to give an empty editor
           typeof this.state.markdownSource === 'string'
             ? this.state.markdownSource
-            : MARKDOWN_PLACE_HOLDER
+            : getMarkdownPlaceholder()
         }
         readOnly={false}
         onLoad={this.setEditor}
@@ -309,7 +312,7 @@ class Markdown extends PureComponent {
         source={
           hasError
             ? MARKDOWN_ERROR_MESSAGE
-            : this.state.markdownSource || MARKDOWN_PLACE_HOLDER
+            : this.state.markdownSource || getMarkdownPlaceholder()
         }
         htmlSanitization={this.props.htmlSanitization}
         htmlSchemaOverrides={this.props.htmlSchemaOverrides}

@@ -1627,22 +1627,31 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     return (
       db?.engine && (
         <StyledAlertMargin>
+          {(() => {
+            const engineSpecificAlert =
+              engineSpecificAlertMapping[
+                db.engine as keyof typeof engineSpecificAlertMapping
+              ];
+            const message =
+              engineSpecificAlert?.message
+                ? t(engineSpecificAlert.message)
+                : connectionAlert?.DEFAULT?.message;
+            const description =
+              engineSpecificAlert?.description
+                ? t(engineSpecificAlert.description)
+                : connectionAlert?.DEFAULT?.description + ipAlert;
+
+            return (
           <Alert
             closable={false}
             css={(theme: SupersetTheme) => antDAlertStyles(theme)}
             type="info"
             showIcon
-            message={
-              engineSpecificAlertMapping[
-                db.engine as keyof typeof engineSpecificAlertMapping
-              ]?.message || connectionAlert?.DEFAULT?.message
-            }
-            description={
-              engineSpecificAlertMapping[
-                db.engine as keyof typeof engineSpecificAlertMapping
-              ]?.description || connectionAlert?.DEFAULT?.description + ipAlert
-            }
+            message={message}
+            description={description}
           />
+            );
+          })()}
         </StyledAlertMargin>
       )
     );

@@ -171,10 +171,10 @@ const allowedExtensionsToAccept = {
   columnar: '.parquet, .zip',
 };
 
-const extensionsToLabel: Record<UploadType, string> = {
-  csv: 'CSV',
-  excel: 'Excel',
-  columnar: 'Columnar',
+const extensionsToFileLabel: Record<UploadType, string> = {
+  csv: 'CSV file',
+  excel: 'Excel file',
+  columnar: 'Columnar file',
 };
 
 export const validateUploadFileExtension = (
@@ -266,34 +266,34 @@ const UploadDataModal: FunctionComponent<UploadDataModalProps> = ({
   const delimiterOptions = [
     {
       value: ',',
-      label: 'Comma ","',
+      label: t('Comma ","'),
     },
     {
       value: ';',
-      label: 'Semicolon ";"',
+      label: t('Semicolon ";"'),
     },
     {
       value: '\t',
-      label: 'Tab "\\t"',
+      label: t('Tab "\\t"'),
     },
     {
       value: '|',
-      label: 'Pipe',
+      label: t('Pipe'),
     },
   ];
 
   const tableAlreadyExistsOptions = [
     {
       value: 'fail',
-      label: 'Fail',
+      label: t('Fail'),
     },
     {
       value: 'replace',
-      label: 'Replace',
+      label: t('Replace'),
     },
     {
       value: 'append',
-      label: 'Append',
+      label: t('Append'),
     },
   ];
 
@@ -626,9 +626,7 @@ const UploadDataModal: FunctionComponent<UploadDataModalProps> = ({
                   <Row>
                     <Col span={24}>
                       <StyledFormItem
-                        label={t('%(label)s file', {
-                          label: extensionsToLabel[type],
-                        })}
+                        label={t(extensionsToFileLabel[type])}
                         name="file"
                         required
                         rules={[{ validator: validateUpload }]}

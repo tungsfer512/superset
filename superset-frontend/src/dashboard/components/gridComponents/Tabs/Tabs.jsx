@@ -521,11 +521,8 @@ const Tabs = props => {
         >
           <span>
             {t(
-              'Deleting a tab will remove all content within it and will deactivate any related alerts or reports. You may still ' +
-                'reverse this action with the',
-            )}{' '}
-            <b>{t('undo')}</b>{' '}
-            {t('button (cmd + z) until you save your changes.')}
+              'Deleting a tab will remove all content within it and will deactivate any related alerts or reports. You may still reverse this action with the undo button (cmd + z) until you save your changes.',
+            )}
           </span>
         </Modal>
       )}

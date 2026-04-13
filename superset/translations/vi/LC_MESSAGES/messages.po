@@ -5638,6 +5638,9 @@ msgstr "Được tạo bởi"
 msgid "Header"
 msgstr "Tiêu đề"
 
+msgid "Click here to learn more about [markdown formatting](%(markdownDocsLink)s)"
+msgstr "Nhấp vào đây để tìm hiểu thêm về [định dạng markdown](%(markdownDocsLink)s)"
+
 msgid "Header Row"
 msgstr "Hàng tiêu đề"
 
@@ -8906,9 +8909,8 @@ msgstr ""
 "Bạn có thể truy cập lại các truy vấn này bằng cách sử dụng tính năng Lưu trước khi xóa tab.\n"
 "Lưu ý rằng bạn sẽ cần đóng các cửa sổ SQL Lab khác trước khi thực hiện việc này."
 
-#, fuzzy
 msgid "SQL Query"
-msgstr "Truy vấn"
+msgstr "Truy vấn SQL"
 
 #, fuzzy
 msgid "SQL expression"
@@ -13886,8 +13888,15 @@ msgstr "biểu tượng kiểu boolean"
 msgid "bottom"
 msgstr "dưới cùng"
 
-msgid "button (cmd + z) until you save your changes."
-msgstr "nút (cmd + z) cho đến khi bạn lưu các thay đổi của mình."
+msgid ""
+"Deleting a tab will remove all content within it and will deactivate any "
+"related alerts or reports. You may still reverse this action with the undo "
+"button (cmd + z) until you save your changes."
+msgstr ""
+"Xóa tab sẽ xóa toàn bộ nội dung bên trong và vô hiệu hóa mọi cảnh báo hoặc "
+"báo cáo liên quan. Bạn vẫn có thể hoàn tác thao tác này bằng nút Hoàn tác "
+"(cmd + z) trước khi bạn lưu các thay đổi."
+
 
 msgid "by using"
 msgstr "bằng cách sử dụng"
@@ -15960,3 +15969,478 @@ msgstr "Ngày mai lúc"
 msgid "Reset password"
 msgstr "Đặt lại mật khẩu"
 
+msgid "Edit Role"
+msgstr "Chỉnh sửa vai trò"
+
+msgid "Sync Permissions"
+msgstr "Đồng bộ quyền"
+
+#, python-format
+msgid "Validating connectivity for %s"
+msgstr "Đang kiểm tra kết nối cho %s"
+
+#, python-format
+msgid "Syncing permissions for %s"
+msgstr "Đang đồng bộ quyền cho %s"
+
+#, python-format
+msgid "Permissions successfully synced for %s"
+msgstr "Đã đồng bộ quyền thành công cho %s"
+
+#, python-format
+msgid "Syncing permissions for %s in the background"
+msgstr "Đang đồng bộ quyền cho %s ở chế độ nền"
+
+#, python-format
+msgid "An error occurred while syncing permissions for %s: %s"
+msgstr "Đã xảy ra lỗi khi đồng bộ quyền cho %s: %s"
+
+msgid "Image download failed, please refresh and try again."
+msgstr "Tải ảnh thất bại, vui lòng tải lại trang và thử lại."
+
+msgid "PDF download failed, please refresh and try again."
+msgstr "Tải PDF thất bại, vui lòng tải lại trang và thử lại."
+
+msgid "An error occurred while loading the SQL"
+msgstr "Đã xảy ra lỗi khi tải câu lệnh SQL"
+
+msgid "Copied to clipboard!"
+msgstr "Đã sao chép vào bộ nhớ tạm!"
+
+msgid "Sorry, your browser does not support copying. Use Ctrl / Cmd + C!"
+msgstr "Trình duyệt của bạn không hỗ trợ sao chép. Hãy dùng Ctrl / Cmd + C!"
+
+msgid "Successfully changed dataset!"
+msgstr "Đã đổi dataset thành công!"
+
+msgid "SQL was formatted"
+msgstr "Đã định dạng SQL"
+
+msgid "Metadata has been synced"
+msgstr "Đã đồng bộ metadata"
+
+msgid "The dataset has been saved"
+msgstr "Dataset đã được lưu"
+
+msgid "List updated"
+msgstr "Danh sách đã được cập nhật"
+
+msgid "Failed to generate chart edit URL"
+msgstr "Không thể tạo URL chỉnh sửa biểu đồ"
+
+msgid "Failed to load chart data."
+msgstr "Không thể tải dữ liệu biểu đồ."
+
+msgid "Failed to save cross-filter scoping"
+msgstr "Không thể lưu phạm vi cross-filter"
+
+msgid "Can not move top level tab into nested tabs"
+msgstr "Không thể di chuyển tab cấp cao nhất vào các tab lồng nhau"
+
+msgid "This chart has been moved to a different filter scope."
+msgstr "Biểu đồ này đã được chuyển sang một phạm vi bộ lọc khác."
+
+msgid "There was an issue fetching the favorite status of this dashboard."
+msgstr "Đã xảy ra sự cố khi lấy trạng thái yêu thích của dashboard này."
+
+msgid "There was an issue favoriting this dashboard."
+msgstr "Đã xảy ra sự cố khi đánh dấu yêu thích dashboard này."
+
+msgid "You do not have permissions to edit this dashboard."
+msgstr "Bạn không có quyền chỉnh sửa dashboard này."
+
+msgid "This dashboard was saved successfully."
+msgstr "Dashboard này đã được lưu thành công."
+
+#, python-format
+msgid "You have used all %(historyLength)s undo slots and will not be able to fully undo subsequent actions. You may save your current state to reset the history."
+msgstr "Bạn đã dùng hết %(historyLength)s lượt hoàn tác và sẽ không thể hoàn tác đầy đủ các thao tác tiếp theo. Bạn có thể lưu trạng thái hiện tại để đặt lại lịch sử."
+
+msgid "Refresh interval saved"
+msgstr "Đã lưu khoảng thời gian làm mới"
+
+msgid "Put positive values and valid minute and second value less than 60"
+msgstr "Nhập giá trị dương và phút/giây hợp lệ nhỏ hơn 60"
+
+msgid "Put some positive value greater than 0"
+msgstr "Nhập giá trị dương lớn hơn 0"
+
+msgid "You must pick a name for the new dashboard"
+msgstr "Bạn phải đặt tên cho dashboard mới"
+
+msgid "Error loading chart datasources. Filters may not work correctly."
+msgstr "Lỗi khi tải datasource của biểu đồ. Bộ lọc có thể hoạt động không chính xác."
+
+msgid "The screenshot could not be downloaded. Please, try again later."
+msgstr "Không thể tải ảnh chụp màn hình. Vui lòng thử lại sau."
+
+msgid "The screenshot has been downloaded."
+msgstr "Ảnh chụp màn hình đã được tải xuống."
+
+msgid "The screenshot is being generated. Please, do not leave the page."
+msgstr "Ảnh chụp màn hình đang được tạo. Vui lòng không rời khỏi trang."
+
+msgid "An error occurred while fetching available CSS templates"
+msgstr "Đã xảy ra lỗi khi tải các mẫu CSS khả dụng"
+
+msgid "An error occurred while fetching available themes"
+msgstr "Đã xảy ra lỗi khi tải các theme khả dụng"
+
+msgid "Changes saved."
+msgstr "Đã lưu thay đổi."
+
+msgid "Embedding deactivated."
+msgstr "Đã tắt nhúng."
+
+msgid "Sorry, something went wrong. Embedding could not be deactivated."
+msgstr "Xin lỗi, đã xảy ra lỗi. Không thể tắt nhúng."
+
+msgid "Sorry, something went wrong. Please try again."
+msgstr "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại."
+
+msgid "Your dashboard is too large. Please reduce its size before saving it."
+msgstr "Dashboard của bạn quá lớn. Vui lòng giảm kích thước trước khi lưu."
+
+msgid "Your dashboard is near the size limit."
+msgstr "Dashboard của bạn đang gần chạm giới hạn kích thước."
+
+msgid "Refreshing charts"
+msgstr "Đang làm mới biểu đồ"
+
+msgid "JSON metadata is invalid!"
+msgstr "JSON metadata không hợp lệ!"
+
+msgid "Dashboard properties updated"
+msgstr "Đã cập nhật thuộc tính dashboard"
+
+msgid "The dashboard has been saved"
+msgstr "Dashboard đã được lưu"
+
+msgid "Data refreshed"
+msgstr "Dữ liệu đã được làm mới"
+
+msgid "An error occurred while opening Explore"
+msgstr "Đã xảy ra lỗi khi mở Explore"
+
+msgid "Sorry, something went wrong. Try again later."
+msgstr "Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau."
+
+#, python-format
+msgid "Chart [%s] has been saved"
+msgstr "Biểu đồ [%s] đã được lưu"
+
+#, python-format
+msgid "Chart [%s] has been overwritten"
+msgstr "Biểu đồ [%s] đã được ghi đè"
+
+#, python-format
+msgid "Dashboard [%s] just got created and chart [%s] was added to it"
+msgstr "Dashboard [%s] vừa được tạo và biểu đồ [%s] đã được thêm vào"
+
+#, python-format
+msgid "Chart [%s] was added to dashboard [%s]"
+msgstr "Biểu đồ [%s] đã được thêm vào dashboard [%s]"
+
+msgid "An error occurred while loading dashboard information."
+msgstr "Đã xảy ra lỗi khi tải thông tin dashboard."
+
+#, python-format
+msgid "Failed to verify select options: %s"
+msgstr "Không thể xác minh các tùy chọn chọn: %s"
+
+msgid "Chart properties updated"
+msgstr "Đã cập nhật thuộc tính biểu đồ"
+
+#, python-format
+msgid "Error while fetching data: %s"
+msgstr "Lỗi khi tải dữ liệu: %s"
+
+#, python-format
+msgid "%s updated"
+msgstr "%s đã được cập nhật"
+
+msgid "There was an error retrieving dashboard tabs."
+msgstr "Đã xảy ra lỗi khi lấy danh sách tab dashboard."
+
+msgid "Annotation template updated"
+msgstr "Mẫu chú thích đã được cập nhật"
+
+msgid "Annotation template created"
+msgstr "Mẫu chú thích đã được tạo"
+
+msgid "The annotation has been updated"
+msgstr "Chú thích đã được cập nhật"
+
+msgid "The annotation has been saved"
+msgstr "Chú thích đã được lưu"
+
+msgid "There was an error while fetching users"
+msgstr "Đã xảy ra lỗi khi tải danh sách người dùng"
+
+#, python-format
+msgid "An error occurred while fetching dashboards: %s"
+msgstr "Đã xảy ra lỗi khi tải dashboard: %s"
+
+#, python-format
+msgid "Deleted: %s"
+msgstr "Đã xóa: %s"
+
+#, python-format
+msgid "There was an issue deleting %s: %s"
+msgstr "Đã xảy ra sự cố khi xóa %s: %s"
+
+msgid "Code Copied!"
+msgstr "Đã sao chép mã!"
+
+msgid "Sorry, your browser does not support copying."
+msgstr "Trình duyệt của bạn không hỗ trợ sao chép."
+
+msgid "Rule added"
+msgstr "Đã thêm rule"
+
+msgid "Tag updated"
+msgstr "Tag đã được cập nhật"
+
+msgid "Tag created"
+msgstr "Tag đã được tạo"
+
+msgid "Local theme set for preview"
+msgstr "Đã đặt theme cục bộ để xem trước"
+
+msgid "Failed to apply theme: Invalid JSON"
+msgstr "Không thể áp dụng theme: JSON không hợp lệ"
+
+msgid "Something went wrong while saving the user info"
+msgstr "Đã xảy ra lỗi khi lưu thông tin người dùng"
+
+msgid "Please enter a SQLAlchemy URI to test"
+msgstr "Vui lòng nhập URI SQLAlchemy để kiểm tra"
+
+msgid "Connection failed, please check your connection settings."
+msgstr "Kết nối thất bại, vui lòng kiểm tra cài đặt kết nối."
+
+msgid "Database settings updated"
+msgstr "Cài đặt cơ sở dữ liệu đã được cập nhật"
+
+msgid "Database connected"
+msgstr "Đã kết nối cơ sở dữ liệu"
+
+#, python-format
+msgid "Sorry there was an error fetching database information: %s"
+msgstr "Xin lỗi, đã xảy ra lỗi khi tải thông tin cơ sở dữ liệu: %s"
+
+msgid "Data imported"
+msgstr "Dữ liệu đã được nhập"
+
+msgid "Unable to read the file, please refresh and try again."
+msgstr "Không thể đọc tệp, vui lòng tải lại trang và thử lại."
+
+msgid "There was an error fetching dataset"
+msgstr "Đã xảy ra lỗi khi tải dataset"
+
+#, python-format
+msgid "The API response from %s does not match the IDatabaseTable interface."
+msgstr "Phản hồi API từ %s không khớp với interface IDatabaseTable."
+
+msgid "There was an issue fetching reports attached to this dashboard."
+msgstr "Đã xảy ra sự cố khi tải các báo cáo gắn với dashboard này."
+
+msgid "The report has been created"
+msgstr "Báo cáo đã được tạo"
+
+msgid "Report updated"
+msgstr "Báo cáo đã được cập nhật"
+
+msgid "We were unable to active or deactivate this report."
+msgstr "Không thể bật hoặc tắt báo cáo này."
+
+msgid "Your report could not be deleted"
+msgstr "Không thể xóa báo cáo của bạn"
+
+#, python-format
+msgid "There was an issue deleting the selected %s: %s"
+msgstr "Đã xảy ra sự cố khi xóa %s đã chọn: %s"
+
+msgid "Error Fetching Tagged Objects"
+msgstr "Lỗi khi tải các đối tượng đã gắn thẻ"
+
+#, python-format
+msgid "There was an issue deleting the selected layers: %s"
+msgstr "Đã xảy ra sự cố khi xóa các lớp đã chọn: %s"
+
+#, python-format
+msgid "There was an issue deleting the selected annotations: %s"
+msgstr "Đã xảy ra sự cố khi xóa các chú thích đã chọn: %s"
+
+msgid "Chart imported"
+msgstr "Biểu đồ đã được nhập"
+
+#, python-format
+msgid "There was an issue deleting the selected charts: %s"
+msgstr "Đã xảy ra sự cố khi xóa các biểu đồ đã chọn: %s"
+
+msgid "An error occurred while fetching dashboards"
+msgstr "Đã xảy ra lỗi khi tải danh sách dashboard"
+
+#, python-format
+msgid "An error occurred while fetching chart owners values: %s"
+msgstr "Đã xảy ra lỗi khi tải giá trị chủ sở hữu biểu đồ: %s"
+
+#, python-format
+msgid "There was an issue deleting the selected templates: %s"
+msgstr "Đã xảy ra sự cố khi xóa các mẫu đã chọn: %s"
+
+msgid "Dashboard imported"
+msgstr "Dashboard đã được nhập"
+
+msgid "There was an issue deleting the selected dashboards: "
+msgstr "Đã xảy ra sự cố khi xóa các dashboard đã chọn: "
+
+#, python-format
+msgid "An error occurred while fetching dashboard owner values: %s"
+msgstr "Đã xảy ra lỗi khi tải giá trị chủ sở hữu dashboard: %s"
+
+msgid "Dataset imported"
+msgstr "Dataset đã được nhập"
+
+msgid "An error occurred while fetching dataset related data"
+msgstr "Đã xảy ra lỗi khi tải dữ liệu liên quan đến dataset"
+
+#, python-format
+msgid "There was an issue deleting the selected datasets: %s"
+msgstr "Đã xảy ra sự cố khi xóa các dataset đã chọn: %s"
+
+msgid "There was an issue duplicating the dataset."
+msgstr "Đã xảy ra sự cố khi nhân bản dataset."
+
+msgid "Query imported"
+msgstr "Truy vấn đã được nhập"
+
+#, python-format
+msgid "There was an issue deleting the selected queries: %s"
+msgstr "Đã xảy ra sự cố khi xóa các truy vấn đã chọn: %s"
+
+msgid "Failed to stop query."
+msgstr "Không thể dừng truy vấn."
+
+msgid "Query was stopped."
+msgstr "Truy vấn đã được dừng."
+
+msgid "An error occurred while removing query. Please contact your administrator."
+msgstr "Đã xảy ra lỗi khi xóa truy vấn. Vui lòng liên hệ quản trị viên."
+
+msgid "An error occurred while fetching tab state"
+msgstr "Đã xảy ra lỗi khi tải trạng thái tab"
+
+msgid "The datasource couldn't be loaded"
+msgstr "Không thể tải datasource"
+
+msgid "This session has encountered an interruption, and some controls may not work as intended. If you are the developer of this app, please check that the guest token is being generated correctly."
+msgstr "Phiên làm việc này đã bị gián đoạn và một số chức năng điều khiển có thể không hoạt động như mong đợi. Nếu bạn là người phát triển ứng dụng này, vui lòng kiểm tra xem guest token có được tạo đúng hay không."
+
+msgid "The user has been updated successfully."
+msgstr "Người dùng đã được cập nhật thành công."
+
+msgid "There was an error creating the role. Please, try again."
+msgstr "Đã xảy ra lỗi khi tạo vai trò. Vui lòng thử lại."
+
+msgid "There was an error duplicating the role. Please, try again."
+msgstr "Đã xảy ra lỗi khi nhân bản vai trò. Vui lòng thử lại."
+
+msgid "There was an error updating the role. Please, try again."
+msgstr "Đã xảy ra lỗi khi cập nhật vai trò. Vui lòng thử lại."
+
+#, python-format
+msgid "%s items could not be tagged because you don’t have edit permissions to all selected objects."
+msgstr "%s mục không thể được gắn thẻ vì bạn không có quyền chỉnh sửa với tất cả đối tượng đã chọn."
+
+msgid "Why do I need to create a database?"
+msgstr "Tại sao tôi cần tạo cơ sở dữ liệu?"
+
+msgid "To begin using your Google Sheets, you need to create a database first. Databases are used as a way to identify your data so that it can be queried and visualized. This database will hold all of your individual Google Sheets you choose to connect here."
+msgstr "Để bắt đầu sử dụng Google Sheets, trước tiên bạn cần tạo một cơ sở dữ liệu. Cơ sở dữ liệu được dùng để định danh dữ liệu để có thể truy vấn và trực quan hóa. Cơ sở dữ liệu này sẽ chứa tất cả các Google Sheets riêng lẻ mà bạn chọn kết nối tại đây."
+
+msgid "Affected Dashboards"
+msgstr "Dashboard bị ảnh hưởng"
+
+msgid "Affected Charts"
+msgstr "Biểu đồ bị ảnh hưởng"
+
+msgid "... and %s others"
+msgstr "... và %s cái khác"
+
+
+msgid "In order to connect to non-public sheets you need to either provide a service account or configure an OAuth2 client."
+msgstr "Để kết nối với các bảng tính không công khai, bạn cần cung cấp tài khoản dịch vụ hoặc cấu hình máy khách OAuth2."
+
+msgid "Upload credentials"
+msgstr "Tải lên thông tin xác thực"
+
+msgid "OAuth2 client information"
+msgstr "Thông tin client OAuth2"
+
+msgid "Client ID"
+msgstr "ID client"
+
+msgid "Client Secret"
+msgstr "Client Secret"
+
+msgid "Authorization Request URI"
+msgstr "URI yêu cầu ủy quyền"
+
+msgid "Token Request URI"
+msgstr "URI yêu cầu token"
+
+msgid "Scope"
+msgstr "Phạm vi"
+
+msgid "CSV upload"
+msgstr "Tải lên CSV"
+
+msgid "Columnar file"
+msgstr "Tệp dạng cột"
+
+msgid "Columns:"
+msgstr "Cột:"
+
+msgid "Append"
+msgstr "Thêm vào"
+
+msgid "Comma \",\""
+msgstr "Dấu phẩy \",\""
+
+msgid "Semicolon \";\""
+msgstr "Dấu chấm phẩy \";\""
+
+msgid "Tab \"\\t\""
+msgstr "Tab \"\\t\""
+
+msgid "Pipe"
+msgstr "Dấu gạch dọc"
+
+msgid "Table name"
+msgstr "Tên bảng"
+
+msgid "File settings"
+msgstr "Cài đặt tệp"
+
+msgid "If table already exists"
+msgstr "Nếu bảng đã tồn tại"
+
+msgid "Fail"
+msgstr "Thất bại"
+
+msgid "Columns to be parsed as dates"
+msgstr "Các cột được phân tích dưới dạng ngày"
+
+msgid "Decimal character"
+msgstr "Ký tự thập phân"
+
+msgid "Columns to read"
+msgstr "Các cột cần đọc"
+
+msgid "Columnar file"
+msgstr "Tệp dạng cột"
+
+msgid "Columnar upload"
+msgstr "Tải lên tệp dạng cột"

@@ -19,7 +19,7 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { css, styled } from '@superset-ui/core';
+import { css, styled, t } from '@superset-ui/core';
 
 import PopoverDropdown from '@superset-ui/core/components/PopoverDropdown';
 import { EditableTitle } from '@superset-ui/core/components';
@@ -169,6 +169,11 @@ class Header extends PureComponent {
   }
 
   render() {
+    const translatedHeaderStyleOptions = headerStyleOptions.map(option => ({
+      ...option,
+      label: t(option.label),
+    }));
+
     const { isFocused } = this.state;
 
     const {
@@ -215,7 +220,7 @@ class Header extends PureComponent {
               menuItems={[
                 <PopoverDropdown
                   id={`${component.id}-header-style`}
-                  options={headerStyleOptions}
+                  options={translatedHeaderStyleOptions}
                   value={component.meta.headerSize}
                   onChange={this.handleChangeSize}
                 />,

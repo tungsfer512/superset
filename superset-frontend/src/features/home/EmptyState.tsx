@@ -45,7 +45,7 @@ const LABELS = {
   create: {
     [WelcomeTable.Charts]: t('Chart'),
     [WelcomeTable.Dashboards]: t('Dashboard'),
-    [WelcomeTable.SavedQueries]: t('SQL query'),
+    [WelcomeTable.SavedQueries]: t('Truy vấn SQL'),
   },
   viewAll: {
     [WelcomeTable.Charts]: t('charts'),
