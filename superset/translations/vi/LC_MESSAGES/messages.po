@@ -14345,16 +14345,16 @@ msgid "pixels"
 msgstr "pixel"
 
 msgid "previous calendar month"
-msgstr "tháng dương lịch trước"
+msgstr "tháng trước"
 
 msgid "previous calendar week"
-msgstr "tuần dương lịch trước"
+msgstr "tuần trước"
 
 msgid "previous calendar year"
-msgstr "năm dương lịch trước"
+msgstr "năm trước"
 
 msgid "previous calendar quarter"
-msgstr "quý dương lịch trước"
+msgstr "quý trước"
 
 msgid "published"
 msgstr "đã xuất bản"

@@ -23,3 +23,7 @@ declare module '*.png' {
 declare module '*.jpg';
 declare module 'just-handlebars-helpers';
 declare module 'handlebars-group-by';
+declare module 'ace-builds/src-min-noconflict/worker-css';
+declare module 'ace-builds/src-min-noconflict/worker-html';
+declare module 'ace-builds/src-min-noconflict/worker-javascript';
+declare module 'ace-builds/src-min-noconflict/worker-json';

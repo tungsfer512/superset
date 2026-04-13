@@ -20,11 +20,35 @@
 import { FC } from 'react';
 import AceEditor, { IAceEditorProps } from 'react-ace';
 
+import { config as aceConfig } from 'ace-builds';
+
 // must go after AceEditor import
 import 'ace-builds/src-min-noconflict/mode-handlebars';
 import 'ace-builds/src-min-noconflict/mode-css';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-monokai';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cssWorkerUrl = require('ace-builds/src-min-noconflict/worker-css');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const htmlWorkerUrl = require('ace-builds/src-min-noconflict/worker-html');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const javascriptWorkerUrl = require('ace-builds/src-min-noconflict/worker-javascript');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const jsonWorkerUrl = require('ace-builds/src-min-noconflict/worker-json');
+
+const resolveWorkerUrl = (workerModule: unknown): string => {
+  if (typeof workerModule === 'string') return workerModule;
+  if (
+    workerModule &&
+    typeof workerModule === 'object' &&
+    'default' in workerModule
+  ) {
+    const maybeDefault = (workerModule as { default?: unknown }).default;
+    if (typeof maybeDefault === 'string') return maybeDefault;
+  }
+  return '';
+};
 
 export type CodeEditorMode = 'handlebars' | 'css';
 export type CodeEditorTheme = 'light' | 'dark';
@@ -44,6 +68,23 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   value,
   ...rest
 }: CodeEditorProps) => {
+  // Ensure web workers resolve correctly under webpack-dev-server.
+  // Without this, Ace can attempt to import a non-string URL (e.g. "[object Object]"),
+  // causing runtime failures in Explore on routes like /explore/...
+  aceConfig.setModuleUrl('ace/mode/css_worker', resolveWorkerUrl(cssWorkerUrl));
+  aceConfig.setModuleUrl(
+    'ace/mode/html_worker',
+    resolveWorkerUrl(htmlWorkerUrl),
+  );
+  aceConfig.setModuleUrl(
+    'ace/mode/javascript_worker',
+    resolveWorkerUrl(javascriptWorkerUrl),
+  );
+  aceConfig.setModuleUrl(
+    'ace/mode/json_worker',
+    resolveWorkerUrl(jsonWorkerUrl),
+  );
+
   const m_name = name || Math.random().toString(36).substring(7);
   const m_theme = theme === 'light' ? 'github' : 'monokai';
   const m_mode = mode || 'handlebars';
@@ -72,6 +113,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           showLineNumbers: true,
           tabSize: 2,
           showGutter: true,
+          useWorker: false,
         }}
         {...rest}
       />

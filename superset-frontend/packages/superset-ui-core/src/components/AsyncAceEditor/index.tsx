@@ -105,6 +105,19 @@ export type AsyncAceEditorOptions = {
   > | null;
 };
 
+function resolveWorkerUrl(workerModule: unknown): string {
+  if (typeof workerModule === 'string') {
+    return workerModule;
+  }
+  if (workerModule && typeof workerModule === 'object' && 'default' in workerModule) {
+    const maybeDefault = (workerModule as { default?: unknown }).default;
+    if (typeof maybeDefault === 'string') {
+      return maybeDefault;
+    }
+  }
+  return '';
+}
+
 /**
  * Get an async AceEditor with automatical loading of specified ace modules.
  */
@@ -153,10 +166,19 @@ export function AsyncAceEditor(
       acequirePromise,
     ]);
 
-    config.setModuleUrl('ace/mode/css_worker', cssWorkerUrl);
-    config.setModuleUrl('ace/mode/javascript_worker', javascriptWorkerUrl);
-    config.setModuleUrl('ace/mode/json_worker', jsonWorkerUrl);
-    config.setModuleUrl('ace/mode/html_worker', htmlWorkerUrl);
+    config.setModuleUrl('ace/mode/css_worker', resolveWorkerUrl(cssWorkerUrl));
+    config.setModuleUrl(
+      'ace/mode/javascript_worker',
+      resolveWorkerUrl(javascriptWorkerUrl),
+    );
+    config.setModuleUrl(
+      'ace/mode/json_worker',
+      resolveWorkerUrl(jsonWorkerUrl),
+    );
+    config.setModuleUrl(
+      'ace/mode/html_worker',
+      resolveWorkerUrl(htmlWorkerUrl),
+    );
 
     await Promise.all(aceModules.map(x => aceModuleLoaders[x]()));
 
@@ -175,6 +197,7 @@ export function AsyncAceEditor(
           theme = inferredTheme,
           tabSize = defaultTabSize,
           defaultValue = '',
+          setOptions,
           ...props
         },
         ref,
@@ -449,7 +472,13 @@ export function AsyncAceEditor(
               theme={theme}
               tabSize={tabSize}
               defaultValue={defaultValue}
-              setOptions={{ fontFamily }}
+              setOptions={{
+                fontFamily,
+                // Some environments fail to fetch ace workers from dev assets.
+                // Disable workers to prevent runtime importScripts crashes.
+                useWorker: false,
+                ...(setOptions || {}),
+              }}
               {...props}
             />
           </>

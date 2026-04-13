@@ -612,11 +612,25 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
     // Section label can be a ReactNode but in some places we want to
     // have a string ID. Using forced type conversion for now,
     // should probably add a `id` field to sections in the future.
-    const sectionId = String(label);
+    // Some core sections use lazy translation via functions: `label: () => t('...')`.
+    // React cannot render functions as children, so resolve them first.
+    const resolvedLabel =
+      typeof label === 'function'
+        ? (label as unknown as () => unknown)()
+        : label;
+    const resolvedDescription =
+      typeof description === 'function'
+        ? (description as unknown as () => unknown)()
+        : description;
+
+    const sectionId = String(resolvedLabel);
     // Plugin control panels often call t() at import time (before language pack).
-    const displayLabel = typeof label === 'string' ? t(label) : label;
+    const displayLabel =
+      typeof resolvedLabel === 'string' ? t(resolvedLabel) : resolvedLabel;
     const displayDescription =
-      typeof description === 'string' ? t(description) : description;
+      typeof resolvedDescription === 'string'
+        ? t(resolvedDescription)
+        : resolvedDescription;
     const isVisible = visibility?.call(this, props, controls) !== false;
     const hasErrors = section.controlSetRows.some(rows =>
       rows.some(item => {
@@ -723,7 +737,7 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
       key: String(section.label),
       label: <PanelHeader />,
       children: PanelChildren,
-      className: section.label ? '' : 'hidden-collapse-header',
+      className: resolvedLabel ? '' : 'hidden-collapse-header',
       style: { display: isVisible ? 'block' : 'none' },
     };
   };
