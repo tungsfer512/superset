@@ -20,6 +20,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { t } from '@superset-ui/core';
 import { useListViewResource } from 'src/views/CRUD/hooks';
+import useI18nReady from 'src/hooks/useI18nReady';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { ActionsBar, ActionProps } from 'src/components/ListView/ActionsBar';
 import {
@@ -106,13 +107,14 @@ function UsersList({ user }: UsersListProps) {
   }, [users]);
 
   const isAdmin = useMemo(() => isUserAdmin(user), [user]);
+  const locale = useI18nReady();
 
   const isActiveOptions = useMemo(
     () => [
       { label: t('Yes'), value: true },
       { label: t('No'), value: false },
     ],
-    [t],
+    [locale],
   );
 
   const fetchRoles = useCallback(() => {
@@ -361,7 +363,7 @@ function UsersList({ user }: UsersListProps) {
         size: 'xl',
       },
     ],
-    [isAdmin, t],
+    [isAdmin, locale],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];
@@ -503,6 +505,7 @@ function UsersList({ user }: UsersListProps) {
       loginCountStats,
       failLoginCountStats,
       isActiveOptions,
+      locale,
     ],
   );
 

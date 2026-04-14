@@ -20,6 +20,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { t, SupersetClient } from '@superset-ui/core';
 import { useListViewResource } from 'src/views/CRUD/hooks';
+import useI18nReady from 'src/hooks/useI18nReady';
 import RoleListAddModal from 'src/features/roles/RoleListAddModal';
 import RoleListEditModal from 'src/features/roles/RoleListEditModal';
 import RoleListDuplicateModal from 'src/features/roles/RoleListDuplicateModal';
@@ -109,6 +110,7 @@ function RolesList({ addDangerToast, addSuccessToast, user }: RolesListProps) {
   });
 
   const isAdmin = useMemo(() => isUserAdmin(user), [user]);
+  const locale = useI18nReady();
 
   const fetchPermissions = useCallback(() => {
     fetchPaginatedData({
@@ -271,7 +273,7 @@ function RolesList({ addDangerToast, addSuccessToast, user }: RolesListProps) {
         size: 'xl',
       },
     ],
-    [isAdmin],
+    [isAdmin, locale],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];
@@ -345,7 +347,7 @@ function RolesList({ addDangerToast, addSuccessToast, user }: RolesListProps) {
         dropdownStyle: { minWidth: WIDER_DROPDOWN_WIDTH },
       },
     ],
-    [permissions, groups, loadingState.groups, loadingState.permissions],
+    [permissions, groups, loadingState.groups, loadingState.permissions, locale],
   );
 
   const emptyState = {

@@ -48,6 +48,7 @@ import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { Switch } from '@superset-ui/core/components/Switch';
 import { DATETIME_WITH_TIME_ZONE } from 'src/constants';
 import withToasts from 'src/components/MessageToasts/withToasts';
+import useI18nReady from 'src/hooks/useI18nReady';
 import AlertStatusIcon from 'src/features/alerts/components/AlertStatusIcon';
 import RecipientIcon from 'src/features/alerts/components/RecipientIcon';
 import {
@@ -129,6 +130,9 @@ function AlertList({
     ],
     [isReportEnabled],
   );
+
+  const locale = useI18nReady();
+
   const {
     state: {
       loading,
@@ -424,7 +428,7 @@ function AlertList({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canDelete, canEdit, isReportEnabled, toggleActive],
+    [canDelete, canEdit, isReportEnabled, locale, toggleActive],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];
@@ -534,7 +538,7 @@ function AlertList({
         dropdownStyle: { minWidth: WIDER_DROPDOWN_WIDTH },
       },
     ],
-    [],
+    [locale],
   );
 
   const header = HeaderExtension ? (

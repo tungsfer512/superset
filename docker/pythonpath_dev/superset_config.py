@@ -184,6 +184,15 @@ PUBLIC_ROLE_LIKE = os.getenv("PUBLIC_ROLE_LIKE", "Gamma")
 
 BABEL_TRANSLATION_DIRS = "/app/superset/translations"
 
+ENVIRONMENT_TAG_CONFIG = {
+    "variable": "SUPERSET_ENV",
+    "values": {
+        "debug": {"color": "", "text": ""},
+        "development": {"color": "", "text": ""},
+        "production": {"color": "", "text": ""},
+    },
+}
+
 SECRET_KEY = os.getenv(
     "SECRET_KEY", "your-super-secret-key-here-please-change-in-production"
 )

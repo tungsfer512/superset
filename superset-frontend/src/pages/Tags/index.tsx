@@ -17,6 +17,7 @@
  * under the License.
  */
 import { useMemo, useState } from 'react';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { isFeatureEnabled, FeatureFlag, t } from '@superset-ui/core';
 import {
   Actions,
@@ -72,6 +73,8 @@ function TagList(props: TagListProps) {
     ],
     [],
   );
+
+  const locale = useI18nReady();
 
   const {
     state: {
@@ -256,7 +259,7 @@ function TagList(props: TagListProps) {
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [userId, canDelete, refreshData, addSuccessToast, addDangerToast],
+    [locale, userId, canDelete, refreshData, addSuccessToast, addDangerToast],
   );
 
   const filters: ListViewFilters = useMemo(() => {
@@ -289,7 +292,7 @@ function TagList(props: TagListProps) {
       },
     ] as ListViewFilters;
     return filters_list;
-  }, [addDangerToast, props.user]);
+  }, [locale, addDangerToast, props.user]);
 
   const sortTypes = [
     {

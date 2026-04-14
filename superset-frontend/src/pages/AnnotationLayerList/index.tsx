@@ -24,6 +24,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import { createFetchRelated, createErrorHandler } from 'src/views/CRUD/utils';
 import withToasts from 'src/components/MessageToasts/withToasts';
+import useI18nReady from 'src/hooks/useI18nReady';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { Typography } from '@superset-ui/core/components/Typography';
 
@@ -85,6 +86,8 @@ function AnnotationLayersList({
 
   const [layerCurrentlyDeleting, setLayerCurrentlyDeleting] =
     useState<AnnotationLayerObject | null>(null);
+
+  const locale = useI18nReady();
 
   const handleLayerDelete = ({ id, name }: AnnotationLayerObject) => {
     SupersetClient.delete({
@@ -223,7 +226,7 @@ function AnnotationLayersList({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canDelete, canCreate],
+    [canDelete, canCreate, locale],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];
@@ -278,7 +281,7 @@ function AnnotationLayersList({
         dropdownStyle: { minWidth: WIDER_DROPDOWN_WIDTH },
       },
     ],
-    [],
+    [locale],
   );
 
   const emptyState = {

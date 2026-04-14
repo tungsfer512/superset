@@ -34,6 +34,7 @@ import {
 } from 'src/views/CRUD/utils';
 import withToasts from 'src/components/MessageToasts/withToasts';
 import { useListViewResource } from 'src/views/CRUD/hooks';
+import useI18nReady from 'src/hooks/useI18nReady';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { Popover, Label, Tooltip } from '@superset-ui/core/components';
 import { getCommonSqlMenuData } from 'src/features/home/commonMenuData';
@@ -122,6 +123,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
 
   const theme = useTheme();
   const history = useHistory();
+  const locale = useI18nReady();
 
   // Preload SQL language since this component will definitely display SQL
   useEffect(() => {
@@ -412,7 +414,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
         ),
       },
     ],
-    [theme], // Add theme to dependencies since it's used in the columns
+    [theme, locale], // Add theme to dependencies since it's used in the columns
   );
 
   const filters: ListViewFilters = useMemo(
@@ -486,7 +488,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
         operator: FilterOperator.Contains,
       },
     ],
-    [addDangerToast],
+    [addDangerToast, locale],
   );
 
   return (

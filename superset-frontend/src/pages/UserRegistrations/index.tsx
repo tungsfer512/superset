@@ -29,6 +29,7 @@ import {
 import { DeleteModal } from '@superset-ui/core/components';
 import { ActionProps, ActionsBar } from 'src/components/ListView/ActionsBar';
 import SubMenu from 'src/features/home/SubMenu';
+import useI18nReady from 'src/hooks/useI18nReady';
 
 const PAGE_SIZE = 25;
 
@@ -62,6 +63,8 @@ export default function UserRegistrations() {
     t('User Registrations'),
     addDangerToast,
   );
+
+  const locale = useI18nReady();
 
   const handleUserRegistrationDelete = async ({
     id,
@@ -143,7 +146,7 @@ export default function UserRegistrations() {
         size: 'xl',
       },
     ],
-    [],
+    [locale],
   );
 
   const filters: ListViewFilters = useMemo(
@@ -192,7 +195,7 @@ export default function UserRegistrations() {
         dateFilterValueType: 'iso',
       },
     ],
-    [],
+    [locale],
   );
 
   const emptyState = {

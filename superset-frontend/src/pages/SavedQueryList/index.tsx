@@ -41,6 +41,7 @@ import {
   Tooltip,
 } from '@superset-ui/core/components';
 import withToasts from 'src/components/MessageToasts/withToasts';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import {
   ImportModal as ImportModelsModal,
@@ -147,6 +148,7 @@ function SavedQueryList({
     setSSHTunnelPrivateKeyPasswordFields,
   ] = useState<string[]>([]);
   const history = useHistory();
+  const locale = useI18nReady();
 
   const openSavedQueryImportModal = () => {
     showImportModal(true);
@@ -497,7 +499,7 @@ function SavedQueryList({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canDelete, canEdit, canExport, copyQueryLink, handleSavedQueryPreview],
+    [canDelete, canEdit, canExport, copyQueryLink, handleSavedQueryPreview, locale],
   );
 
   const filters: ListViewFilters = useMemo(
@@ -583,7 +585,7 @@ function SavedQueryList({
         paginate: true,
       },
     ],
-    [addDangerToast],
+    [addDangerToast, locale],
   );
 
   return (

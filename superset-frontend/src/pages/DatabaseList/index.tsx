@@ -27,6 +27,7 @@ import rison from 'rison';
 import { useSelector } from 'react-redux';
 import { useQueryParams, BooleanParam } from 'use-query-params';
 import { LocalStorageKeys, setItem } from 'src/utils/localStorageHelpers';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import {
   createErrorHandler,
@@ -125,6 +126,7 @@ function DatabaseList({
     t('database'),
     addDangerToast,
   );
+  const locale = useI18nReady();
   const fullUser = useSelector<any, UserWithPermissionsAndRoles>(
     state => state.user,
   );
@@ -566,7 +568,7 @@ function DatabaseList({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canDelete, canEdit, canExport],
+    [canDelete, canEdit, canExport, locale],
   );
 
   const filters: ListViewFilters = useMemo(
@@ -632,7 +634,7 @@ function DatabaseList({
         dropdownStyle: { minWidth: WIDER_DROPDOWN_WIDTH },
       },
     ],
-    [],
+    [locale],
   );
 
   return (

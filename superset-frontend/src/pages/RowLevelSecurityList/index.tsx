@@ -18,6 +18,7 @@
  */
 import { t, SupersetClient } from '@superset-ui/core';
 import { useMemo, useState } from 'react';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { ConfirmStatusChange, Tooltip } from '@superset-ui/core/components';
 import {
   ModifiedInfo,
@@ -72,6 +73,8 @@ function RowLevelSecurityList(props: RLSProps) {
     undefined,
     true,
   );
+
+  const locale = useI18nReady();
 
   function handleRuleEdit(rule: null) {
     setCurrentRule(rule);
@@ -237,6 +240,7 @@ function RowLevelSecurityList(props: RLSProps) {
       },
     ],
     [
+      locale,
       user.userId,
       canEdit,
       canWrite,
@@ -307,7 +311,7 @@ function RowLevelSecurityList(props: RLSProps) {
         paginate: true,
       },
     ],
-    [user],
+    [locale, user],
   );
 
   const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];

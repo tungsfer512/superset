@@ -177,6 +177,11 @@ const SliceHeaderControls = (
     getChartMetadataRegistry()
       .get(props.slice.viz_type)
       ?.behaviors?.includes(Behavior.InteractiveChart);
+
+  const isGuestUser = !useSelector<RootState, string | null>(
+    ({ dashboardInfo }) => dashboardInfo.userId,
+  );
+  const isEmbeddedMode = isGuestUser;
   const canExplore = props.supersetCanExplore;
   const { canDrillToDetail, canViewQuery, canViewTable } = usePermissions();
 
@@ -542,6 +547,21 @@ const SliceHeaderControls = (
     });
   }
 
+  const EMBEDDED_ALLOWED_KEYS = new Set<string>([
+    MenuKeys.ForceRefresh,
+    // MenuKeys.Share,
+    MenuKeys.Download,
+  ]);
+  const menuItems = isEmbeddedMode
+    ? newMenuItems.filter(
+        item =>
+          item != null &&
+          'key' in item &&
+          item.key != null &&
+          EMBEDDED_ALLOWED_KEYS.has(String(item.key)),
+      )
+    : newMenuItems;
+
   return (
     <>
       {isFullSize && (
@@ -559,7 +579,7 @@ const SliceHeaderControls = (
             data-test={`slice_${slice.slice_id}-menu`}
             id={`slice_${slice.slice_id}-menu`}
             selectable={false}
-            items={newMenuItems}
+            items={menuItems}
           />
         )}
         overlayStyle={dropdownOverlayStyle}

@@ -27,6 +27,7 @@ import SubMenu from 'src/features/home/SubMenu';
 import withToasts from 'src/components/MessageToasts/withToasts';
 import { fDuration } from '@superset-ui/core/utils/dates';
 import AlertStatusIcon from 'src/features/alerts/components/AlertStatusIcon';
+import useI18nReady from 'src/hooks/useI18nReady';
 import {
   useListViewResource,
   useSingleViewResource,
@@ -86,6 +87,8 @@ function ExecutionLog({
       fetchResource(alertId);
     }
   }, [alertId]);
+
+  const locale = useI18nReady();
 
   const initialSort = [{ id: 'start_dttm', desc: true }];
   const columns = useMemo(
@@ -172,7 +175,7 @@ function ExecutionLog({
         id: 'error_message',
       },
     ],
-    [isReportEnabled],
+    [isReportEnabled, locale],
   );
   const path = `/${isReportEnabled ? 'report' : 'alert'}/list/`;
   const ALERT_TEXT = t('Alert');

@@ -31,6 +31,7 @@ import {
 } from '@superset-ui/core/components';
 
 import rison from 'rison';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import { createErrorHandler, createFetchRelated } from 'src/views/CRUD/utils';
 import withToasts from 'src/components/MessageToasts/withToasts';
@@ -105,6 +106,7 @@ function ThemesList({
     refreshData,
     toggleBulkSelect,
   } = useListViewResource<ThemeObject>('theme', t('Themes'), addDangerToast);
+  const locale = useI18nReady();
   const { setTemporaryTheme, getCurrentCrudThemeId } = useThemeContext();
   const [themeModalOpen, setThemeModalOpen] = useState<boolean>(false);
   const [currentTheme, setCurrentTheme] = useState<ThemeObject | null>(null);
@@ -489,6 +491,7 @@ function ThemesList({
       canExport,
       canSetSystemThemes,
       appliedThemeId,
+      locale,
     ],
   );
 
@@ -566,7 +569,7 @@ function ThemesList({
         paginate: true,
       },
     ],
-    [],
+    [locale],
   );
 
   return (

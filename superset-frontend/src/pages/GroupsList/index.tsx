@@ -20,6 +20,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { t } from '@superset-ui/core';
 import { useListViewResource } from 'src/views/CRUD/hooks';
+import useI18nReady from 'src/hooks/useI18nReady';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { ActionsBar, ActionProps } from 'src/components/ListView/ActionsBar';
 import { ListView, ListViewProps } from 'src/components/ListView';
@@ -110,6 +111,7 @@ function GroupsList({ user }: GroupsListProps) {
   const [roles, setRoles] = useState<Role[]>([]);
 
   const isAdmin = useMemo(() => isUserAdmin(user), [user]);
+  const locale = useI18nReady();
 
   const fetchRoles = useCallback(() => {
     fetchPaginatedData({
@@ -266,7 +268,7 @@ function GroupsList({ user }: GroupsListProps) {
         size: 'xl',
       },
     ],
-    [isAdmin],
+    [isAdmin, locale],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];
@@ -340,7 +342,7 @@ function GroupsList({ user }: GroupsListProps) {
         dropdownStyle: { minWidth: WIDER_DROPDOWN_WIDTH },
       },
     ],
-    [loadingState.roles, roles],
+    [loadingState.roles, roles, locale],
   );
 
   const emptyState = {

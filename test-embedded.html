@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Superset Embedded</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #superset-container { width: 100%; height: 100vh; }
+    #superset-container iframe { width: 100%; height: 100%; border: none; }
+  </style>
+</head>
+<body>
+  <div id="superset-container"></div>
+  <!-- python -m http.server 3000 để chạy, http://localhost:3000/test-embedded.html -->
+  <script src="https://unpkg.com/@superset-ui/embedded-sdk"></script>
+  <script>
+    // ============================================================
+    // CẤU HÌNH — thay đổi các giá trị bên dưới cho phù hợp 
+    // ============================================================
+    const SUPERSET_URL = 'http://localhost:9000';  // webpack dev server
+    const DASHBOARD_EMBEDDED_UUID = '9785499e-c8ce-4494-80ab-49d136c81447';
+
+    // Admin credentials để lấy guest token (CHỈ DÙNG CHO TEST)
+    const ADMIN_USERNAME = 'admin';
+    const ADMIN_PASSWORD = 'admin';
+
+    async function getGuestToken() {
+      // 1. Login để lấy access token
+      const loginResp = await fetch(`${SUPERSET_URL}/api/v1/security/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: ADMIN_USERNAME,
+          password: ADMIN_PASSWORD,
+          provider: 'db',
+        }),
+      });
+      const { access_token } = await loginResp.json();
+
+      // 2. Lấy guest token
+      const guestResp = await fetch(`${SUPERSET_URL}/api/v1/security/guest_token/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${access_token}`,
+        },
+        body: JSON.stringify({
+          user: { username: 'guest', first_name: 'Guest', last_name: 'User' },
+          resources: [{ type: 'dashboard', id: DASHBOARD_EMBEDDED_UUID }],
+          rls: [],
+        }),
+      });
+      const { token } = await guestResp.json();
+      return token;
+    }
+
+    supersetEmbeddedSdk.embedDashboard({
+      id: DASHBOARD_EMBEDDED_UUID,
+      supersetDomain: SUPERSET_URL,
+      mountPoint: document.getElementById('superset-container'),
+      fetchGuestToken: () => getGuestToken(),
+      dashboardUiConfig: {},
+    });
+  </script>
+</body>
+</html>

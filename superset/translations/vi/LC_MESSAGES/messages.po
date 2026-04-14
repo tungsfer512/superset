@@ -4369,14 +4369,14 @@ msgid "Drill by: %s"
 msgstr "Drill theo: %s"
 
 msgid "Drill to detail"
-msgstr "Drill tới chi tiết"
+msgstr "Xem chi tiết"
 
 msgid "Drill to detail by"
-msgstr "Drill tới chi tiết theo"
+msgstr "Xem chi tiết theo"
 
 msgid "Drill to detail by value is not yet supported for this chart type."
 msgstr ""
-"Drill tới chi tiết theo giá trị hiện chưa được hỗ trợ cho loại biểu đồ "
+"Xem chi tiết theo giá trị hiện chưa được hỗ trợ cho loại biểu đồ "
 "này."
 
 msgid ""
@@ -4395,7 +4395,7 @@ msgstr ""
 
 #, python-format
 msgid "Drill to detail: %s"
-msgstr "Drill tới chi tiết: %s"
+msgstr "Xem chi tiết: %s"
 
 msgid "Drop a column here or click"
 msgid_plural "Drop columns here or click"

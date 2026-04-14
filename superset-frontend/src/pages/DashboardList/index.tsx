@@ -25,6 +25,7 @@ import {
 } from '@superset-ui/core';
 import { useSelector } from 'react-redux';
 import { useState, useMemo, useCallback } from 'react';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { Link } from 'react-router-dom';
 import rison from 'rison';
 import {
@@ -149,9 +150,7 @@ function DashboardList(props: DashboardListProps) {
   );
   const canReadTag = findPermission('can_read', 'Tag', roles);
 
-  const locale = useSelector(
-    (state: { common?: { locale?: string } }) => state?.common?.locale,
-  );
+  const locale = useI18nReady();
 
   const {
     state: {
@@ -520,6 +519,7 @@ function DashboardList(props: DashboardListProps) {
       refreshData,
       addSuccessToast,
       addDangerToast,
+      locale,
     ],
   );
 

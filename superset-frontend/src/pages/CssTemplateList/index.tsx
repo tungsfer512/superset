@@ -39,6 +39,7 @@ import {
 import CssTemplateModal from 'src/features/cssTemplates/CssTemplateModal';
 import { TemplateObject } from 'src/features/cssTemplates/types';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
+import useI18nReady from 'src/hooks/useI18nReady';
 import { Icons } from '@superset-ui/core/components/Icons';
 
 const PAGE_SIZE = 25;
@@ -74,6 +75,7 @@ function CssTemplatesList({
     t('CSS templates'),
     addDangerToast,
   );
+  const locale = useI18nReady();
   const [cssTemplateModalOpen, setCssTemplateModalOpen] =
     useState<boolean>(false);
   const [currentCssTemplate, setCurrentCssTemplate] =
@@ -192,7 +194,7 @@ function CssTemplatesList({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canDelete, canCreate],
+    [canDelete, canCreate, locale],
   );
 
   const menuData: SubMenuProps = {
@@ -253,7 +255,7 @@ function CssTemplatesList({
         paginate: true,
       },
     ],
-    [],
+    [locale],
   );
 
   return (

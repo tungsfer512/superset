@@ -78,6 +78,7 @@ import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { findPermission } from 'src/utils/findPermission';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
+import useI18nReady from 'src/hooks/useI18nReady';
 
 const FlexRowContainer = styled.div`
   align-items: center;
@@ -185,9 +186,7 @@ function ChartList(props: ChartListProps) {
     refreshData,
   } = useListViewResource<Chart>('chart', t('chart'), addDangerToast);
 
-  const locale = useSelector(
-    (state: { common?: { locale?: string } }) => state?.common?.locale,
-  );
+  const locale = useI18nReady();
 
   const chartIds = useMemo(() => charts.map(c => c.id), [charts]);
   const { roles } = useSelector<any, UserWithPermissionsAndRoles>(
@@ -574,6 +573,7 @@ function ChartList(props: ChartListProps) {
       refreshData,
       addSuccessToast,
       addDangerToast,
+      locale,
     ],
   );
 

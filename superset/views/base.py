@@ -293,7 +293,7 @@ def menu_data(user: User) -> dict[str, Any]:
             ),
             "user_logout_url": appbuilder.get_url_for_logout,
             "user_login_url": appbuilder.get_url_for_login,
-            "locale": session.get("locale", "en"),
+            "locale": session.get("locale", str(get_locale())),
         },
     }
 
@@ -403,7 +403,7 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
         and bool(available_specs[GSheetsEngineSpec])
     )
 
-    language = locale.language if locale else "en"
+    language = locale.language if locale else app.config.get("BABEL_DEFAULT_LOCALE", "en")
     auth_type = app.config["AUTH_TYPE"]
     auth_user_registration = app.config["AUTH_USER_REGISTRATION"]
     frontend_config["AUTH_USER_REGISTRATION"] = auth_user_registration
@@ -442,7 +442,6 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
         "extra_categorical_color_schemes": app.config[
             "EXTRA_CATEGORICAL_COLOR_SCHEMES"
         ],
-        "menu_data": menu_data(g.user),
     }
 
     bootstrap_data.update(app.config["COMMON_BOOTSTRAP_OVERRIDES_FUNC"](bootstrap_data))
@@ -454,6 +453,7 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
 def common_bootstrap_payload() -> dict[str, Any]:
     return {
         **cached_common_bootstrap_data(utils.get_user_id(), get_locale()),
+        "menu_data": menu_data(g.user),
         "flash_messages": get_flashed_messages(with_categories=True),
     }
 

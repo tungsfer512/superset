@@ -73,6 +73,7 @@ import DuplicateDatasetModal from 'src/features/datasets/DuplicateDatasetModal';
 import { useSelector } from 'react-redux';
 import { QueryObjectColumns } from 'src/views/CRUD/types';
 import { WIDER_DROPDOWN_WIDTH } from 'src/components/ListView/utils';
+import useI18nReady from 'src/hooks/useI18nReady';
 
 const extensionsRegistry = getExtensionsRegistry();
 const DatasetDeleteRelatedExtension = extensionsRegistry.get(
@@ -166,6 +167,8 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
     toggleBulkSelect,
     refreshData,
   } = useListViewResource<Dataset>('dataset', t('dataset'), addDangerToast);
+
+  const locale = useI18nReady();
 
   const [datasetCurrentlyDeleting, setDatasetCurrentlyDeleting] = useState<
     | (Dataset & {
@@ -514,7 +517,7 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canEdit, canDelete, canExport, openDatasetEditModal, canDuplicate, user],
+    [canEdit, canDelete, canExport, openDatasetEditModal, canDuplicate, user, locale],
   );
 
   const filterTypes: ListViewFilters = useMemo(
@@ -628,7 +631,7 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
         dropdownStyle: { minWidth: WIDER_DROPDOWN_WIDTH },
       },
     ],
-    [user],
+    [user, locale],
   );
 
   const menuData: SubMenuProps = {

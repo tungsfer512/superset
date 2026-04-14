@@ -40,6 +40,7 @@ import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import withToasts from 'src/components/MessageToasts/withToasts';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import { createErrorHandler } from 'src/views/CRUD/utils';
+import useI18nReady from 'src/hooks/useI18nReady';
 
 import { AnnotationObject } from 'src/features/annotations/types';
 import AnnotationModal from 'src/features/annotations/AnnotationModal';
@@ -89,6 +90,7 @@ function AnnotationList({
     addDangerToast,
     false,
   );
+  const locale = useI18nReady();
   const [annotationModalOpen, setAnnotationModalOpen] =
     useState<boolean>(false);
   const [annotationLayerName, setAnnotationLayerName] = useState<string>('');
@@ -230,7 +232,7 @@ function AnnotationList({
         disableSortBy: true,
       },
     ],
-    [true, true],
+    [locale],
   );
 
   const subMenuButtons: SubMenuProps['buttons'] = [];

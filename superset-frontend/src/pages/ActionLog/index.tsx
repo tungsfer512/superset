@@ -18,6 +18,7 @@
  */
 import { useMemo } from 'react';
 import { t, css } from '@superset-ui/core';
+import useI18nReady from 'src/hooks/useI18nReady';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import { useListViewResource } from 'src/views/CRUD/hooks';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
@@ -46,6 +47,7 @@ const PAGE_SIZE = 25;
 
 function ActionLogList() {
   const { addDangerToast, addSuccessToast } = useToasts();
+  const locale = useI18nReady();
   const initialSort = [{ id: 'dttm', desc: true }];
   const subMenuButtons: SubMenuProps['buttons'] = [];
 
@@ -131,7 +133,7 @@ function ActionLogList() {
         operator: ListViewFilterOperator.Equals,
       },
     ],
-    [],
+    [locale],
   );
 
   const columns = useMemo(
@@ -253,7 +255,7 @@ function ActionLogList() {
         }: any) => <span>{dttm}</span>,
       },
     ],
-    [],
+    [locale],
   );
 
   const emptyState = {
