@@ -46,7 +46,7 @@ export default function ThemeLanguagePicker({
   menuMode = 'horizontal',
   gap = 2,
 }: ThemeLanguagePickerProps) {
-  const common = getBootstrapData().common;
+  const { common } = getBootstrapData();
   const navbarRight = common.menu_data.navbar_right;
   const langFromQuery = new URLSearchParams(window.location.search).get('lang');
   const resolvedLangFromQuery =
