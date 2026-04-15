@@ -1,65 +1,260 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Test Superset Embedded</title>
-  <style>
-    body { margin: 0; font-family: sans-serif; }
-    #superset-container { width: 100%; height: 100vh; }
-    #superset-container iframe { width: 100%; height: 100%; border: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 20px;
+            flex-shrink: 0;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #error-message {
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        #dashboard-container {
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            overflow: hidden;
+            border: none;
+            position: relative;
+        }
+
+        /* Make the iframe fill the container */
+        #dashboard-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+
+        .error {
+            color: red;
+            padding: 15px 20px;
+            background-color: #ffe6e6;
+            border-radius: 4px;
+        }
+    </style>
 </head>
+
 <body>
-  <div id="superset-container"></div>
-  <!-- python -m http.server 3000 để chạy, http://localhost:3000/test-embedded.html -->
-  <script src="https://unpkg.com/@superset-ui/embedded-sdk"></script>
-  <script>
-    // ============================================================
-    // CẤU HÌNH — thay đổi các giá trị bên dưới cho phù hợp 
-    // ============================================================
-    const SUPERSET_URL = 'http://localhost:9000';  // webpack dev server
-    const DASHBOARD_EMBEDDED_UUID = '9785499e-c8ce-4494-80ab-49d136c81447';
+    <div id="error-message"></div>
+    <div id="dashboard-container" class="loading">Loading dashboard...</div>
 
-    // Admin credentials để lấy guest token (CHỈ DÙNG CHO TEST)
-    const ADMIN_USERNAME = 'admin';
-    const ADMIN_PASSWORD = 'admin';
+    <script src="https://unpkg.com/@superset-ui/embedded-sdk"></script>
+    <script>
+        const SUPERSET_URL = 'http://localhost:8088';
+        const SUPERSET_ADMIN = 'admin';
+        const SUPERSET_PASSWORD = '@Abc123';
 
-    async function getGuestToken() {
-      // 1. Login để lấy access token
-      const loginResp = await fetch(`${SUPERSET_URL}/api/v1/security/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: ADMIN_USERNAME,
-          password: ADMIN_PASSWORD,
-          provider: 'db',
-        }),
-      });
-      const { access_token } = await loginResp.json();
+        const params = new URLSearchParams(window.location.search);
+        const DASHBOARD_ID = params.get("dashboard_id");
 
-      // 2. Lấy guest token
-      const guestResp = await fetch(`${SUPERSET_URL}/api/v1/security/guest_token/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${access_token}`,
-        },
-        body: JSON.stringify({
-          user: { username: 'guest', first_name: 'Guest', last_name: 'User' },
-          resources: [{ type: 'dashboard', id: DASHBOARD_EMBEDDED_UUID }],
-          rls: [],
-        }),
-      });
-      const { token } = await guestResp.json();
-      return token;
-    }
+        async function login(username, password) {
+            const myHeaders = new Headers();
+            myHeaders.append("Accept", "application/json");
+            myHeaders.append("Content-Type", "application/json");
+            const raw = JSON.stringify({
+                "password": password,
+                "provider": "db",
+                "refresh": true,
+                "username": username
+            });
+            const requestOptions = {
+                method: "POST",
+                body: raw,
+                headers: myHeaders,
+                redirect: "follow"
+            };
+            try {
+                const response = await fetch(SUPERSET_URL + "/api/v1/security/login", requestOptions);
+                const data = await response.json();
+                return data.access_token;
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
-    supersetEmbeddedSdk.embedDashboard({
-      id: DASHBOARD_EMBEDDED_UUID,
-      supersetDomain: SUPERSET_URL,
-      mountPoint: document.getElementById('superset-container'),
-      fetchGuestToken: () => getGuestToken(),
-      dashboardUiConfig: {},
-    });
-  </script>
+        async function get_guest_token() {
+            const access_token = await login(SUPERSET_ADMIN, SUPERSET_PASSWORD);
+            console.log( "access_token", access_token);
+            const myHeaders = new Headers();
+            myHeaders.append("Accept", "application/json");
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("Authorization", "Bearer " + access_token);
+
+            const raw = JSON.stringify({
+                "user": {
+                    "username": SUPERSET_ADMIN,
+                    "first_name": "",
+                    "last_name": ""
+                },
+                "resources": [
+                    {
+                        "type": "dashboard",
+                        "id": DASHBOARD_ID
+                    }
+                ],
+                "rls": [],
+            });
+
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow"
+            };
+            const response = await fetch(SUPERSET_URL + "/api/v1/security/guest_token/", requestOptions);
+            const data = await response.json();
+            console.log("guest_token", data);
+            return data.token;
+        }
+
+        const container = document.getElementById('dashboard-container');
+        const errorDiv = document.getElementById('error-message');
+
+        function showError(message) {
+            errorDiv.innerHTML = '<div class="error">Error: ' + message + '</div>';
+            container.innerHTML = '';
+        }
+
+        async function testConnection() {
+            try {
+                const response = await fetch(SUPERSET_URL + '/api/v1/security/csrf_token/', {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                console.log('Superset connection test:', response.status, response.statusText);
+                if (!response.ok && response.status !== 401) {
+                    console.warn('Superset may not be accessible:', response.status);
+                }
+            } catch (error) {
+                console.error('Cannot reach Superset at', SUPERSET_URL, error);
+                showError('Cannot connect to Superset at ' + SUPERSET_URL + '. Please check:<br>' +
+                    '1. Superset server is running<br>' +
+                    '2. The URL is correct<br>' +
+                    '3. CORS is enabled in Superset config');
+            }
+        }
+
+        async function embedDashboard() {
+            if (typeof window.supersetEmbeddedSdk === 'undefined') {
+                showError('Superset Embedded SDK failed to load. Please check your internet connection.');
+                return;
+            }
+
+            if (typeof window.supersetEmbeddedSdk.embedDashboard !== 'function') {
+                showError('embedDashboard function not found in SDK.');
+                return;
+            }
+
+            testConnection();
+
+            container.innerHTML = '';
+
+            const guest_token = await get_guest_token();
+
+            const embedConfig = {
+                id: DASHBOARD_ID,
+                supersetDomain: SUPERSET_URL,
+                mountPoint: container,
+                fetchGuestToken: () => Promise.resolve(guest_token),
+                dashboardUiConfig: {
+                    hideTitle: true,
+                    hideChartControls: false,
+                },
+                urlParams: {
+                    "standalone": 1,
+                },
+                width: '100%',
+                height: '100%',
+            };
+
+            console.log('Embedding dashboard with config:', {
+                id: DASHBOARD_ID,
+                supersetDomain: SUPERSET_URL,
+                guest_token: guest_token,
+            });
+
+            window.supersetEmbeddedSdk.embedDashboard(embedConfig)
+                .then((dashboard) => {
+                    console.log('Dashboard embedded successfully:', dashboard);
+                    setTimeout(() => {
+                        const iframe = container.querySelector('iframe');
+                        if (iframe) {
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100%';
+                            console.log('Iframe resized to fill container');
+                        }
+                    }, 100);
+                })
+                .catch((error) => {
+                    console.error('Error embedding dashboard:', error);
+                    console.error('Error details:', {
+                        message: error.message,
+                        stack: error.stack,
+                        name: error.name
+                    });
+                    let errorMsg = 'Failed to embed dashboard: ' + (error.message || 'Unknown error');
+
+                    if (error.message && error.message.includes('CORS')) {
+                        errorMsg += '<br><br><strong>CORS Error:</strong> Make sure your Superset config allows requests from this origin.';
+                    }
+                    if (error.message && error.message.includes('token')) {
+                        errorMsg += '<br><br><strong>Token Error:</strong> The guest token may be expired or invalid. Generate a new token.';
+                    }
+                    if (error.message && error.message.includes('404') || error.message && error.message.includes('Not Found')) {
+                        errorMsg += '<br><br><strong>Not Found:</strong> Check that the dashboard ID and Superset URL are correct.';
+                    }
+
+                    showError(errorMsg);
+                });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(embedDashboard, 100);
+            });
+        } else {
+            setTimeout(embedDashboard, 100);
+        }
+    </script>
 </body>
+
 </html>
