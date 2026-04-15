@@ -3794,9 +3794,6 @@ msgstr ""
 msgid "Datetime format"
 msgstr "Định dạng ngày giờ"
 
-msgid "Day"
-msgstr "Ngày"
-
 msgid "Day (freq=D)"
 msgstr "Ngày (tần suất = D)"
 
@@ -4222,7 +4219,7 @@ msgstr ""
 "số lượng cột lớn."
 
 msgid "Disable drill to detail"
-msgstr "Tắt tính năng drill to detail"
+msgstr "Tắt tính năng xem chi tiết"
 
 msgid "Disable embedding?"
 msgstr "Tắt nhúng?"
@@ -4231,7 +4228,7 @@ msgid "Disabled"
 msgstr "Đã tắt"
 
 msgid "Disables the drill to detail feature for this database."
-msgstr "Vô hiệu hóa tính năng drill to detail cho cơ sở dữ liệu này."
+msgstr "Vô hiệu hóa tính năng xem chi tiết cho cơ sở dữ liệu này."
 
 msgid "Discard"
 msgstr "Hủy bỏ"
@@ -4356,17 +4353,17 @@ msgid "Draw split lines for minor y-axis ticks"
 msgstr "Vẽ các đường phân tách cho vạch nhỏ của trục tung"
 
 msgid "Drill by"
-msgstr "Drill theo"
+msgstr "Xem chi tiết"
 
 msgid "Drill by is not available for this data point"
-msgstr "Drill theo không khả dụng cho điểm dữ liệu này"
+msgstr "Xem chi tiết không khả dụng cho điểm dữ liệu này"
 
 msgid "Drill by is not yet supported for this chart type"
-msgstr "Drill theo hiện chưa được hỗ trợ cho loại biểu đồ này"
+msgstr "Xem chi tiết hiện chưa được hỗ trợ cho loại biểu đồ này"
 
 #, python-format
 msgid "Drill by: %s"
-msgstr "Drill theo: %s"
+msgstr "Xem chi tiết: %s"
 
 msgid "Drill to detail"
 msgstr "Xem chi tiết"
@@ -4383,14 +4380,14 @@ msgid ""
 "Drill to detail is disabled because this chart does not group data by "
 "dimension value."
 msgstr ""
-"Tính năng drill tới chi tiết đã bị tắt vì biểu đồ này không nhóm dữ liệu "
+"Tính năng xem chi tiết đã bị tắt vì biểu đồ này không nhóm dữ liệu "
 "theo giá trị chiều."
 
 msgid ""
 "Drill to detail is disabled for this database. Change the database "
 "settings to enable it."
 msgstr ""
-"Tính năng drill tới chi tiết đã bị tắt cho cơ sở dữ liệu này. Hãy thay "
+"Tính năng xem chi tiết đã bị tắt cho cơ sở dữ liệu này. Hãy thay "
 "đổi cài đặt cơ sở dữ liệu để bật lại."
 
 #, python-format
@@ -5160,7 +5157,7 @@ msgid "Failed to load chart data."
 msgstr "Tải dữ liệu biểu đồ không thành công."
 
 msgid "Failed to load dimensions for drill by"
-msgstr "Tải chiều dữ liệu để khoan không thành công"
+msgstr "Tải chiều dữ liệu để xem chi tiết không thành công"
 
 msgid "Failed to retrieve advanced type"
 msgstr "Lấy loại nâng cao không thành công"
@@ -5712,9 +5709,6 @@ msgstr "Máy chủ"
 
 msgid "Hostname or IP address"
 msgstr "Tên máy chủ hoặc địa chỉ IP"
-
-msgid "Hour"
-msgstr "Giờ"
 
 #, python-format
 msgid "Hours %s"
@@ -6888,9 +6882,6 @@ msgstr "Đường phân tách phụ"
 msgid "Minor ticks"
 msgstr "Vạch chia phụ"
 
-msgid "Minute"
-msgstr "Phút"
-
 #, python-format
 msgid "Minutes %s"
 msgstr "Phút %s"
@@ -6927,9 +6918,6 @@ msgstr "Các cột đã chỉnh sửa: %s"
 
 msgid "Monday"
 msgstr "Thứ Hai"
-
-msgid "Month"
-msgstr "Tháng"
 
 #, python-format
 msgid "Months %s"
@@ -8710,7 +8698,7 @@ msgid "Right value"
 msgstr "Giá trị bên phải"
 
 msgid "Right-click on a dimension value to drill to detail by that value."
-msgstr "Nhấp chuột phải vào một giá trị chiều để khoan sâu vào chi tiết theo giá trị đó."
+msgstr "Nhấp chuột phải vào một giá trị chiều để xem chi tiết theo giá trị đó."
 
 
 msgid "Role"
@@ -9195,9 +9183,6 @@ msgstr "Tìm trong bộ lọc"
 
 msgid "Search..."
 msgstr "Tìm kiếm..."
-
-msgid "Second"
-msgstr "Giây"
 
 msgid "Secondary"
 msgstr "Phụ"
@@ -13449,9 +13434,6 @@ msgstr "Giới hạn Trục Y"
 msgid "YScale Interval"
 msgstr "Khoảng cách Tỷ lệ Trục Y"
 
-msgid "Year"
-msgstr "Năm"
-
 msgid "Year (freq=AS)"
 msgstr "Năm (tần suất=AS)"
 
@@ -13995,9 +13977,6 @@ msgstr "tên tập dữ liệu"
 msgid "date"
 msgstr "ngày"
 
-msgid "day"
-msgstr "ngày"
-
 msgid "day of the month"
 msgstr "ngày trong tháng"
 
@@ -14177,9 +14156,6 @@ msgstr "bản đồ nhiệt: giá trị được chuẩn hóa trên toàn bộ b
 msgid "here"
 msgstr "tại đây"
 
-msgid "hour"
-msgstr "giờ"
-
 msgid ""
 "image-rendering CSS attribute of the canvas object that defines how the "
 "browser scales up the image"
@@ -14252,17 +14228,11 @@ msgstr "chỉ số"
 msgid "min"
 msgstr "giá trị nhỏ nhất"
 
-msgid "minute"
-msgstr "phút"
-
 msgid "minute(s)"
 msgstr "phút"
 
 msgid "monotone"
 msgstr "đơn điệu"
-
-msgid "month"
-msgstr "tháng"
 
 msgid "more than {max} {name}"
 msgstr "nhiều hơn {max} {name}"
@@ -14413,9 +14383,6 @@ msgstr "đang chạy"
 msgid "saved queries"
 msgstr "truy vấn đã lưu"
 
-msgid "seconds"
-msgstr "giây"
-
 msgid "series"
 msgstr "chuỗi"
 
@@ -14553,18 +14520,6 @@ msgstr "y"
 msgid "y: values are normalized within each row"
 msgstr "y: giá trị được chuẩn hóa trong mỗi hàng"
 
-msgid "year"
-msgstr "năm"
-
-msgid "years"
-msgstr "năm"
-
-msgid "minutes"
-msgstr "phút"
-
-msgid "days"
-msgstr "ngày"
-
 msgid "ago"
 msgstr "trước"
 
@@ -14614,9 +14569,6 @@ msgstr "phút trước"
 
 msgid "ago"
 msgstr "trước"
-
-msgid "minutes"
-msgstr "phút"
 
 msgid "SQL Query"
 msgstr "Truy vấn SQL"
@@ -15275,7 +15227,7 @@ msgid "can download"
 msgstr "Tải xuống"
 
 msgid "can drill"
-msgstr "Khoan sâu (drill)"
+msgstr "có thể xem chi tiết"
 
 msgid "can duplicate"
 msgstr "Nhân bản"
@@ -15311,7 +15263,7 @@ msgid "can get"
 msgstr "Lấy dữ liệu"
 
 msgid "can get drill info"
-msgstr "Thông tin drill"
+msgstr "có thể lấy thông tin xem chi tiết"
 
 msgid "can get results"
 msgstr "Lấy kết quả truy vấn"
@@ -16444,3 +16396,79 @@ msgstr "Tệp dạng cột"
 
 msgid "Columnar upload"
 msgstr "Tải lên tệp dạng cột"
+
+msgid "Don't refresh"
+msgstr "Không tự động làm mới"
+
+msgid "years"
+msgstr "năm"
+
+msgid "year"
+msgstr "năm"
+
+msgid "Years"
+msgstr "Năm"
+
+msgid "Year"
+msgstr "Năm"
+
+msgid "months"
+msgstr "tháng"
+
+msgid "month"
+msgstr "tháng"
+
+msgid "Months"
+msgstr "Tháng"
+
+msgid "Month"
+msgstr "Tháng"
+
+msgid "days"
+msgstr "ngày"
+
+msgid "day"
+msgstr "ngày"
+
+msgid "Days"
+msgstr "Ngày"
+
+msgid "Day"
+msgstr "Ngày"
+
+msgid "hours"
+msgstr "giờ"
+
+msgid "hour"
+msgstr "giờ"
+
+msgid "Hours"
+msgstr "Giờ"
+
+msgid "Hour"
+msgstr "Giờ"
+
+msgid "minutes"
+msgstr "phút"
+
+msgid "minute"
+msgstr "phút"
+
+msgid "Minutes"
+msgstr "Phút"
+
+msgid "Minute"
+msgstr "Phút"
+
+msgid "seconds"
+msgstr "giây"
+
+msgid "second"
+msgstr "giây"
+
+msgid "Seconds"
+msgstr "Giây"
+
+msgid "Second"
+msgstr "Giây"
+

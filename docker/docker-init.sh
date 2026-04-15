@@ -35,6 +35,7 @@ Init Step ${1}/${STEP_CNT} [${2}] -- ${3}
 ######################################################################
 EOF
 }
+ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
 # If Cypress run – overwrite the password for admin and export env variables
 if [ "$CYPRESS_CONFIG" == "true" ]; then
@@ -49,12 +50,12 @@ superset db upgrade
 echo_step "1" "Complete" "Applying DB migrations"
 
 # Create an admin user
-echo_step "2" "Starting" "Setting up admin user ( admin / $ADMIN_PASSWORD )"
+echo_step "2" "Starting" "Setting up admin user ( $ADMIN_USER / $ADMIN_PASSWORD )"
 if [ "$CYPRESS_CONFIG" == "true" ]; then
     superset load_test_users
 else
     superset fab create-admin \
-        --username admin \
+        --username $ADMIN_USER \
         --email admin@superset.com \
         --password "$ADMIN_PASSWORD" \
         --firstname Superset \
