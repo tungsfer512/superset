@@ -50,3 +50,4 @@ export {
   type PluginContextType,
 } from './DynamicPlugins';
 export * from './FacePile';
+export * from './ThemeLanguagePicker';

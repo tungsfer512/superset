@@ -7438,7 +7438,7 @@ msgstr "Trong thời gian ân hạn"
 
 
 msgid "On dashboards"
-msgstr "Trên dashboard"
+msgstr "Dashboard"
 
 msgid ""
 "One or many columns to group by. High cardinality groupings should "

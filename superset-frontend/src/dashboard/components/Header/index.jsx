@@ -44,6 +44,7 @@ import {
 } from '@superset-ui/core/components';
 import { findPermission } from 'src/utils/findPermission';
 import { safeStringify } from 'src/utils/safeStringify';
+import { ThemeLanguagePicker } from 'src/components';
 import PublishedStatus from 'src/dashboard/components/PublishedStatus';
 import UndoRedoKeyListeners from 'src/dashboard/components/UndoRedoKeyListeners';
 import PropertiesModal from 'src/dashboard/components/PropertiesModal';
@@ -118,6 +119,47 @@ const actionButtonsStyle = theme => css`
   .undoRedo {
     display: flex;
     margin-right: ${theme.sizeUnit * 2}px;
+  }
+`;
+
+const themeLanguagePickerStyle = theme => css`
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-left: ${theme.sizeUnit}px;
+
+  .ant-menu {
+    border-bottom: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  .ant-menu-submenu {
+    display: flex;
+    align-items: center;
+  }
+
+  .ant-menu-submenu-title {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-inline: ${theme.sizeUnit}px;
+  }
+
+  .language-submenu-with-caret .ant-menu-submenu-title {
+    flex-direction: row-reverse;
+    gap: ${theme.sizeUnit}px;
+  }
+
+  .theme-submenu-with-caret .ant-menu-submenu-title {
+    flex-direction: row-reverse;
+    gap: ${theme.sizeUnit}px;
+  }
+
+  .ant-menu-submenu::after {
+    border-bottom: none !important;
   }
 `;
 
@@ -717,6 +759,11 @@ const Header = () => {
                 {t('Edit dashboard')}
               </Button>
             )}
+          </div>
+        )}
+        {isEmbedded && (
+          <div css={themeLanguagePickerStyle}>
+            <ThemeLanguagePicker gap={1} />
           </div>
         )}
       </div>

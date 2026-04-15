@@ -19,7 +19,7 @@
 import { useCallback, useMemo } from 'react';
 import { css, useTheme } from '@superset-ui/core';
 import { ThemedAgGridReact } from '@superset-ui/core/components';
-import type { Column, GridOptions } from 'ag-grid-community';
+import type { Column } from 'ag-grid-community';
 import type { AgGridReactProps } from 'ag-grid-react';
 
 import copyTextToClipboard from 'src/utils/copy';
@@ -139,7 +139,7 @@ export function GridTable<RecordType extends object>({
 
   const rowHeight = theme.sizeUnit * (size === GridSize.Middle ? 9 : 7);
 
-  const gridOptions = useMemo<GridOptions>(
+  const gridOptions = useMemo<AgGridReactProps['gridOptions']>(
     () => ({
       enableCellTextSelection: true,
       ensureDomOrder: true,

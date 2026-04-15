@@ -260,10 +260,12 @@ export const useHeaderActionsMenu = ({
     }
 
     // Divider
-    menuItems.push({ type: 'divider' });
+    if (!isEmbedded) {
+      menuItems.push({ type: 'divider' });
+    }
 
     // Save as
-    if (userCanSave) {
+    if (userCanSave && !isEmbedded) {
       menuItems.push(
         createModalMenuItem(
           MenuKeys.SaveModal,
@@ -296,7 +298,7 @@ export const useHeaderActionsMenu = ({
     menuItems.push(downloadMenuItem);
 
     // Share submenu
-    if (userCanShare) {
+    if (userCanShare && !isEmbedded) {
       menuItems.push(shareMenuItems);
     }
 
@@ -309,7 +311,9 @@ export const useHeaderActionsMenu = ({
     }
 
     // Divider
-    menuItems.push({ type: 'divider' });
+    if (!isEmbedded) {
+      menuItems.push({ type: 'divider' });
+    }
 
     // Report dropdown
     if (!editMode && reportMenuItem) {

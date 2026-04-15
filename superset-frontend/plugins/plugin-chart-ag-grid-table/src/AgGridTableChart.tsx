@@ -27,16 +27,12 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash';
 
 import {
-  CellClickedEvent,
-  IMenuActionParams,
-} from '@superset-ui/core/components/ThemedAgGridReact';
-import {
   AgGridTableChartTransformedProps,
   InputColumn,
   SearchOption,
   SortByItem,
 } from './types';
-import AgGridDataTable from './AgGridTable';
+import AgGridDataTable, { type AgGridTableProps } from './AgGridTable';
 import { updateTableOwnState } from './utils/externalAPIs';
 import TimeComparisonVisibility from './AgGridTable/components/TimeComparisonVisibility';
 import { useColDefs } from './utils/useColDefs';
@@ -165,8 +161,8 @@ export default function TableChart<D extends DataRecord = DataRecord>(
     [timeGrain],
   );
 
-  const toggleFilter = useCallback(
-    (event: CellClickedEvent | IMenuActionParams) => {
+  const toggleFilter: AgGridTableProps['handleCrossFilter'] = useCallback(
+    event => {
       if (
         emitCrossFilters &&
         event.column &&

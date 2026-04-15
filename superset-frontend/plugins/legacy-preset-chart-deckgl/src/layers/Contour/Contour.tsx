@@ -102,14 +102,18 @@ export const getLayer: GetLayerType<ContourLayer> = function ({
     },
   });
 
+  const getPosition = (d: { position: number[]; weight: number }): Position => {
+    const [lng = 0, lat = 0] = d.position;
+    return [lng, lat];
+  };
+
   return new ContourLayer({
     id: `contourLayer-${fd.slice_id}`,
     data,
     contours,
     cellSize: safeCellSize,
     aggregation: aggregation.toUpperCase(),
-    getPosition: (d: { position: number[]; weight: number }) =>
-      d.position as Position,
+    getPosition,
     getWeight: (d: { weight: number }) => d.weight || 0,
     ...commonLayerProps({
       formData: fd,

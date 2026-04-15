@@ -113,7 +113,7 @@
 
         async function get_guest_token() {
             const access_token = await login(SUPERSET_ADMIN, SUPERSET_PASSWORD);
-            console.log( "access_token", access_token);
+            console.log("access_token", access_token);
             const myHeaders = new Headers();
             myHeaders.append("Accept", "application/json");
             myHeaders.append("Content-Type", "application/json");
@@ -148,6 +148,7 @@
 
         const container = document.getElementById('dashboard-container');
         const errorDiv = document.getElementById('error-message');
+        let currentLocale = null; // tracks locale selected by user
 
         function showError(message) {
             errorDiv.innerHTML = '<div class="error">Error: ' + message + '</div>';
@@ -198,9 +199,10 @@
                 dashboardUiConfig: {
                     hideTitle: false,
                     hideChartControls: false,
-                },
-                urlParams: {
-                    "standalone": 1,
+                    urlParams: {
+                        "standalone": 1,
+                        ...(currentLocale ? { "lang": currentLocale } : {}),
+                    },
                 },
                 width: '100%',
                 height: '100%',
@@ -210,6 +212,7 @@
                 id: DASHBOARD_ID,
                 supersetDomain: SUPERSET_URL,
                 guest_token: guest_token,
+                dashboardUiConfig: embedConfig.dashboardUiConfig,
             });
 
             window.supersetEmbeddedSdk.embedDashboard(embedConfig)
@@ -254,6 +257,16 @@
         } else {
             setTimeout(embedDashboard, 100);
         }
+
+        // Re-embed when locale changes from inside the iframe
+        window.addEventListener('message', (event) => {
+            console.log('Received message:', event.data);
+            if (event.data && event.data.type === 'superset-locale-changed') {
+                console.log('Locale changed to:', event.data.locale, '- re-embedding dashboard...');
+                currentLocale = event.data.locale;
+                setTimeout(embedDashboard, 100);
+            }
+        });
     </script>
 </body>
 

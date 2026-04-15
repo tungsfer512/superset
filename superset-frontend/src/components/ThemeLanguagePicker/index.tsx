@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,29 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { render } from '@superset-ui/core/spec';
-import '@testing-library/jest-dom';
-import { FallbackProps } from 'react-error-boundary';
-
-import FallbackComponent from '../../../src/chart/components/FallbackComponent';
-
-const setup = (props: Partial<FallbackProps> = {}) =>
-  render(
-    <FallbackComponent
-      error={props.error ?? ERROR}
-      resetErrorBoundary={props.resetErrorBoundary ?? (() => undefined)}
-    />,
-  );
-
-const ERROR = new Error('CaffeineOverLoadException');
-
-test('renders error only', () => {
-  const { getByText } = setup({ error: ERROR });
-  expect(getByText('Error: CaffeineOverLoadException')).toBeInTheDocument();
-});
-
-test('renders when nothing is given', () => {
-  const { getByText } = setup({});
-  expect(getByText('Unknown Error')).toBeInTheDocument();
-});
+export { default as ThemeLanguagePicker } from './ThemeLanguagePicker';
+export { default as ThemePicker } from './ThemePicker';
+export { default as LanguagePicker } from './LanguagePicker';
+export type { ThemeLanguagePickerProps } from './ThemeLanguagePicker';
+export type { ThemePickerProps } from './ThemePicker';
+export type { LanguagePickerProps } from './LanguagePicker';

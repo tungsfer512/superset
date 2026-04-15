@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from typing import Callable
+import re
 
 from flask import abort, current_app, request
 from flask_appbuilder import expose
@@ -85,6 +86,45 @@ class EmbeddedView(BaseSupersetView):
                 "dashboard_id": embedded.dashboard_id,
             },
         }
+
+        # Allow locale override via ?lang= for embedded dashboards.
+        # Cross-origin iframes may not share cookies, so session-based locale
+        # selection is unreliable in embedded mode.
+        lang_param = request.args.get("lang", "")
+        if lang_param and re.fullmatch(r"[a-zA-Z]{2,8}(?:_[a-zA-Z]{2,8})?", lang_param):
+            configured_languages = current_app.config.get("LANGUAGES", {})
+            if not configured_languages or lang_param in configured_languages:
+                common = bootstrap_data["common"]
+                navbar_right = common.get("navbar_right")
+                menu_data = common.get("menu_data")
+                menu_navbar_right = (
+                    menu_data.get("navbar_right")
+                    if isinstance(menu_data, dict)
+                    else None
+                )
+                bootstrap_data["common"] = {
+                    **common,
+                    "locale": lang_param,
+                    **(
+                        {"navbar_right": {**navbar_right, "locale": lang_param}}
+                        if isinstance(navbar_right, dict)
+                        else {}
+                    ),
+                    **(
+                        {
+                            "menu_data": {
+                                **menu_data,
+                                "navbar_right": {
+                                    **menu_navbar_right,
+                                    "locale": lang_param,
+                                },
+                            }
+                        }
+                        if isinstance(menu_data, dict)
+                        and isinstance(menu_navbar_right, dict)
+                        else {}
+                    ),
+                }
 
         return self.render_template(
             "superset/spa.html",

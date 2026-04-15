@@ -17,7 +17,9 @@
 import builtins
 from typing import Callable, Union
 
-from flask import g, redirect, Response, url_for
+import re
+
+from flask import current_app, g, redirect, request, Response, url_for
 from flask_appbuilder import expose
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -117,8 +119,29 @@ class Dashboard(BaseSupersetView):
             dashboard_version="v2",
         )
 
+        common = common_bootstrap_payload()
+
+        # Allow locale override via ?lang= URL param for embedded dashboards.
+        # Session cookies are blocked in cross-origin iframes, so the session-based
+        # locale mechanism does not work. We validate against configured LANGUAGES
+        # (if set) or a safe locale-code pattern to prevent injection.
+        lang_param = request.args.get("lang", "")
+        if lang_param and re.fullmatch(r"[a-zA-Z]{2,8}(?:_[a-zA-Z]{2,8})?", lang_param):
+            configured_languages = current_app.config.get("LANGUAGES", {})
+            if not configured_languages or lang_param in configured_languages:
+                navbar_right = common.get("navbar_right")
+                common = {
+                    **common,
+                    "locale": lang_param,
+                    **(
+                        {"navbar_right": {**navbar_right, "locale": lang_param}}
+                        if isinstance(navbar_right, dict)
+                        else {}
+                    ),
+                }
+
         bootstrap_data = {
-            "common": common_bootstrap_payload(),
+            "common": common,
             "embedded": {"dashboard_id": dashboard_id_or_slug},
         }
 

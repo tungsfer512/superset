@@ -25,6 +25,7 @@ import {
   useState,
   ChangeEvent,
   useEffect,
+  type ComponentProps,
 } from 'react';
 
 import { ThemedAgGridReact } from '@superset-ui/core/components';
@@ -32,12 +33,7 @@ import {
   AgGridReact,
   AllCommunityModule,
   ClientSideRowModelModule,
-  type ColDef,
   ModuleRegistry,
-  GridReadyEvent,
-  GridState,
-  CellClickedEvent,
-  IMenuActionParams,
 } from '@superset-ui/core/components/ThemedAgGridReact';
 import { type FunctionComponent } from 'react';
 import { JsonObject, DataRecordValue, DataRecord, t } from '@superset-ui/core';
@@ -49,13 +45,21 @@ import { SearchOption, SortByItem } from '../types';
 import getInitialSortState, { shouldSort } from '../utils/getInitialSortState';
 import { PAGE_SIZE_OPTIONS } from '../consts';
 
+type ThemedAgGridProps = ComponentProps<typeof ThemedAgGridReact>;
+type GridReadyEventParam = Parameters<
+  NonNullable<ThemedAgGridProps['onGridReady']>
+>[0];
+type CellClickedEventParam = Parameters<
+  NonNullable<ThemedAgGridProps['onCellClicked']>
+>[0];
+
 export interface AgGridTableProps {
   gridTheme?: string;
   isDarkMode?: boolean;
   gridHeight?: number;
   updateInterval?: number;
   data?: any[];
-  onGridReady?: (params: GridReadyEvent) => void;
+  onGridReady?: (params: GridReadyEventParam) => void;
   colDefsFromProps: any[];
   includeSearch: boolean;
   allowRearrangeColumns: boolean;
@@ -74,7 +78,7 @@ export interface AgGridTableProps {
   percentMetrics: string[];
   serverPageLength: number;
   hasServerPageLengthChanged: boolean;
-  handleCrossFilter: (event: CellClickedEvent | IMenuActionParams) => void;
+  handleCrossFilter: (event: CellClickedEventParam) => void;
   isActiveFilterValue: (key: string, val: DataRecordValue) => boolean;
   renderTimeComparisonDropdown: () => JSX.Element | null;
   cleanedTotals: DataRecord;
@@ -121,7 +125,7 @@ const AgGridDataTable: FunctionComponent<AgGridTableProps> = memo(
     const containerRef = useRef<HTMLDivElement>(null);
 
     const searchId = `search-${id}`;
-    const gridInitialState: GridState = {
+    const gridInitialState = {
       ...(serverPagination && {
         sort: {
           sortModel: getInitialSortState(serverPaginationData?.sortBy || []),
@@ -129,7 +133,7 @@ const AgGridDataTable: FunctionComponent<AgGridTableProps> = memo(
       }),
     };
 
-    const defaultColDef = useMemo<ColDef>(
+    const defaultColDef = useMemo(
       () => ({
         filter: true,
         sortable: true,
@@ -254,7 +258,7 @@ const AgGridDataTable: FunctionComponent<AgGridTableProps> = memo(
       }
     }, [width]);
 
-    const onGridReady = (params: GridReadyEvent) => {
+    const onGridReady = (params: GridReadyEventParam) => {
       // This will make columns fill the grid width
       params.api.sizeColumnsToFit();
     };

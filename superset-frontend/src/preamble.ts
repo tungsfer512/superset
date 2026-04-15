@@ -55,7 +55,13 @@ setupClient({ appRoot: applicationRoot() });
 
 // Load language pack before anything else
 (async () => {
-  const lang = bootstrapData.common.locale || 'en';
+  const langFromQuery = new URLSearchParams(window.location.search).get('lang');
+  const safeLangFromQuery =
+    langFromQuery && /^[a-zA-Z]{2,8}(?:_[a-zA-Z]{2,8})?$/.test(langFromQuery)
+      ? langFromQuery
+      : null;
+  const lang = safeLangFromQuery || String(bootstrapData.common.locale || 'en');
+
   if (lang !== 'en') {
     try {
       // Second call to configure to set the language pack

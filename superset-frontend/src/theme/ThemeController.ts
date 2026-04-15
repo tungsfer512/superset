@@ -633,7 +633,7 @@ export class ThemeController {
     if (savedMode && this.isValidThemeMode(savedMode)) return savedMode;
 
     // Default to system preference when both themes are available
-    return ThemeMode.DEFAULT;
+    return ThemeMode.SYSTEM;
   }
 
   /**
