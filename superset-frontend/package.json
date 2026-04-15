@@ -31,6 +31,7 @@
     "doc": "docs",
     "test": "spec"
   },
+  "private": true,
   "workspaces": [
     "packages/*",
     "plugins/*",
@@ -82,9 +83,13 @@
     "last 3 edge versions"
   ],
   "dependencies": {
+    "@deck.gl/extensions": "^9.3.0",
+    "@deck.gl/mesh-layers": "^9.3.0",
+    "@deck.gl/widgets": "^9.3.0",
     "@emotion/cache": "^11.4.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@react-spring/web": "^9.7.5",
     "@reduxjs/toolkit": "^1.9.3",
     "@rjsf/core": "^5.21.1",
     "@rjsf/utils": "^5.24.3",
@@ -124,6 +129,7 @@
     "antd": "^5.24.6",
     "chrono-node": "^2.7.8",
     "classnames": "^2.2.5",
+    "currencyformatter.js": "^1.0.5",
     "d3-color": "^3.1.0",
     "d3-scale": "^2.1.2",
     "dayjs": "^1.11.13",
@@ -141,6 +147,7 @@
     "geostyler-qgis-parser": "2.0.1",
     "geostyler-style": "7.5.0",
     "geostyler-wfs-parser": "^2.0.3",
+    "global-box": "^2.0.2",
     "googleapis": "^154.1.0",
     "immer": "^10.1.1",
     "interweave": "^13.1.0",
@@ -353,7 +360,8 @@
     "remark-gfm": "^3.0.1",
     "underscore": "^1.13.7",
     "jspdf": "^4.0.0",
-    "nwsapi": "^2.2.13"
+    "nwsapi": "^2.2.13",
+    "query-string": "6.14.1"
   },
   "readme": "ERROR: No README data found!",
   "scarfSettings": {

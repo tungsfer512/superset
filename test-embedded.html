@@ -79,7 +79,7 @@
 
     <script src="https://unpkg.com/@superset-ui/embedded-sdk"></script>
     <script>
-        const SUPERSET_URL = 'http://localhost:8088';
+        const SUPERSET_URL = 'http://localhost:9000';
         const SUPERSET_ADMIN = 'admin';
         const SUPERSET_PASSWORD = '@Abc123';
 
@@ -196,7 +196,7 @@
                 mountPoint: container,
                 fetchGuestToken: () => Promise.resolve(guest_token),
                 dashboardUiConfig: {
-                    hideTitle: true,
+                    hideTitle: false,
                     hideChartControls: false,
                 },
                 urlParams: {
