@@ -27,9 +27,7 @@ import logging
 import os
 import sys
 
-from celery.schedules import crontab
-from flask_caching.backends.filesystemcache import FileSystemCache
-from typing import Callable
+from typing import Callable, TypedDict
 
 logger = logging.getLogger()
 
@@ -58,50 +56,6 @@ SQLALCHEMY_EXAMPLES_URI = (
     f"{EXAMPLES_USER}:{EXAMPLES_PASSWORD}@"
     f"{EXAMPLES_HOST}:{EXAMPLES_PORT}/{EXAMPLES_DB}"
 )
-
-REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-REDIS_PORT = os.getenv("REDIS_PORT", "6379")
-REDIS_CELERY_DB = os.getenv("REDIS_CELERY_DB", "0")
-REDIS_RESULTS_DB = os.getenv("REDIS_RESULTS_DB", "1")
-
-RESULTS_BACKEND = FileSystemCache("/app/superset_home/sqllab")
-
-CACHE_CONFIG = {
-    "CACHE_TYPE": "RedisCache",
-    "CACHE_DEFAULT_TIMEOUT": 300,
-    "CACHE_KEY_PREFIX": "superset_",
-    "CACHE_REDIS_HOST": REDIS_HOST,
-    "CACHE_REDIS_PORT": REDIS_PORT,
-    "CACHE_REDIS_DB": REDIS_RESULTS_DB,
-}
-DATA_CACHE_CONFIG = CACHE_CONFIG
-THUMBNAIL_CACHE_CONFIG = CACHE_CONFIG
-
-
-class CeleryConfig:
-    broker_url = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CELERY_DB}"
-    imports = (
-        "superset.sql_lab",
-        "superset.tasks.scheduler",
-        "superset.tasks.thumbnails",
-        "superset.tasks.cache",
-    )
-    result_backend = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_RESULTS_DB}"
-    worker_prefetch_multiplier = 1
-    task_acks_late = False
-    beat_schedule = {
-        "reports.scheduler": {
-            "task": "reports.scheduler",
-            "schedule": crontab(minute="*", hour="*"),
-        },
-        "reports.prune_log": {
-            "task": "reports.prune_log",
-            "schedule": crontab(minute=10, hour=0),
-        },
-    }
-
-
-CELERY_CONFIG = CeleryConfig
 
 FEATURE_FLAGS = {
     # When using a recent version of Druid that supports JOINs turn this on
@@ -228,29 +182,9 @@ FEATURE_FLAGS = {
     # in addition to relative timeshifts (e.g., "1 day ago")
     "DATE_RANGE_TIMESHIFTS_ENABLED": True,
 }
-ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
-WEBDRIVER_BASEURL = f"http://superset_app{os.environ.get('SUPERSET_APP_ROOT', '/')}/"  # When using docker compose baseurl should be http://superset_nginx{ENV{BASEPATH}}/  # noqa: E501
-# The base URL for the email report hyperlinks.
-WEBDRIVER_BASEURL_USER_FRIENDLY = (
-    f"http://localhost:8888/{os.environ.get('SUPERSET_APP_ROOT', '/')}/"
-)
-SQLLAB_CTAS_NO_LIMIT = True
 
 log_level_text = os.getenv("SUPERSET_LOG_LEVEL", "INFO")
 LOG_LEVEL = getattr(logging, log_level_text.upper(), logging.INFO)
-
-if os.getenv("CYPRESS_CONFIG") == "true":
-    # When running the service as a cypress backend, we need to import the config
-    # located @ tests/integration_tests/superset_test_config.py
-    base_dir = os.path.dirname(__file__)
-    module_folder = os.path.abspath(
-        os.path.join(base_dir, "../../tests/integration_tests/")
-    )
-    sys.path.insert(0, module_folder)
-    from superset_test_config import *  # noqa
-
-    sys.path.pop(0)
-
 
 # Allow HTML, CSS and Handlebars templates in markdown components
 # Must set HTML_SANITIZATION = False to allow CSS Styles box to work
@@ -296,10 +230,6 @@ LANGUAGES = {
     "sl": {"flag": "si", "name": "Slovenian"},
 }
 
-PUBLIC_ROLE_LIKE = os.getenv("PUBLIC_ROLE_LIKE", "Gamma")
-
-BABEL_TRANSLATION_DIRS = "/app/superset/translations"
-
 ENVIRONMENT_TAG_CONFIG = {
     "variable": "SUPERSET_ENV",
     "values": {
@@ -310,7 +240,7 @@ ENVIRONMENT_TAG_CONFIG = {
 }
 
 SECRET_KEY = os.getenv(
-    "SECRET_KEY", "your-super-secret-key-here-please-change-in-production"
+    "SUPERSET_SECRET_KEY", "your-super-secret-key-here-please-change-in-production"
 )
 
 WTF_CSRF_ENABLED = False
@@ -346,9 +276,7 @@ SESSION_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = False
 
-AUTH_ROLE_PUBLIC = None
-
-GUEST_ROLE_NAME = "Admin"
+GUEST_ROLE_NAME = "Gamma"
 GUEST_TOKEN_JWT_PUBLIC_KEY = ""
 
 SQLLAB_ASYNC_TIME_LIMIT_SEC = 60 * 60 * 6  # 6 hours
@@ -389,6 +317,127 @@ LOGO_RIGHT_TEXT: Callable[[], str] | str = os.getenv("LOGO_RIGHT_TEXT", "Dashboa
 FAVICONS = json.loads(
     str(os.getenv("FAVICONS", [{"href": "/static/assets/images/favicon.png"}]))
 )
+
+# This is an important setting, and should be lower than your
+# [load balancer / proxy / envoy / kong / ...] timeout settings.
+# You should also make sure to configure your WSGI server
+# (gunicorn, nginx, apache, ...) timeout setting to be <= to this setting
+SUPERSET_WEBSERVER_TIMEOUT = 60 * 5
+
+# Override the default d3 locale format
+# Default values are equivalent to
+# D3_FORMAT = {
+#     "decimal": ".",           # - decimal place string (e.g., ".").
+#     "thousands": ",",         # - group separator string (e.g., ",").
+#     "grouping": [3],          # - array of group sizes (e.g., [3]), cycled as needed.
+#     "currency": ["$", ""]     # - currency prefix/suffix strings (e.g., ["$", ""])
+# }
+# https://github.com/d3/d3-format/blob/main/README.md#formatLocale
+class D3Format(TypedDict, total=False):
+    decimal: str
+    thousands: str
+    grouping: list[int]
+    currency: list[str]
+
+
+D3_FORMAT: D3Format = {
+    "decimal": ".",
+    "thousands": ",",
+    "grouping": [3],
+    "currency": ["", "đ"],
+}
+
+# Override the default d3 locale for time format
+# Default values are equivalent to
+# D3_TIME_FORMAT = {
+#     "dateTime": "%x, %X",
+#     "date": "%-m/%-d/%Y",
+#     "time": "%-I:%M:%S %p",
+#     "periods": ["AM", "PM"],
+#     "days": ["Sunday", "Monday", "Tuesday", "Wednesday",
+#              "Thursday", "Friday", "Saturday"],
+#     "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+#     "months": ["January", "February", "March", "April",
+#                "May", "June", "July", "August",
+#                "September", "October", "November", "December"],
+#     "shortMonths": ["Jan", "Feb", "Mar", "Apr",
+#                     "May", "Jun", "Jul", "Aug",
+#                     "Sep", "Oct", "Nov", "Dec"]
+# }
+# https://github.com/d3/d3-time-format/tree/main#locales
+class D3TimeFormat(TypedDict, total=False):
+    date: str
+    dateTime: str
+    time: str
+    periods: list[str]
+    days: list[str]
+    shortDays: list[str]
+    months: list[str]
+    shortMonths: list[str]
+
+
+D3_TIME_FORMAT: D3TimeFormat = {
+    "dateTime": "%x, %X",
+    "date": "%-m/%-d/%Y",
+    "time": "%-I:%M:%S %p",
+    "periods": ["AM", "PM"],
+    "days": [
+        "Chủ nhật",
+        "Thứ hai",
+        "Thứ ba",
+        "Thứ tư",
+        "Thứ năm",
+        "Thứ sáu",
+        "Thứ bảy",
+    ],
+    "shortDays": [
+        "Chủ nhật",
+        "Thứ hai",
+        "Thứ ba",
+        "Thứ tư",
+        "Thứ năm",
+        "Thứ sáu",
+        "Thứ bảy",
+    ],
+    "months": [
+        "Tháng một",
+        "Tháng hai",
+        "Tháng ba",
+        "Tháng tư",
+        "Tháng năm",
+        "Tháng sáu",
+        "Tháng bảy",
+        "Tháng tám",
+        "Tháng chín",
+        "Tháng mười",
+        "Tháng mười một",
+        "Tháng mười hai",
+    ],
+    "shortMonths": [
+        "Tháng một",
+        "Tháng hai",
+        "Tháng ba",
+        "Tháng tư",
+        "Tháng năm",
+        "Tháng sáu",
+        "Tháng bảy",
+        "Tháng tám",
+        "Tháng chín",
+        "Tháng mười",
+        "Tháng mười một",
+        "Tháng mười hai",
+    ],
+}
+
+CURRENCIES = ["VND", "USD", "EUR", "GBP", "INR", "MXN", "JPY", "CNY"]
+
+PREFERRED_DATABASES: list[str] = [
+    "PostgreSQL",
+    "Presto",
+    "MySQL",
+    "SQLite",
+    # etc.
+]
 
 #
 # Optionally import superset_config_docker.py (which will have been included on
