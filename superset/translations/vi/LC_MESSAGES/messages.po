@@ -16472,3 +16472,148 @@ msgstr "Giây"
 msgid "Second"
 msgstr "Giây"
 
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+msgid "Sign in with"
+msgstr "Đăng nhập với"
+
+msgid "Enter your login and password below:"
+msgstr "Nhập tên đăng nhập và mật khẩu của bạn bên dưới:"
+
+msgid "Username:"
+msgstr "Tên đăng nhập:"
+
+msgid "Password:"
+msgstr "Mật khẩu:"
+
+
+msgid "Please DO NOT overwrite the \"filter_scopes\" key."
+msgstr "Vui lòng KHÔNG ghi đè khóa \"filter_scopes\"."
+
+msgid ""
+"Please check your query and confirm that all template parameters are "
+"surround by double braces, for example, \"{{ ds }}\". Then, try running "
+"your query again."
+msgstr ""
+"Vui lòng kiểm tra truy vấn của bạn và xác nhận rằng tất cả các tham số mẫu "
+"đều được bao quanh bởi dấu ngoặc kép, ví dụ, \"{{ ds }}\". Sau đó, hãy thử "
+"chạy truy vấn của bạn một lần nữa."
+
+#, python-format
+msgid ""
+"Please check your query for syntax errors at or near "
+"\"%(syntax_error)s\". Then, try running your query again."
+msgstr ""
+"Vui lòng kiểm tra truy vấn của bạn để tìm lỗi cú pháp tại hoặc gần "
+"\"%(syntax_error)s\". Sau đó, hãy thử chạy truy vấn của bạn một lần nữa."
+
+#, python-format
+msgid ""
+"Please check your query for syntax errors near \"%(server_error)s\". "
+"Then, try running your query again."
+msgstr ""
+"Vui lòng kiểm tra truy vấn của bạn để tìm lỗi cú pháp gần \"%(server_error)s\". "
+"Sau đó, hãy thử chạy truy vấn của bạn một lần nữa."
+
+#, fuzzy
+msgid ""
+"Please check your template parameters for syntax errors and make sure "
+"they match across your SQL query and Set Parameters. Then, try running "
+"your query again."
+msgstr ""
+"Vui lòng kiểm tra các tham số mẫu của bạn để tìm lỗi cú pháp và đảm bảo "
+"chúng khớp với truy vấn SQL và các tham số đã thiết lập. Sau đó, hãy thử "
+"chạy truy vấn của bạn một lần nữa."
+
+msgid "Please choose a valid value"
+msgstr "Vui lòng chọn một giá trị hợp lệ"
+
+#, fuzzy
+msgid "Please choose at least one groupby"
+msgstr "Vui lòng chọn ít nhất một nhóm"
+
+msgid "Please confirm"
+msgstr "Vui lòng xác nhận"
+
+msgid "Please confirm the overwrite values."
+msgstr "Vui lòng xác nhận các giá trị ghi đè."
+
+#, fuzzy
+msgid "Please confirm your password"
+msgstr ""
+
+msgid "Please enter a SQLAlchemy URI to test"
+msgstr "Vui lòng nhập URI SQLAlchemy để kiểm tra"
+
+#, fuzzy
+msgid "Please enter a valid email"
+msgstr "Vui lòng nhập một email hợp lệ"
+
+msgid "Please enter a valid email address"
+msgstr "Vui lòng nhập một địa chỉ email hợp lệ"
+
+msgid "Please enter valid text. Spaces alone are not permitted."
+msgstr "Vui lòng nhập văn bản hợp lệ. Không được phép chỉ nhập khoảng trắng."
+
+msgid "Please enter your email"
+msgstr "Vui lòng nhập email của bạn"
+
+#, fuzzy
+msgid "Please enter your first name"
+msgstr "Vui lòng nhập tên của bạn"
+
+#, fuzzy
+msgid "Please enter your last name"
+msgstr "Vui lòng nhập họ của bạn"
+
+#, fuzzy
+msgid "Please enter your password"
+msgstr "Vui lòng nhập mật khẩu của bạn"
+
+#, fuzzy
+msgid "Please enter your username"
+msgstr "Vui lòng nhập tên đăng nhập của bạn"
+
+msgid "Please provide a valid range"
+msgstr "Vui lòng cung cấp một khoảng hợp lệ"
+
+msgid "Please provide a value within range"
+msgstr "Vui lòng cung cấp một giá trị trong khoảng"
+
+msgid "Please re-enter the password."
+msgstr "Vui lòng nhập lại mật khẩu."
+
+msgid "Please re-export your file and try importing again"
+msgstr "Vui lòng xuất lại tệp của bạn và thử nhập lại"
+
+#, fuzzy
+msgid "Please reach out to the Chart Owner for assistance."
+msgid_plural "Please reach out to the Chart Owners for assistance."
+msgstr[0] "Vui lòng liên hệ với chủ sở hữu biểu đồ để được trợ giúp."
+msgstr[1] "Vui lòng liên hệ với chủ sở hữu biểu đồ để được trợ giúp."
+
+msgid "Please save your chart first, then try creating a new email report."
+msgstr ""
+"Vui lòng lưu biểu đồ của bạn trước, sau đó thử tạo một báo cáo email mới."
+
+msgid "Please save your dashboard first, then try creating a new email report."
+msgstr ""
+"Vui lòng lưu dashboard của bạn trước, sau đó thử tạo một báo cáo email mới."
+
+#, fuzzy
+msgid "Please select at least one role or group"
+msgstr "Vui lòng chọn ít nhất một vai trò hoặc nhóm"
+
+msgid "Please select both a Dataset and a Chart type to proceed"
+msgstr ""
+"Vui lòng chọn một tập dữ liệu và một loại biểu đồ để tiếp tục"
+
+#, python-format
+msgid ""
+"Please specify the Dataset ID for the ``%(name)s`` metric in the Jinja "
+"macro."
+msgstr "Vui lòng chỉ định ID tập dữ liệu cho số liệu ``%(name)s`` trong macro Jinja."
+
+msgid "Please use 3 different metric labels"
+msgstr "Vui lòng sử dụng 3 nhãn số liệu khác nhau"
