@@ -3867,8 +3867,8 @@ msgstr "Lược đồ mặc định"
 msgid "Default URL"
 msgstr "URL mặc định"
 
-msgid "Default URL to redirect to when accessing from the dataset list page"
-msgstr "URL mặc định để chuyển hướng khi truy cập từ trang danh sách tập dữ liệu"
+msgid "Default URL to redirect to when accessing from the dataset list page. Accepts relative URLs such as"
+msgstr "URL mặc định để chuyển hướng khi truy cập từ trang danh sách tập dữ liệu. Chấp nhận URL tương đối như"
 
 msgid "Default Value"
 msgstr "Giá trị mặc định"
@@ -16617,3 +16617,35 @@ msgstr "Vui lòng chỉ định ID tập dữ liệu cho số liệu ``%(name)s`
 
 msgid "Please use 3 different metric labels"
 msgstr "Vui lòng sử dụng 3 nhãn số liệu khác nhau"
+
+msgid "Theme & CSS"
+msgstr "Chủ đề giao diện & CSS"
+
+msgid "Select a theme"
+msgstr "Chọn một chủ đề"
+
+msgid "Clear the selection to revert to the system default theme"
+msgstr "Xóa lựa chọn để quay lại chủ đề mặc định của hệ thống"
+
+msgid "Load CSS template"
+msgstr "Tải mẫu CSS"
+
+msgid "CSS editor"
+msgstr "Trình chỉnh sửa CSS"
+
+msgid "Apply & Save"
+msgstr "Áp dụng & Lưu"
+
+msgid "Open SQL Lab in a new tab"
+msgstr "Mở SQL Lab trong tab mới"
+
+msgid "When specifying SQL, the datasource acts as a view. Superset will use this statement as a subquery while grouping and filtering on the generated parent queries.If changes are made to your SQL query, columns in your dataset will be synced when saving the dataset."
+msgstr "Khi chỉ định SQL, datasource hoạt động như một view. Superset sẽ sử dụng câu lệnh này như một subquery trong khi nhóm và lọc trên các truy vấn cha được tạo ra. Nếu có thay đổi được thực hiện đối với truy vấn SQL của bạn, các cột trong dataset của bạn sẽ được đồng bộ khi lưu dataset."
+
+msgid "Edit %s in modal"
+msgstr "Chỉnh sửa %s trong hộp thoại"
+
+msgid "entries per page"
+msgstr "mục mỗi trang"
+
+ 

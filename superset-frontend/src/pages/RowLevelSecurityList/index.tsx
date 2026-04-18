@@ -135,6 +135,7 @@ function RowLevelSecurityList(props: RLSProps) {
       {
         accessor: 'filter_type',
         Header: t('Filter Type'),
+        Cell: ({ row: { original } }: any) => t(original.filter_type),
         size: 'lg',
         id: 'filter_type',
       },

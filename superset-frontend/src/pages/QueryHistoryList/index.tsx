@@ -28,7 +28,6 @@ import {
 } from '@superset-ui/core';
 import {
   createFetchRelated,
-  createFetchDistinct,
   createErrorHandler,
   shortenSQL,
 } from 'src/views/CRUD/utils';
@@ -55,9 +54,20 @@ import QueryPreviewModal from 'src/features/queries/QueryPreviewModal';
 import { addSuccessToast } from 'src/components/MessageToasts/actions';
 import getOwnerName from 'src/utils/getOwnerName';
 import { extendedDayjs } from '@superset-ui/core/utils/dates';
+import rison from 'rison';
 
 const PAGE_SIZE = 25;
 const SQL_PREVIEW_MAX_LINES = 4;
+
+const QUERY_STATUS_LABELS: Record<string, string> = {
+  failed: t('failed'),
+  pending: t('pending'),
+  running: t('running'),
+  success: t('success'),
+  stopped: t('stopped'),
+  timed_out: t('working timeout'),
+  scheduled: t('scheduled'),
+};
 
 const TopAlignedListView = styled(ListView)<ListViewProps<QueryObject>>`
   table .ant-table-cell {
@@ -152,6 +162,35 @@ function QueryList({ addDangerToast }: QueryListProps) {
     activeChild: 'Query history',
     ...getCommonSqlMenuData(),
   };
+
+  const fetchStatusOptions = useCallback(
+    async (filterValue = '', page: number, pageSize: number) => {
+      const query = rison.encode_uri({
+        filter: filterValue,
+        page,
+        page_size: pageSize,
+      });
+      const { json = {} } = await SupersetClient.get({
+        endpoint: `/api/v1/query/distinct/status?q=${query}`,
+      });
+
+      const data = (json?.result || [])
+        .filter(({ text }: { text: string }) => text?.trim().length > 0)
+        .map(({ text, value }: { text: string; value: string }) => {
+          const normalized = String(value).toLowerCase();
+          return {
+            label: QUERY_STATUS_LABELS[normalized] || t(text),
+            value,
+          };
+        });
+
+      return {
+        data,
+        totalCount: json?.count,
+      };
+    },
+    [],
+  );
 
   const initialSort = [{ id: QueryObjectColumns.StartTime, desc: true }];
   const columns = useMemo(
@@ -443,16 +482,8 @@ function QueryList({ addDangerToast }: QueryListProps) {
         id: 'status',
         input: 'select',
         operator: FilterOperator.Equals,
-        unfilteredLabel: 'All',
-        fetchSelects: createFetchDistinct(
-          'query',
-          'status',
-          createErrorHandler(errMsg =>
-            addDangerToast(
-              t('An error occurred while fetching schema values: %s', errMsg),
-            ),
-          ),
-        ),
+        unfilteredLabel: t('All'),
+        fetchSelects: fetchStatusOptions,
         paginate: true,
       },
       {
@@ -461,7 +492,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
         id: 'user',
         input: 'select',
         operator: FilterOperator.RelationOneMany,
-        unfilteredLabel: 'All',
+        unfilteredLabel: t('All'),
         fetchSelects: createFetchRelated(
           'query',
           'user',
@@ -488,7 +519,7 @@ function QueryList({ addDangerToast }: QueryListProps) {
         operator: FilterOperator.Contains,
       },
     ],
-    [addDangerToast, locale],
+    [addDangerToast, fetchStatusOptions, locale],
   );
 
   return (
