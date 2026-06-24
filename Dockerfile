@@ -40,7 +40,7 @@ COPY docker/ /app/docker/
 ARG NPM_BUILD_CMD="build"
 
 # Install system dependencies required for node-gyp
-RUN /app/docker/apt-install.sh build-essential python3 zstd
+RUN /app/docker/apt-install.sh build-essential python3 zstd pkg-config default-libmysqlclient-dev python3-dev
 
 # Define environment variables for frontend build
 ENV BUILD_CMD=${NPM_BUILD_CMD} \
@@ -194,7 +194,11 @@ RUN /app/docker/apt-install.sh \
       libsasl2-modules-gssapi-mit \
       libpq-dev \
       libecpg-dev \
-      libldap2-dev
+      libldap2-dev \
+      pkg-config \
+      default-libmysqlclient-dev \
+      build-essential \
+      python3-dev
 
 # Copy compiled things from previous stages
 COPY --from=superset-node /app/superset/static/assets superset/static/assets
@@ -237,7 +241,9 @@ FROM python-common AS dev
 RUN /app/docker/apt-install.sh \
     git \
     pkg-config \
-    default-libmysqlclient-dev
+    default-libmysqlclient-dev \
+    build-essential \
+    python3-dev
 
 # Copy development requirements and install them
 COPY requirements/*.txt requirements/

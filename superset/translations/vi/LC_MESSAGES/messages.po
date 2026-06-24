@@ -9804,7 +9804,7 @@ msgid "Show split lines"
 msgstr "Hiển thị các đường phân tách"
 
 msgid "Show summary"
-msgstr "Hiển thị tóm tắt"
+msgstr "Hiển thị tổng quan"
 
 msgid "Show the value on top of the bar"
 msgstr "Hiển thị giá trị trên đầu cột"
@@ -10303,7 +10303,7 @@ msgid "Sum values"
 msgstr "Tổng các giá trị"
 
 msgid "Summary"
-msgstr "Tóm tắt"
+msgstr "Tổng"
 
 msgid "Sunburst Chart"
 msgstr "Biểu đồ Sunburst"
