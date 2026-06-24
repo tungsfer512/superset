@@ -36,6 +36,12 @@ const StyledCard = styled(Card)`
   ${({ theme }) => `
     overflow: hidden;
 
+    /* Reserve space for the absolutely-positioned status badge (titleRight)
+       so the meta description never runs underneath / overlaps it. */
+    .ant-card-meta-description {
+      padding-right: ${theme.sizeUnit * 30}px;
+    }
+
     .gradient-container {
       position: relative;
       height: 100%;

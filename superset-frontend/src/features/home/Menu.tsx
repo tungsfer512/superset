@@ -175,7 +175,7 @@ const StyledRow = styled(Row)`
 const StyledCol = styled(Col)`
   ${({ theme }) => css`
     display: flex;
-    gap: ${theme.sizeUnit * 4}px;
+    // gap: ${theme.sizeUnit * 4}px;
   `}
 `;
 

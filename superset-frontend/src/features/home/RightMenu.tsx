@@ -26,7 +26,6 @@ import {
   t,
   styled,
   css,
-  SupersetTheme,
   SupersetClient,
   getExtensionsRegistry,
   useTheme,
@@ -39,7 +38,7 @@ import {
   Typography,
   TelemetryPixel,
 } from '@superset-ui/core/components';
-import type { ItemType, MenuItem } from '@superset-ui/core/components/Menu';
+import type { MenuItem } from '@superset-ui/core/components/Menu';
 import { ensureAppRoot, makeUrl } from 'src/utils/pathUtils';
 import { findPermission } from 'src/utils/findPermission';
 import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
@@ -513,45 +512,8 @@ const RightMenu = ({
         });
       }
 
-      if (navbarRight.version_string || navbarRight.version_sha) {
-        items.push({ type: 'divider', key: 'version-info-divider' });
-
-        const aboutItem: ItemType = {
-          type: 'group',
-          label: t('About'),
-          key: 'about-section',
-          children: [
-            {
-              key: 'about-info',
-              style: { height: 'auto', minHeight: 'auto' },
-              label: (
-                <div
-                  css={(theme: SupersetTheme) => css`
-                    font-size: ${theme.fontSizeSM}px;
-                    color: ${theme.colorTextSecondary || theme.colorText};
-                    white-space: pre-wrap;
-                    padding: ${theme.sizeUnit}px ${theme.sizeUnit * 2}px;
-                  `}
-                >
-                  {[
-                    navbarRight.show_watermark &&
-                      t('Powered by Apache Superset'),
-                    navbarRight.version_string &&
-                      `${t('Version')}: ${navbarRight.version_string}`,
-                    navbarRight.version_sha &&
-                      `${t('SHA')}: ${navbarRight.version_sha}`,
-                    navbarRight.build_number &&
-                      `${t('Build')}: ${navbarRight.build_number}`,
-                  ]
-                    .filter(Boolean)
-                    .join('\n')}
-                </div>
-              ),
-            },
-          ],
-        };
-        items.push(aboutItem);
-      }
+      // About section (Powered by Apache Superset / version info) intentionally
+      // disabled per local customization.
       return items;
     };
 

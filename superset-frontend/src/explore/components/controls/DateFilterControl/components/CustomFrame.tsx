@@ -141,7 +141,7 @@ export function CustomFrame(props: FrameComponentProps) {
   return (
     <AntdThemeProvider locale={datePickerLocale}>
       <div data-test="custom-frame">
-        <div className="section-title">{t('Configure custom time range')}</div>
+        {/* <div className="section-title">{t('Configure custom time range')}</div> */}
         <Row gutter={24}>
           <Col span={12}>
             <div className="control-label">

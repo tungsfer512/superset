@@ -60,7 +60,172 @@ FEATURE_FLAGS = {
     "DASHBOARD_NATIVE_FILTERS": True,
     "DASHBOARD_NATIVE_FILTERS_SET": True,
     "DASHBOARD_NATIVE_FILTERS_USE_CACHE": False,
+    # Exposes a live JSON theme editor in the navbar for tuning the theme below
+    "ENABLE_THEME_EDITOR": True,
 }
+
+# ---------------------------------------------------
+# UI Theme — "Teal modern" brand (TOGGLE)
+# Flip APPLY_BRAND_THEME to True to enable the teal brand theme, logo and font.
+# All definitions are kept below so it's easy to re-enable / tweak later.
+# Live-editable via the navbar Theme Editor (ENABLE_THEME_EDITOR).
+# ---------------------------------------------------
+APPLY_BRAND_THEME = False
+
+_BRAND_LIGHT = "#0E9F9F"
+_BRAND_DARK = "#2DD4BF"
+_FONT_STACK = "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+
+_BRAND_TEXT = "#0A201E"
+
+_LOGO_TOKENS = {
+    "brandLogoUrl": "/static/assets/images/brand-logo.svg",
+    "brandLogoHref": "/",
+    "brandLogoAlt": "Dashboard",
+    "brandLogoHeight": "30px",
+    "brandLogoMargin": "16px",
+}
+
+_BRAND_THEME_DEFAULT = {
+    "token": {
+        "colorPrimary": _BRAND_LIGHT,
+        "colorInfo": _BRAND_LIGHT,
+        "colorLink": _BRAND_LIGHT,
+        "colorSuccess": "#15924E",
+        "colorWarning": "#C7790B",
+        "colorError": "#DC2F44",
+        # Higher-contrast neutrals (cool, biased toward the teal accent)
+        "colorText": _BRAND_TEXT,
+        "colorTextSecondary": "#3E5754",
+        "colorBgLayout": "#E7EFEE",
+        "colorBgContainer": "#FFFFFF",
+        "colorBorder": "#C6D5D2",
+        "colorBorderSecondary": "#DAE5E3",
+        "borderRadius": 12,
+        "borderRadiusLG": 18,
+        "borderRadiusSM": 8,
+        "controlHeight": 40,
+        "fontFamily": _FONT_STACK,
+        "fontSize": 14,
+        "fontWeightStrong": 700,
+        "wireframe": False,
+        "boxShadow": "0 1px 2px rgba(10,32,30,.06), 0 12px 28px -12px rgba(10,32,30,.18)",
+        "boxShadowSecondary": "0 8px 24px -10px rgba(10,32,30,.18)",
+        **_LOGO_TOKENS,
+    },
+    "components": {
+        "Button": {"controlHeight": 40, "fontWeight": 700, "borderRadius": 12, "primaryShadow": "none"},
+        "Card": {"borderRadiusLG": 18, "paddingLG": 22},
+        "Menu": {"itemBorderRadius": 10, "itemSelectedBg": "#E2F6F4", "itemSelectedColor": "#0B8585"},
+        "Table": {
+            "headerBg": "#E6F4F2",
+            "headerColor": "#0B6E6E",
+            "headerSplitColor": "transparent",
+            "borderColor": "#E0EAE8",
+            "rowHoverBg": "#F0FAF9",
+            "cellPaddingBlock": 12,
+            "borderRadiusLG": 16,
+        },
+        "Input": {"controlHeight": 40, "borderRadius": 12, "activeShadow": "0 0 0 3px rgba(14,159,159,.16)"},
+        "InputNumber": {"controlHeight": 40, "borderRadius": 12},
+        "Select": {"controlHeight": 40, "borderRadius": 12},
+        "Tabs": {"inkBarColor": _BRAND_LIGHT, "itemSelectedColor": _BRAND_LIGHT, "itemHoverColor": "#0B8585", "titleFontSize": 14},
+        "Modal": {"borderRadiusLG": 18},
+        "Tag": {"borderRadiusSM": 8},
+        "Segmented": {"borderRadius": 10, "itemSelectedBg": _BRAND_LIGHT, "itemSelectedColor": "#FFFFFF"},
+        "Pagination": {"borderRadius": 10, "itemActiveBg": _BRAND_LIGHT},
+        "Tooltip": {"borderRadius": 8},
+        "Switch": {"colorPrimary": _BRAND_LIGHT},
+        "Slider": {"colorPrimary": _BRAND_LIGHT},
+    },
+}
+
+_BRAND_THEME_DARK = {
+    "algorithm": "dark",
+    "token": {
+        "colorPrimary": _BRAND_DARK,
+        "colorInfo": _BRAND_DARK,
+        "colorLink": _BRAND_DARK,
+        "colorSuccess": "#34D399",
+        "colorWarning": "#FBBF24",
+        "colorError": "#FB7185",
+        "colorText": "#E9F3F1",
+        "colorTextSecondary": "#A6C0BC",
+        "colorBgLayout": "#070F0E",
+        "colorBgContainer": "#0F201E",
+        "colorBgElevated": "#152825",
+        "colorBorder": "#234440",
+        "colorBorderSecondary": "#1A332F",
+        "borderRadius": 12,
+        "borderRadiusLG": 18,
+        "borderRadiusSM": 8,
+        "controlHeight": 40,
+        "fontFamily": _FONT_STACK,
+        "fontSize": 14,
+        "fontWeightStrong": 700,
+        "wireframe": False,
+        "boxShadow": "0 1px 2px rgba(0,0,0,.5), 0 14px 34px -14px rgba(0,0,0,.6)",
+        **_LOGO_TOKENS,
+    },
+    "components": {
+        "Button": {"controlHeight": 40, "fontWeight": 700, "borderRadius": 12, "primaryShadow": "none"},
+        "Card": {"borderRadiusLG": 18, "paddingLG": 22},
+        "Menu": {"itemBorderRadius": 10},
+        "Table": {
+            "headerBg": "#13302C",
+            "headerColor": "#5EEAD4",
+            "headerSplitColor": "transparent",
+            "rowHoverBg": "#13302C",
+            "cellPaddingBlock": 12,
+        },
+        "Input": {"controlHeight": 40, "borderRadius": 12},
+        "InputNumber": {"controlHeight": 40, "borderRadius": 12},
+        "Select": {"controlHeight": 40, "borderRadius": 12},
+        "Tabs": {"inkBarColor": _BRAND_DARK, "itemSelectedColor": _BRAND_DARK},
+        "Modal": {"borderRadiusLG": 18},
+        "Tag": {"borderRadiusSM": 8},
+        "Segmented": {"borderRadius": 10, "itemSelectedBg": _BRAND_DARK, "itemSelectedColor": "#062322"},
+        "Pagination": {"borderRadius": 10},
+        "Tooltip": {"borderRadius": 8},
+    },
+}
+
+# Inter font (loaded at runtime when the brand theme is on)
+_BRAND_FONT_URLS = [
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+]
+
+# Brand logo + chart palette (used when the brand theme is on)
+_BRAND_APP_ICON = "/static/assets/images/brand-logo.svg"
+_BRAND_CATEGORICAL_COLOR_SCHEMES = [
+    {
+        "id": "supersetTeal",
+        "label": "Teal Brand",
+        "description": "Teal-led brand palette",
+        "isDefault": True,
+        "colors": [
+            "#0E9F9F", "#23C9B9", "#5F6FEF", "#E8A93B", "#E1485B",
+            "#14B8A6", "#0B8585", "#818CF8", "#16A34A", "#9333EA",
+        ],
+    }
+]
+
+# ---- Apply the theme based on the toggle above ----
+if APPLY_BRAND_THEME:
+    THEME_DEFAULT = _BRAND_THEME_DEFAULT
+    THEME_DARK = _BRAND_THEME_DARK
+    CUSTOM_FONT_URLS = _BRAND_FONT_URLS
+    EXTRA_CATEGORICAL_COLOR_SCHEMES = _BRAND_CATEGORICAL_COLOR_SCHEMES
+    APP_ICON = _BRAND_APP_ICON
+    APP_ICON_WIDTH = 150
+    LOGO_TOOLTIP = "Dashboard"
+else:
+    # Original Superset colors / logo
+    THEME_DEFAULT = {"algorithm": "default"}
+    THEME_DARK = {"algorithm": "dark"}
+    CUSTOM_FONT_URLS = []
+    EXTRA_CATEGORICAL_COLOR_SCHEMES = []
+    APP_ICON = "/static/assets/images/superset-logo-horiz.png"
 
 
 # Allow HTML, CSS and Handlebars templates in markdown components
