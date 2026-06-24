@@ -104,6 +104,9 @@ export type FrameComponentProps = {
   onChange: (timeRange: string) => void;
   value: string;
   isOverflowingFilterBar?: boolean;
+  // When true, the Custom frame only exposes the specific start/end date
+  // pickers (no mode selector, relative inputs, or anchor controls).
+  onlySpecificRange?: boolean;
 };
 
 export interface DateFilterControlProps {
@@ -113,4 +116,7 @@ export interface DateFilterControlProps {
   onOpenPopover?: () => void;
   onClosePopover?: () => void;
   isOverflowingFilterBar?: boolean;
+  // When true, only the "Custom" frame (start/end picker) is shown and the
+  // range type selector is hidden. Used by the dashboard Time Range filter.
+  onlyCustomFrame?: boolean;
 }

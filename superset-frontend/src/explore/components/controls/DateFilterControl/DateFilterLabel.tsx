@@ -145,6 +145,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
     onOpenPopover = noOp,
     onClosePopover = noOp,
     isOverflowingFilterBar = false,
+    onlyCustomFrame = false,
   } = props;
   const defaultTimeFilter = useDefaultTimeFilter();
 
@@ -152,7 +153,10 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
   const [actualTimeRange, setActualTimeRange] = useState<string>(value);
 
   const [show, setShow] = useState<boolean>(false);
-  const guessedFrame = useMemo(() => guessFrame(value), [value]);
+  const guessedFrame = useMemo(
+    () => (onlyCustomFrame ? 'Custom' : guessFrame(value)),
+    [value, onlyCustomFrame],
+  );
   const [frame, setFrame] = useState<FrameType>(guessedFrame);
   const [lastFetchedTimeRange, setLastFetchedTimeRange] = useState(value);
   const [timeRangeValue, setTimeRangeValue] = useState(value);
@@ -271,14 +275,18 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
 
   const overlayContent = (
     <ContentStyleWrapper>
-      <div className="control-label">{t('Range type')}</div>
-      <StyledRangeType
-        ariaLabel={t('Range type')}
-        options={FRAME_OPTIONS}
-        value={frame}
-        onChange={onChangeFrame}
-      />
-      {frame !== 'No filter' && <Divider />}
+      {!onlyCustomFrame && (
+        <>
+          <div className="control-label">{t('Range type')}</div>
+          <StyledRangeType
+            ariaLabel={t('Range type')}
+            options={FRAME_OPTIONS}
+            value={frame}
+            onChange={onChangeFrame}
+          />
+        </>
+      )}
+      {!onlyCustomFrame && frame !== 'No filter' && <Divider />}
       {frame === 'Common' && (
         <CommonFrame value={timeRangeValue} onChange={setTimeRangeValue} />
       )}
@@ -299,6 +307,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
           value={timeRangeValue}
           onChange={setTimeRangeValue}
           isOverflowingFilterBar={isOverflowingFilterBar}
+          onlySpecificRange={onlyCustomFrame}
         />
       )}
       {frame === 'No filter' && <div data-test={DateFilterTestKey.NoFilter} />}

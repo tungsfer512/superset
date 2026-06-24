@@ -37,6 +37,8 @@ import {
   RenderApiModule,
   ClientSideRowModelModule,
   CustomFilterModule,
+  EventApiModule,
+  RowSelectionModule,
 } from 'ag-grid-community';
 
 /**
@@ -61,6 +63,8 @@ export const defaultModules: Module[] = [
   RenderApiModule,
   ClientSideRowModelModule,
   CustomFilterModule,
+  EventApiModule,
+  RowSelectionModule,
 ];
 
 export const setupAGGridModules = (additionalModules: Module[] = []) => {
