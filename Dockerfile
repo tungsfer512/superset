@@ -200,6 +200,14 @@ RUN /app/docker/apt-install.sh \
       build-essential \
       python3-dev
 
+# Build & bake the MySQL driver (provides the `MySQLdb` module). Superset's
+# MySQL engine spec imports MySQLdb for column-type mapping even when you
+# connect through another driver (see superset/db_engine_specs/mysql.py), so
+# it must always be present. Built here (build deps available above) so it is
+# baked into the image instead of compiled on every container start.
+RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
+    uv pip install --no-cache-dir mysqlclient
+
 # Copy compiled things from previous stages
 COPY --from=superset-node /app/superset/static/assets superset/static/assets
 
