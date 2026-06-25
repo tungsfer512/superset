@@ -348,3 +348,279 @@ PREFERRED_DATABASES: list[str] = [
     "Google Sheets",
     "Trino",
 ]
+
+# =====================================================================
+# Keycloak SSO (OpenID Connect via OAuth) — TOGGLE
+# ---------------------------------------------------------------------
+# Turn ON by setting env var  ENABLE_KEYCLOAK_SSO=true
+# When OFF (default) nothing below runs and Superset keeps its normal
+# database login — zero impact.
+#
+# Env vars (only read when enabled):
+#   KEYCLOAK_BASE_URL       e.g. https://keycloak.example.com   (no trailing /)
+#   KEYCLOAK_REALM          e.g. myrealm
+#   KEYCLOAK_CLIENT_ID      e.g. superset
+#   KEYCLOAK_CLIENT_SECRET  confidential client secret
+#   KEYCLOAK_DEFAULT_ROLE   Superset role for new users (default: Gamma)
+#   KEYCLOAK_ROLE_SYNC      "true" to sync roles from Keycloak each login
+#
+# Keycloak client setup:
+#   - OpenID Connect client, "Client authentication" ON (confidential)
+#   - Standard flow enabled
+#   - Valid redirect URI:  https://<superset-host>/oauth-authorized/keycloak
+#   - (for role sync) add realm/client roles + a "roles" token mapper
+# =====================================================================
+ENABLE_KEYCLOAK_SSO = os.getenv("ENABLE_KEYCLOAK_SSO", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+if ENABLE_KEYCLOAK_SSO:
+    import logging as _kc_logging
+
+    import sqlalchemy as _sa
+    from sqlalchemy.orm import relationship as _sa_relationship
+    from flask import flash, g, redirect, request
+    from flask_appbuilder import BaseView, Model, ModelView, expose
+    from flask_appbuilder._compat import as_unicode
+    from flask_appbuilder.models.sqla.interface import SQLAInterface
+    from flask_appbuilder.security.forms import LoginForm_db
+    from flask_appbuilder.security.manager import AUTH_OAUTH
+    from flask_appbuilder.utils.base import get_safe_redirect
+    from flask_login import login_user
+
+    from superset.security import SupersetSecurityManager
+
+    # ---- DB-backed dynamic role mapping (managed via an admin CRUD page) ----
+    class KeycloakRoleMapping(Model):
+        """One row = map a Keycloak role name -> an existing Superset role."""
+
+        __tablename__ = "keycloak_role_mapping"
+        __table_args__ = {"extend_existing": True}
+
+        id = _sa.Column(_sa.Integer, primary_key=True)
+        keycloak_role = _sa.Column(_sa.String(255), nullable=False)
+        # FK to the FAB role table -> rendered as a Select2 dropdown of roles
+        superset_role_id = _sa.Column(
+            _sa.Integer,
+            _sa.ForeignKey("ab_role.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        superset_role = _sa_relationship("Role")
+
+        def __repr__(self) -> str:
+            return f"{self.keycloak_role} -> {self.superset_role}"
+
+    _kc_base = os.getenv("KEYCLOAK_BASE_URL", "http://localhost:8080").rstrip("/")
+    _kc_realm = os.getenv("KEYCLOAK_REALM", "master")
+    _kc_realm_url = f"{_kc_base}/realms/{_kc_realm}"
+    _kc_oidc = f"{_kc_realm_url}/protocol/openid-connect"
+
+    AUTH_TYPE = AUTH_OAUTH
+
+    OAUTH_PROVIDERS = [
+        {
+            "name": "keycloak",
+            "icon": "fa-key",
+            "token_key": "access_token",
+            "remote_app": {
+                "client_id": os.getenv("KEYCLOAK_CLIENT_ID", "superset"),
+                "client_secret": os.getenv("KEYCLOAK_CLIENT_SECRET", ""),
+                "server_metadata_url": (
+                    f"{_kc_realm_url}/.well-known/openid-configuration"
+                ),
+                "api_base_url": f"{_kc_oidc}/",
+                "access_token_url": f"{_kc_oidc}/token",
+                "authorize_url": f"{_kc_oidc}/auth",
+                "jwks_uri": f"{_kc_oidc}/certs",
+                "client_kwargs": {"scope": "openid email profile"},
+            },
+        }
+    ]
+
+    # Auto-create a Superset user on first SSO login
+    AUTH_USER_REGISTRATION = os.getenv("AUTH_USER_REGISTRATION", "False").lower() in ("true", "1", "yes")
+    AUTH_USER_REGISTRATION_ROLE = os.getenv("AUTH_USER_REGISTRATION_ROLE", "Gamma")
+
+    # Optional: sync Superset roles from Keycloak roles on each login.
+    # Keep OFF until AUTH_ROLES_MAPPING is configured, otherwise users may end
+    # up with no roles. New users always get AUTH_USER_REGISTRATION_ROLE.
+    AUTH_ROLES_SYNC_AT_LOGIN = os.getenv("KEYCLOAK_ROLE_SYNC", "false").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+    # Map a Keycloak (realm or client) role -> Superset role(s)
+    AUTH_ROLES_MAPPING = {
+        "superset_admin": ["Admin"],
+        "superset_alpha": ["Alpha"],
+        "superset_gamma": ["Gamma"],
+    }
+
+    class _DBLoginPostView(BaseView):
+        """Restore username/password (DB) login while AUTH_TYPE=AUTH_OAUTH.
+
+        The React login page already renders BOTH the DB form and the Keycloak
+        button, but under OAUTH the framework registers no POST handler for
+        /login/. This view adds that POST handler so both methods work together
+        (GET /login/ stays the normal React page; OAuth uses /login/<provider>).
+        """
+
+        route_base = ""
+
+        @expose("/login/", methods=["POST"])
+        def login_db_post(self):  # noqa: D401
+            if g.user is not None and g.user.is_authenticated:
+                return redirect(self.appbuilder.get_url_for_index)
+            next_url = get_safe_redirect(request.args.get("next", ""))
+            form = LoginForm_db()
+            if form.validate_on_submit():
+                user = self.appbuilder.sm.auth_user_db(
+                    form.username.data, form.password.data
+                )
+                if user:
+                    login_user(user, remember=False)
+                    return redirect(next_url or self.appbuilder.get_url_for_index)
+                flash(as_unicode("Invalid login. Please try again."), "warning")
+            return redirect(self.appbuilder.get_url_for_login)
+
+    class KeycloakSecurityManager(SupersetSecurityManager):
+        """Map Keycloak user info + roles onto Superset accounts and keep the
+        database login working alongside the Keycloak SSO button."""
+
+        def register_views(self):
+            super().register_views()
+            # add the POST /login/ DB-auth handler (GET /login/ = React page)
+            self.appbuilder.add_view_no_menu(_DBLoginPostView())
+            # ensure the mapping table exists
+            try:
+                from superset import db
+
+                KeycloakRoleMapping.__table__.create(
+                    bind=db.engine, checkfirst=True
+                )
+            except Exception as ex:  # noqa: BLE001
+                _kc_logging.getLogger(__name__).warning(
+                    "Keycloak role-mapping table not ready: %s", ex
+                )
+
+            # --- React admin page: REST API + SPA view + Security menu link ---
+            from flask_appbuilder.security.decorators import (
+                has_access,
+                permission_name,
+            )
+            from superset.constants import (
+                MODEL_API_RW_METHOD_PERMISSION_MAP,
+                RouteMethod,
+            )
+            from superset.views.base import BaseSupersetView
+            from superset.views.base_api import BaseSupersetModelRestApi
+
+            class KeycloakRoleMappingRestApi(BaseSupersetModelRestApi):
+                datamodel = SQLAInterface(KeycloakRoleMapping)
+                resource_name = "keycloak_role_mapping"
+                allow_browser_login = True
+                class_permission_name = "KeycloakRoleMapping"
+                method_permission_name = MODEL_API_RW_METHOD_PERMISSION_MAP
+                include_route_methods = (
+                    RouteMethod.REST_MODEL_VIEW_CRUD_SET | {RouteMethod.RELATED}
+                )
+                list_columns = [
+                    "id",
+                    "keycloak_role",
+                    "superset_role.id",
+                    "superset_role.name",
+                ]
+                show_columns = list_columns
+                add_columns = ["keycloak_role", "superset_role"]
+                edit_columns = add_columns
+                order_columns = ["keycloak_role"]
+                search_columns = ["keycloak_role"]
+                base_order = ("keycloak_role", "asc")
+                allowed_rel_fields = {"superset_role"}
+
+            class KeycloakRoleMappingPageView(BaseSupersetView):
+                route_base = "/"
+                class_permission_name = "security"
+
+                @expose("/keycloak-role-mapping/")
+                @has_access
+                @permission_name("read")
+                def list(self):
+                    return super().render_app_template()
+
+            self.appbuilder.add_api(KeycloakRoleMappingRestApi)
+            self.appbuilder.add_view(
+                KeycloakRoleMappingPageView,
+                "Keycloak Role Mapping",
+                label="Keycloak Role Mapping",
+                category="Security",
+                category_label="Security",
+                icon="fa-exchange",
+            )
+
+        def _oauth_calculate_user_roles(self, userinfo):
+            """Dynamic role mapping (only used when KEYCLOAK_ROLE_SYNC=true).
+
+            Keeps the explicit AUTH_ROLES_MAPPING + registration role, then ALSO
+            auto-assigns any Keycloak role whose name matches an existing
+            Superset role name. So adding a new role only requires creating it
+            in Superset + Keycloak with the same name — no config change.
+            """
+            roles = super()._oauth_calculate_user_roles(userinfo)
+            seen = {r.name for r in roles}
+            kc_roles = set(userinfo.get("role_keys", []))
+
+            def _add(superset_role_name):
+                role = self.find_role(superset_role_name)
+                if role and role.name not in seen:
+                    roles.append(role)
+                    seen.add(role.name)
+
+            # (a) dynamic: Keycloak role name == Superset role name
+            for role_key in kc_roles:
+                _add(role_key)
+
+            # (b) mappings configured via the admin CRUD page (DB table)
+            try:
+                from superset import db
+
+                for mapping in db.session.query(KeycloakRoleMapping).all():
+                    if mapping.keycloak_role in kc_roles and mapping.superset_role:
+                        _add(mapping.superset_role.name)
+            except Exception as ex:  # noqa: BLE001
+                _kc_logging.getLogger(__name__).warning(
+                    "Keycloak role-mapping lookup failed: %s", ex
+                )
+            return roles
+
+        def oauth_user_info(self, provider, response=None):
+            if provider != "keycloak":
+                return {}
+            userinfo = self.oauth_remotes[provider].get("userinfo").json()
+            roles: list[str] = []
+            try:
+                import jwt as _jwt
+
+                claims = _jwt.decode(
+                    response["access_token"],
+                    options={"verify_signature": False},
+                )
+                roles += (claims.get("realm_access") or {}).get("roles", [])
+                for _client_access in (claims.get("resource_access") or {}).values():
+                    roles += (_client_access or {}).get("roles", [])
+            except Exception as ex:  # noqa: BLE001
+                _kc_logging.getLogger(__name__).warning(
+                    "Keycloak SSO: could not parse roles from token: %s", ex
+                )
+            return {
+                "username": userinfo.get("preferred_username")
+                or userinfo.get("email"),
+                "email": userinfo.get("email", ""),
+                "first_name": userinfo.get("given_name", ""),
+                "last_name": userinfo.get("family_name", ""),
+                "role_keys": roles,
+            }
+
+    CUSTOM_SECURITY_MANAGER = KeycloakSecurityManager

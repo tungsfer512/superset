@@ -16649,3 +16649,60 @@ msgid "entries per page"
 msgstr "mục mỗi trang"
 
  
+# --- Added: Keycloak Role Mapping page + login (vi) ---
+msgid "Register"
+msgstr "Đăng ký"
+
+msgid "Keycloak Role Mapping"
+msgstr "Ánh xạ vai trò Keycloak"
+
+msgid "Keycloak role"
+msgstr "Vai trò Keycloak"
+
+msgid "Superset role"
+msgstr "Vai trò Superset"
+
+msgid "Select a Superset role"
+msgstr "Chọn vai trò Superset"
+
+msgid "Add role mapping"
+msgstr "Thêm ánh xạ vai trò"
+
+msgid "Edit role mapping"
+msgstr "Sửa ánh xạ vai trò"
+
+msgid "Role mapping"
+msgstr "Ánh xạ vai trò"
+
+msgid "No role mappings yet"
+msgstr "Chưa có ánh xạ vai trò nào"
+
+msgid "role mapping"
+msgstr "ánh xạ vai trò"
+
+msgid "Could not load Superset roles"
+msgstr "Không tải được danh sách vai trò Superset"
+
+msgid "Deleted role mapping"
+msgstr "Đã xóa ánh xạ vai trò"
+
+msgid "Role mapping created."
+msgstr "Đã tạo ánh xạ vai trò."
+
+msgid "Role mapping updated."
+msgstr "Đã cập nhật ánh xạ vai trò."
+
+msgid "e.g. superset_admin"
+msgstr "vd: superset_admin"
+
+msgid "Keycloak role is required"
+msgstr "Vui lòng nhập vai trò Keycloak"
+
+msgid "Superset role is required"
+msgstr "Vui lòng chọn vai trò Superset"
+
+msgid "There was an issue saving the role mapping."
+msgstr "Có lỗi khi lưu ánh xạ vai trò."
+
+msgid "There was an issue deleting the role mapping."
+msgstr "Có lỗi khi xóa ánh xạ vai trò."

@@ -138,6 +138,13 @@ const RolesList = lazy(
   () => import(/* webpackChunkName: "RolesList" */ 'src/pages/RolesList'),
 );
 
+const KeycloakRoleMappingList = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "KeycloakRoleMappingList" */ 'src/pages/KeycloakRoleMappingList'
+    ),
+);
+
 const UsersList: LazyExoticComponent<any> = lazy(
   () => import(/* webpackChunkName: "UsersList" */ 'src/pages/UsersList'),
 );
@@ -329,6 +336,10 @@ if (isAdmin) {
     {
       path: '/list_groups/',
       Component: GroupsList,
+    },
+    {
+      path: '/keycloak-role-mapping/',
+      Component: KeycloakRoleMappingList,
     },
   );
 }

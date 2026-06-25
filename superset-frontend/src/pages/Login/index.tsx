@@ -158,26 +158,9 @@ export default function Login() {
             </Form>
           </Flex>
         )}
-        {authType === AuthType.AuthOauth && (
-          <Flex justify="center" gap={0} vertical>
-            <Form layout="vertical" requiredMark="optional" form={form}>
-              {providers.map((provider: OAuthProvider) => (
-                <Form.Item<LoginForm>>
-                  <Button
-                    href={buildProviderLoginUrl(provider.name)}
-                    block
-                    iconPosition="start"
-                    icon={getAuthIconElement(provider.name)}
-                  >
-                    {t('Sign in with')} {capitalize(provider.name)}
-                  </Button>
-                </Form.Item>
-              ))}
-            </Form>
-          </Flex>
-        )}
-
-        {(authType === AuthType.AuthDB || authType === AuthType.AuthLDAP) && (
+        {(authType === AuthType.AuthDB ||
+          authType === AuthType.AuthLDAP ||
+          authType === AuthType.AuthOauth) && (
           <Flex justify="center" vertical gap="middle">
             <Typography.Text type="secondary">
               {t('Enter your login and password below:')}
@@ -241,6 +224,22 @@ export default function Login() {
                 </Flex>
               </Form.Item>
             </Form>
+          </Flex>
+        )}
+
+        {authType === AuthType.AuthOauth && (
+          <Flex justify="center" gap="small" vertical>
+            {providers.map((provider: OAuthProvider) => (
+              <Button
+                key={provider.name}
+                href={buildProviderLoginUrl(provider.name)}
+                block
+                iconPosition="start"
+                icon={getAuthIconElement(provider.name)}
+              >
+                {t('Sign in with')} {capitalize(provider.name)}
+              </Button>
+            ))}
           </Flex>
         )}
       </StyledCard>
