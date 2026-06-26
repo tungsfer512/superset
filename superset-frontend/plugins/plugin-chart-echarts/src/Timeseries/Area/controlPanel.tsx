@@ -41,6 +41,8 @@ import {
   truncateXAxis,
   xAxisBounds,
   minorTicks,
+  seriesColorsControl,
+  categoryColorsControl,
 } from '../../controls';
 import { AreaChartStackControlOptions } from '../../constants';
 
@@ -68,6 +70,8 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         ...seriesOrderSection,
         ['color_scheme'],
+        [seriesColorsControl],
+        [categoryColorsControl],
         ['time_shift_color'],
         [
           {

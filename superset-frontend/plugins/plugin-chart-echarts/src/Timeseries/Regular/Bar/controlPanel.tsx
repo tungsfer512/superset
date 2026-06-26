@@ -39,6 +39,8 @@ import {
   xAxisBounds,
   xAxisLabelRotation,
   xAxisLabelInterval,
+  seriesColorsControl,
+  categoryColorsControl,
 } from '../../../controls';
 
 import { OrientationType } from '../../types';
@@ -324,6 +326,8 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         ...seriesOrderSection,
         ['color_scheme'],
+        [seriesColorsControl],
+        [categoryColorsControl],
         ['time_shift_color'],
         ...showValueSection,
         [

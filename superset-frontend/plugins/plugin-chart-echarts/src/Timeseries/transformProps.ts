@@ -215,6 +215,13 @@ export default function transformProps(
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
+  // Per-chart color overrides (label -> hex), set via the Series colors /
+  // Category colors controls. Applied below; overrides the color scheme for
+  // THIS chart only, so the same label can differ across charts.
+  const seriesColors: Record<string, string> =
+    (formData as any).seriesColors ?? (formData as any).series_colors ?? {};
+  const categoryColors: Record<string, string> =
+    (formData as any).categoryColors ?? (formData as any).category_colors ?? {};
   const rebasedData = rebaseForecastDatum(data, verboseMap);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
   if (
@@ -378,6 +385,8 @@ export default function transformProps(
         timeShiftColor,
         theme,
         hasDimensions: (groupBy?.length ?? 0) > 0,
+        seriesColors,
+        categoryColors,
       },
     );
     if (transformedSeries) {

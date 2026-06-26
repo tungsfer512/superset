@@ -16706,3 +16706,25 @@ msgstr "Có lỗi khi lưu ánh xạ vai trò."
 
 msgid "There was an issue deleting the role mapping."
 msgstr "Có lỗi khi xóa ánh xạ vai trò."
+
+# --- Series/Category color controls (vi) ---
+msgid "Category colors"
+msgstr "Màu theo cột"
+
+msgid "Select a series to color…"
+msgstr "Chọn series để tô màu…"
+
+msgid "Select a column value to color…"
+msgstr "Chọn giá trị cột để tô màu…"
+
+msgid "Add series"
+msgstr "Thêm series"
+
+msgid "Add column value"
+msgstr "Thêm giá trị cột"
+
+msgid "Color by series"
+msgstr "Tô theo series"
+
+msgid "Color by column (category)"
+msgstr "Tô theo cột (category)"

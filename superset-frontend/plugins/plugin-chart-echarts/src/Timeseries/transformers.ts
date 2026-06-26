@@ -198,6 +198,8 @@ export function transformSeries(
     timeShiftColor?: boolean;
     theme?: SupersetTheme;
     hasDimensions?: boolean;
+    seriesColors?: Record<string, string>;
+    categoryColors?: Record<string, string>;
   },
 ): SeriesOption | undefined {
   const { name, data } = series;
@@ -228,6 +230,8 @@ export function transformSeries(
     timeCompare = [],
     timeShiftColor,
     theme,
+    seriesColors,
+    categoryColors,
   } = opts;
   const contexts = seriesContexts[name || ''] || [];
   const hasForecast =
@@ -282,14 +286,49 @@ export function transformSeries(
 
   const isDarkMode = theme ? isThemeDark(theme) : false;
 
+  // Per-chart color overrides. Trim-tolerant lookup in a given map.
+  const findIn = (
+    map: Record<string, string> | undefined,
+    key: unknown,
+  ): string | undefined => {
+    if (!map || key === undefined || key === null) return undefined;
+    const k = String(key);
+    if (map[k]) return map[k];
+    const trimmed = k.trim();
+    const match = Object.keys(map).find(c => c.trim() === trimmed);
+    return match ? map[match] : undefined;
+  };
+  // Series-level override: matches the series/legend name.
+  const colorOverride =
+    findIn(seriesColors, forecastSeries.name) ??
+    findIn(seriesColors, name) ??
+    findIn(seriesColors, seriesKey);
+  // Per-point coloring: a point uses its category color if set, otherwise the
+  // series override (applied to every point so it also wins over colorBy:data,
+  // e.g. bars). Falls back to the scheme when neither is set.
+  const applyPointColors = (arr: any): any => {
+    if ((!categoryColors && !colorOverride) || !Array.isArray(arr)) return arr;
+    return arr.map((pt: any) => {
+      const value = Array.isArray(pt) ? pt : pt?.value;
+      const x = Array.isArray(value) ? value[0] : undefined;
+      const c = findIn(categoryColors, x) ?? colorOverride;
+      if (!c) return pt;
+      return Array.isArray(pt)
+        ? { value: pt, itemStyle: { color: c } }
+        : { ...pt, itemStyle: { ...(pt.itemStyle || {}), color: c } };
+    });
+  };
+
   /**
    * if timeShiftColor is enabled the colorScaleKey forces the color to be the
    * same as the original series, otherwise uses separate colors
    * */
   const itemStyle: ItemStyleOption = {
-    color: timeShiftColor
-      ? colorScale(colorScaleKey, sliceId)
-      : colorScale(seriesKey || forecastSeries.name, sliceId),
+    color:
+      colorOverride ||
+      (timeShiftColor
+        ? colorScale(colorScaleKey, sliceId)
+        : colorScale(seriesKey || forecastSeries.name, sliceId)),
     opacity,
     borderWidth: 0,
   };
@@ -331,11 +370,14 @@ export function transformSeries(
   const symbol =
     plotType === 'line' ? (isDarkMode ? 'circle' : 'emptyCircle') : undefined;
 
+  const baseData =
+    Array.isArray(data) && seriesType === 'bar' && !stack
+      ? transformNegativeLabelsPosition(series, isHorizontal)
+      : series.data;
+
   return {
     ...series,
-    ...(Array.isArray(data) && seriesType === 'bar' && !stack
-      ? { data: transformNegativeLabelsPosition(series, isHorizontal) }
-      : null),
+    data: applyPointColors(baseData),
     connectNulls,
     queryIndex,
     yAxisIndex,

@@ -388,3 +388,33 @@ export const showExtraControls: CustomControlItem = {
     default: false,
   },
 };
+
+// Color whole series (e.g. each line). Pick a series, then a color.
+export const seriesColorsControl: CustomControlItem = {
+  name: 'series_colors',
+  config: {
+    type: 'SeriesColorsControl',
+    label: t('Series colors'),
+    description: t(
+      'Override the color of a whole series for this chart only (e.g. each line). Overrides the color scheme.',
+    ),
+    renderTrigger: true,
+    default: {},
+    colorMode: 'series',
+  },
+};
+
+// Color individual bars/points by their x-axis category value.
+export const categoryColorsControl: CustomControlItem = {
+  name: 'category_colors',
+  config: {
+    type: 'SeriesColorsControl',
+    label: t('Category colors'),
+    description: t(
+      'Override the color of individual columns/points by their x-axis value for this chart only.',
+    ),
+    renderTrigger: true,
+    default: {},
+    colorMode: 'category',
+  },
+};

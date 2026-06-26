@@ -41,6 +41,8 @@ import {
   xAxisBounds,
   xAxisLabelRotation,
   xAxisLabelInterval,
+  seriesColorsControl,
+  categoryColorsControl,
 } from '../../../controls';
 
 const {
@@ -65,6 +67,8 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         ...seriesOrderSection,
         ['color_scheme'],
+        [seriesColorsControl],
+        [categoryColorsControl],
         ['time_shift_color'],
         ...showValueSectionWithoutStack,
         [
