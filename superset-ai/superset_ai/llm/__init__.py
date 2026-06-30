@@ -14,23 +14,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Smoke tests for the sidecar skeleton."""
+"""LLM provider abstraction (default: Anthropic Claude)."""
 
-from fastapi.testclient import TestClient
+from superset_ai.llm.base import LlmClient, LlmResult, ToolResult, ToolUse
 
-from superset_ai.main import app
-
-client = TestClient(app)
-
-
-def test_health_ok():
-    response = client.get("/health")
-    assert response.status_code == 200
-    body = response.json()
-    assert body["status"] == "ok"
-    assert "version" in body
-    # Secrets must never be returned, only whether a provider is configured.
-    assert isinstance(body["llm_configured"], bool)
-    assert "anthropic_api_key" not in body
-    assert "openai_api_key" not in body
-    assert "gemini_api_key" not in body
+__all__ = ["LlmClient", "LlmResult", "ToolResult", "ToolUse"]

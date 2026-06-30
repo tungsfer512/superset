@@ -21,6 +21,9 @@ from __future__ import annotations
 from fastapi import Depends, HTTPException, Request
 
 from superset_ai.auth.passthrough import SupersetAuth, extract_auth
+from superset_ai.llm.base import LlmClient
+from superset_ai.smart.grounding import GroundingService
+from superset_ai.store import ConversationStore
 from superset_ai.superset_client import SupersetClient
 
 
@@ -30,6 +33,30 @@ def get_superset_client(request: Request) -> SupersetClient:
     if client is None:  # pragma: no cover - misconfiguration guard
         raise HTTPException(status_code=503, detail="Superset client not ready.")
     return client
+
+
+def get_llm(request: Request) -> LlmClient:
+    """Return the configured LLM client, or 503 if no API key was provided."""
+    llm: LlmClient | None = getattr(request.app.state, "llm", None)
+    if llm is None:
+        raise HTTPException(
+            status_code=503,
+            detail="AI provider is not configured (missing API key).",
+        )
+    return llm
+
+
+def get_store(request: Request) -> ConversationStore:
+    """Return the shared conversation store."""
+    store: ConversationStore | None = getattr(request.app.state, "store", None)
+    if store is None:  # pragma: no cover - misconfiguration guard
+        raise HTTPException(status_code=503, detail="Conversation store not ready.")
+    return store
+
+
+def get_grounding(request: Request) -> GroundingService | None:
+    """Return the grounding service, or None if grounding is disabled."""
+    return getattr(request.app.state, "grounding", None)
 
 
 def get_auth(request: Request) -> SupersetAuth:
@@ -45,3 +72,6 @@ def get_auth(request: Request) -> SupersetAuth:
 
 AuthDep = Depends(get_auth)
 ClientDep = Depends(get_superset_client)
+LlmDep = Depends(get_llm)
+StoreDep = Depends(get_store)
+GroundingDep = Depends(get_grounding)

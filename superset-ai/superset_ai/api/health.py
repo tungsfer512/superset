@@ -22,6 +22,7 @@ from fastapi import APIRouter
 
 from superset_ai import __version__
 from superset_ai.config import get_settings
+from superset_ai.llm.factory import is_configured, resolve_model, resolve_provider
 
 router = APIRouter(tags=["health"])
 
@@ -36,8 +37,8 @@ def health() -> dict[str, object]:
     return {
         "status": "ok",
         "version": __version__,
-        "llm_provider": settings.llm_provider,
-        "llm_model": settings.llm_model,
-        "llm_key_configured": settings.anthropic_api_key is not None,
+        "llm_provider": resolve_provider(settings),
+        "llm_model": resolve_model(settings),
+        "llm_configured": is_configured(settings),
         "superset_base_url": settings.superset_base_url,
     }

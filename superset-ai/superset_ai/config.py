@@ -46,15 +46,27 @@ class Settings(BaseSettings):
     superset_api_timeout: int = 30
 
     # --- LLM provider ---
+    # Selects which connector to use: "anthropic" | "openai" | "gemini".
     llm_provider: str = "anthropic"
-    llm_model: str = "claude-sonnet-4-6"
+    # Override the model id. If empty, a sensible default per provider is used.
+    llm_model: str | None = None
     llm_max_tokens: int = 4096
+    # Per-provider API keys (only the selected provider's key is required).
     anthropic_api_key: str | None = None
+    openai_api_key: str | None = None
+    gemini_api_key: str | None = None
 
     # --- Guardrails ---
     sql_row_limit: int = 1000
     response_token_guard: int = 25000
     allow_write_tools: bool = False
+    max_tool_iterations: int = 6
+
+    # --- Smart grounding (schema indexer + glossary + retriever) ---
+    enable_grounding: bool = True
+    grounding_top_k: int = 5
+    schema_cache_ttl: int = 300
+    glossary_path: str | None = None
 
 
 @lru_cache

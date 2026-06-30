@@ -25,18 +25,37 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from superset_ai import __version__
-from superset_ai.api import data, health
+from superset_ai.api import ask, data, health, schema, sql
 from superset_ai.config import get_settings
+from superset_ai.llm.factory import create_llm
+from superset_ai.smart.grounding import GroundingService
+from superset_ai.smart.schema_indexer import SchemaIndexer
+from superset_ai.smart.semantic_layer import Glossary
+from superset_ai.store import InMemoryConversationStore
 from superset_ai.superset_client import SupersetClient
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Manage the shared Superset client connection pool."""
+    """Create shared singletons (Superset client, LLM, conversation store)."""
     settings = get_settings()
     app.state.superset_client = SupersetClient(
         settings.superset_base_url, timeout=settings.superset_api_timeout
     )
+    app.state.store = InMemoryConversationStore()
+    app.state.grounding = None
+    if settings.enable_grounding:
+        app.state.grounding = GroundingService(
+            SchemaIndexer(cache_ttl=settings.schema_cache_ttl),
+            Glossary.load(settings.glossary_path),
+            top_k=settings.grounding_top_k,
+        )
+    try:
+        # None if the selected provider has no API key configured.
+        app.state.llm = create_llm(settings)
+    except ValueError:
+        # Unknown provider name: start anyway; AI endpoints return 503.
+        app.state.llm = None
     try:
         yield
     finally:
@@ -64,6 +83,9 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router)
     app.include_router(data.router)
+    app.include_router(ask.router)
+    app.include_router(sql.router)
+    app.include_router(schema.router)
     return app
 
 
