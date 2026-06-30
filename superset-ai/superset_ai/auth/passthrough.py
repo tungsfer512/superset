@@ -24,6 +24,7 @@ what lets Superset apply the correct RBAC and Row Level Security.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -45,6 +46,11 @@ class SupersetAuth:
     def uses_cookie(self) -> bool:
         """Cookie-based sessions need CSRF protection for unsafe methods."""
         return self.cookie is not None and self.authorization is None
+
+    def identity(self) -> str:
+        """Stable, non-reversible per-caller key (for rate limiting/logging)."""
+        raw = self.authorization or self.cookie or "anonymous"
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
     def to_headers(self) -> dict[str, str]:
         """Build the outgoing header set for a Superset request."""

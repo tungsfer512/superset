@@ -32,6 +32,7 @@ from uuid import uuid4
 
 from superset_ai.auth.passthrough import SupersetAuth
 from superset_ai.config import Settings
+from superset_ai.guards import truncate_for_llm
 from superset_ai.llm.base import LlmClient, ToolResult
 from superset_ai.prompts.system import (
     ASK_SYSTEM_PROMPT,
@@ -118,7 +119,10 @@ async def _run_events(
             tool_results.append(
                 ToolResult(
                     tool_use.id,
-                    json.dumps(output, default=str),
+                    truncate_for_llm(
+                        json.dumps(output, default=str),
+                        settings.response_token_guard,
+                    ),
                     name=tool_use.name,
                 )
             )

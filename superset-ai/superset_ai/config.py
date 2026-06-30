@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     response_token_guard: int = 25000
     allow_write_tools: bool = False
     max_tool_iterations: int = 6
+    rate_limit_per_min: int = 30
+    # Extra browser origins allowed to call the sidecar (comma-separated).
+    extra_cors_origins: str = ""
 
     # --- Smart grounding (schema indexer + glossary + retriever) ---
     enable_grounding: bool = True

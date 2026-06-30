@@ -71,7 +71,20 @@ def get_auth(request: Request) -> SupersetAuth:
 
 
 AuthDep = Depends(get_auth)
+
+
+def enforce_rate_limit(request: Request, auth: SupersetAuth = AuthDep) -> None:
+    """Reject the request with 429 if the caller exceeded their quota."""
+    limiter = getattr(request.app.state, "rate_limiter", None)
+    if limiter is not None and not limiter.allow(auth.identity()):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Please slow down and try again.",
+        )
+
+
 ClientDep = Depends(get_superset_client)
 LlmDep = Depends(get_llm)
 StoreDep = Depends(get_store)
 GroundingDep = Depends(get_grounding)
+RateLimitDep = Depends(enforce_rate_limit)
