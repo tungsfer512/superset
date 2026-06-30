@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     rate_limit_per_min: int = 30
     # Extra browser origins allowed to call the sidecar (comma-separated).
     extra_cors_origins: str = ""
+    # Optional Redis backend for conversations + rate limiting (multi-worker).
+    # If unset, in-memory implementations are used (single worker only).
+    redis_url: str | None = None
 
     # --- Smart grounding (schema indexer + glossary + retriever) ---
     enable_grounding: bool = True

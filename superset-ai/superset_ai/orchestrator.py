@@ -33,7 +33,7 @@ from uuid import uuid4
 from superset_ai.auth.passthrough import SupersetAuth
 from superset_ai.config import Settings
 from superset_ai.guards import truncate_for_llm
-from superset_ai.llm.base import LlmClient, ToolResult
+from superset_ai.llm.base import LlmClient, LlmResult, TextDelta, ToolResult
 from superset_ai.prompts.system import (
     ASK_SYSTEM_PROMPT,
     EXPLAIN_SQL_SYSTEM_PROMPT,
@@ -80,23 +80,58 @@ async def _ground_question(
     return f"{question}\n\n---\n{context}"
 
 
+async def _turn(
+    llm: LlmClient,
+    settings: Settings,
+    messages: list[dict[str, Any]],
+    *,
+    stream: bool,
+) -> AsyncIterator[tuple[str, dict[str, Any]] | LlmResult]:
+    """Produce one assistant turn, streaming token events when supported.
+
+    Yields ``("token", {...})`` deltas (only when streaming) and finally the
+    :class:`LlmResult` for that turn.
+    """
+    if stream and hasattr(llm, "complete_stream"):
+        async for chunk in llm.complete_stream(
+            system=ASK_SYSTEM_PROMPT,
+            messages=messages,
+            tools=TOOL_SCHEMAS,
+            max_tokens=settings.llm_max_tokens,
+        ):
+            if isinstance(chunk, TextDelta):
+                yield "token", {"text": chunk.text}
+            else:
+                yield chunk
+        return
+    yield await llm.complete(
+        system=ASK_SYSTEM_PROMPT,
+        messages=messages,
+        tools=TOOL_SCHEMAS,
+        max_tokens=settings.llm_max_tokens,
+    )
+
+
 async def _run_events(
     llm: LlmClient,
     client: SupersetClient,
     auth: SupersetAuth,
     settings: Settings,
     messages: list[dict[str, Any]],
+    *,
+    stream: bool = False,
 ) -> AsyncIterator[tuple[str, dict[str, Any]]]:
     """Run the tool-use loop, yielding (event_type, payload) as it progresses."""
     artifacts: list[dict[str, Any]] = []
 
     for _ in range(settings.max_tool_iterations):
-        result = await llm.complete(
-            system=ASK_SYSTEM_PROMPT,
-            messages=messages,
-            tools=TOOL_SCHEMAS,
-            max_tokens=settings.llm_max_tokens,
-        )
+        result: LlmResult | None = None
+        async for item in _turn(llm, settings, messages, stream=stream):
+            if isinstance(item, LlmResult):
+                result = item
+            else:
+                yield item
+        assert result is not None
         messages.append(result.assistant_message)
 
         if result.stop_reason != "tool_use" or not result.tool_uses:
@@ -197,7 +232,9 @@ async def stream_ask(
     base_len = len(history)
 
     yield "start", {"conversation_id": cid}
-    async for event_type, payload in _run_events(llm, client, auth, settings, messages):
+    async for event_type, payload in _run_events(
+        llm, client, auth, settings, messages, stream=True
+    ):
         yield event_type, payload
 
     store.append(cid, messages[base_len:])

@@ -14,14 +14,27 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""LLM provider abstraction (default: Anthropic Claude)."""
+"""Shared pytest fixtures.
 
-from superset_ai.llm.base import (
-    LlmClient,
-    LlmResult,
-    TextDelta,
-    ToolResult,
-    ToolUse,
-)
+Tests must be deterministic regardless of a developer's local ``.env`` or
+``SUPERSET_AI_*`` environment, so this autouse fixture strips that state and
+clears the cached settings around every test.
+"""
 
-__all__ = ["LlmClient", "LlmResult", "TextDelta", "ToolResult", "ToolUse"]
+import os
+
+import pytest
+
+from superset_ai.config import get_settings
+
+
+@pytest.fixture(autouse=True)
+def _hermetic_settings(monkeypatch, tmp_path):
+    for key in list(os.environ):
+        if key.startswith("SUPERSET_AI_"):
+            monkeypatch.delenv(key, raising=False)
+    # Settings resolves ``.env`` relative to the cwd; move away from it.
+    monkeypatch.chdir(tmp_path)
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()

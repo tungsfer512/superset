@@ -47,6 +47,13 @@ class ToolResult:
 
 
 @dataclass
+class TextDelta:
+    """An incremental chunk of assistant text emitted during streaming."""
+
+    text: str
+
+
+@dataclass
 class LlmResult:
     """One assistant turn, normalized across providers."""
 

@@ -18,7 +18,7 @@
 
 from __future__ import annotations
 
-from superset_ai.llm.base import LlmResult, ToolResult, ToolUse
+from superset_ai.llm.base import LlmResult, TextDelta, ToolResult, ToolUse
 
 
 class FakeLLM:
@@ -31,6 +31,14 @@ class FakeLLM:
     async def complete(self, *, system, messages, tools=None, max_tokens=None):
         self.calls.append({"system": system, "messages": list(messages)})
         return self._results.pop(0)
+
+    async def complete_stream(self, *, system, messages, tools=None, max_tokens=None):
+        result = await self.complete(
+            system=system, messages=messages, tools=tools, max_tokens=max_tokens
+        )
+        if result.text:
+            yield TextDelta(result.text)
+        yield result
 
     def user_message(self, text):
         return {"role": "user", "content": text}

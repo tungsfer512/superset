@@ -25,6 +25,7 @@ httpx
 pydantic-settings
 prison          # RISON encoding for Superset REST query params (same lib Superset uses)
 sqlglot         # SQL parsing / SELECT-only guard / LIMIT enforcement
+redis==4.6.0    # optional Redis backend (pinned to match Superset)
 anthropic       # Claude LLM client (tool use)
 openai          # OpenAI GPT connector
 google-genai    # Google Gemini connector

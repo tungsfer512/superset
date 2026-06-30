@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from typing import Any
 
 
 class RateLimiter:
@@ -47,3 +48,32 @@ class RateLimiter:
         recent.append(now)
         self._hits[key] = recent
         return True
+
+
+class RedisRateLimiter:
+    """Fixed-window (per minute) limiter shared across workers via Redis."""
+
+    def __init__(
+        self,
+        max_per_minute: int,
+        url: str | None = None,
+        *,
+        client: Any = None,
+    ) -> None:
+        self._max = max_per_minute
+        if client is None:
+            import redis  # imported lazily so redis is optional
+
+            client = redis.from_url(url, decode_responses=True)
+        self._client = client
+
+    def allow(self, key: str) -> bool:
+        """Increment the caller's per-minute counter; False when over quota."""
+        if self._max <= 0:
+            return True
+        bucket = int(time.time() // 60)
+        redis_key = f"rl:{key}:{bucket}"
+        count = self._client.incr(redis_key)
+        if count == 1:
+            self._client.expire(redis_key, 60)
+        return int(count) <= self._max

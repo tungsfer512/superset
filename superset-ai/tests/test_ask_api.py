@@ -71,5 +71,6 @@ def test_ask_stream_emits_sse_events():
     body = resp.text
     assert "event: start" in body
     assert "event: tool" in body
+    assert "event: token" in body  # token-level streaming
     assert "event: answer" in body
     assert "event: done" in body

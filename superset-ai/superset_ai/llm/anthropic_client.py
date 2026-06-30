@@ -18,11 +18,12 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from typing import Any
 
 from anthropic import AsyncAnthropic
 
-from superset_ai.llm.base import LlmResult, ToolResult, ToolUse
+from superset_ai.llm.base import LlmResult, TextDelta, ToolResult, ToolUse
 
 
 class AnthropicClient:
@@ -61,7 +62,31 @@ class AnthropicClient:
             tools=self._to_anthropic_tools(tools),
             messages=messages,
         )
+        return self._to_result(response)
 
+    async def complete_stream(
+        self,
+        *,
+        system: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+        max_tokens: int | None = None,
+    ) -> AsyncIterator[TextDelta | LlmResult]:
+        """Stream text deltas, then yield the final normalized result."""
+        async with self._client.messages.stream(
+            model=self._model,
+            max_tokens=max_tokens or self._max_tokens,
+            system=system,
+            tools=self._to_anthropic_tools(tools),
+            messages=messages,
+        ) as stream:
+            async for text in stream.text_stream:
+                yield TextDelta(text)
+            final = await stream.get_final_message()
+        yield self._to_result(final)
+
+    @staticmethod
+    def _to_result(response: Any) -> LlmResult:
         text_parts: list[str] = []
         tool_uses: list[ToolUse] = []
         for block in response.content:
@@ -72,7 +97,6 @@ class AnthropicClient:
                 tool_uses.append(
                     ToolUse(id=block.id, name=block.name, input=dict(tool_input))
                 )
-
         assistant_message = {
             "role": "assistant",
             "content": [block.model_dump() for block in response.content],

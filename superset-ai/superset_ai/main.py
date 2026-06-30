@@ -32,11 +32,12 @@ from superset_ai.api import ask, data, health, schema, sql
 from superset_ai.config import Settings, get_settings
 from superset_ai.deps import RateLimitDep
 from superset_ai.llm.factory import create_llm
-from superset_ai.ratelimit import RateLimiter
+from superset_ai.ratelimit import RateLimiter, RedisRateLimiter
 from superset_ai.smart.grounding import GroundingService
 from superset_ai.smart.schema_indexer import SchemaIndexer
 from superset_ai.smart.semantic_layer import Glossary
 from superset_ai.store import InMemoryConversationStore
+from superset_ai.store.redis_store import RedisConversationStore
 from superset_ai.superset_client import SupersetClient
 
 logger = logging.getLogger("superset_ai")
@@ -49,8 +50,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.superset_client = SupersetClient(
         settings.superset_base_url, timeout=settings.superset_api_timeout
     )
-    app.state.store = InMemoryConversationStore()
-    app.state.rate_limiter = RateLimiter(settings.rate_limit_per_min)
+    if settings.redis_url:
+        app.state.store = RedisConversationStore(settings.redis_url)
+        app.state.rate_limiter = RedisRateLimiter(
+            settings.rate_limit_per_min, settings.redis_url
+        )
+        logger.info("Using Redis backend for conversations and rate limiting.")
+    else:
+        app.state.store = InMemoryConversationStore()
+        app.state.rate_limiter = RateLimiter(settings.rate_limit_per_min)
     app.state.grounding = None
     if settings.enable_grounding:
         app.state.grounding = GroundingService(

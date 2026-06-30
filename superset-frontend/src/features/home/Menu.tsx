@@ -22,7 +22,14 @@ import { ensureStaticPrefix } from 'src/utils/assetUrl';
 import { ensureAppRoot } from 'src/utils/pathUtils';
 import { getUrlParam } from 'src/utils/urlUtils';
 import { MainNav, MenuItem } from '@superset-ui/core/components/Menu';
-import { Tooltip, Grid, Row, Col, Image } from '@superset-ui/core/components';
+import {
+  Tooltip,
+  Grid,
+  Row,
+  Col,
+  Image,
+  Flex,
+} from '@superset-ui/core/components';
 import { GenericLink } from 'src/components';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Icons } from '@superset-ui/core/components/Icons';
@@ -34,6 +41,7 @@ import {
   MenuObjectProps,
   MenuData,
 } from 'src/types/bootstrapTypes';
+import { AskAIButton } from 'src/features/aiAssistant';
 import RightMenu from './RightMenu';
 import { NAVBAR_MENU_POPUP_OFFSET } from './commonMenuData';
 
@@ -374,13 +382,20 @@ export function Menu({
           />
         </StyledCol>
         <Col md={8} xs={24}>
-          <RightMenu
-            align={screens.md ? 'flex-end' : 'flex-start'}
-            settings={settings}
-            navbarRight={navbarRight}
-            isFrontendRoute={isFrontendRoute}
-            environmentTag={environmentTag}
-          />
+          <Flex
+            align="center"
+            justify={screens.md ? 'flex-end' : 'flex-start'}
+            gap="small"
+          >
+            <AskAIButton />
+            <RightMenu
+              align={screens.md ? 'flex-end' : 'flex-start'}
+              settings={settings}
+              navbarRight={navbarRight}
+              isFrontendRoute={isFrontendRoute}
+              environmentTag={environmentTag}
+            />
+          </Flex>
         </Col>
       </StyledRow>
     </StyledHeader>
