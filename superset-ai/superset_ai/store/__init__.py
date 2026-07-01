@@ -19,6 +19,11 @@
 from superset_ai.store.conversations import (
     ConversationStore,
     InMemoryConversationStore,
+    SqliteConversationStore,
 )
 
-__all__ = ["ConversationStore", "InMemoryConversationStore"]
+__all__ = [
+    "ConversationStore",
+    "InMemoryConversationStore",
+    "SqliteConversationStore",
+]

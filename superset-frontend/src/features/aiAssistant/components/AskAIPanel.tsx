@@ -31,6 +31,7 @@ import { Button, Input, Typography } from '@superset-ui/core/components';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { useAskAi } from '../hooks/useAskAi';
 import ChatMessage from './ChatMessage';
+import ConversationHistory from './ConversationHistory';
 import SuggestedPrompts from './SuggestedPrompts';
 
 export interface AskAIPanelProps {
@@ -142,9 +143,10 @@ function loadSize(): { width: number; height: number } {
 
 /** The chat window body: resizable/fullscreen, header, message list and input. */
 export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
-  const { messages, status, error, send, reset } = useAskAi();
+  const { messages, status, error, send, reset, openConversation } = useAskAi();
   const [draft, setDraft] = useState('');
   const [fullscreen, setFullscreen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [size, setSize] = useState(loadSize);
   const bodyRef = useRef<HTMLDivElement>(null);
   const isLoading = status === 'loading';
@@ -241,9 +243,21 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
           type="text"
           size="small"
           icon={<Icons.PlusOutlined style={iconButtonStyle} />}
-          onClick={reset}
+          onClick={() => {
+            setShowHistory(false);
+            reset();
+          }}
           aria-label={t('New chat')}
           title={t('New chat')}
+          style={iconButtonStyle}
+        />
+        <Button
+          type="text"
+          size="small"
+          icon={<Icons.ClockCircleOutlined style={iconButtonStyle} />}
+          onClick={() => setShowHistory(prev => !prev)}
+          aria-label={t('History')}
+          title={t('History')}
           style={iconButtonStyle}
         />
         <Button
@@ -275,18 +289,29 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
       </Header>
 
       <Body ref={bodyRef}>
-        {messages.length === 0 ? (
-          <SuggestedPrompts prompts={DEFAULT_PROMPTS} onSelect={send} />
+        {showHistory ? (
+          <ConversationHistory
+            onSelect={id => {
+              setShowHistory(false);
+              openConversation(id);
+            }}
+          />
         ) : (
-          messages.map(message => (
-            <ChatMessage key={message.id} message={message} />
-          ))
-        )}
-        {isLoading && <Typing>{t('Assistant is thinking…')}</Typing>}
-        {error && (
-          <Typography.Text type="danger" data-test="ai-error">
-            {error}
-          </Typography.Text>
+          <>
+            {messages.length === 0 ? (
+              <SuggestedPrompts prompts={DEFAULT_PROMPTS} onSelect={send} />
+            ) : (
+              messages.map(message => (
+                <ChatMessage key={message.id} message={message} />
+              ))
+            )}
+            {isLoading && <Typing>{t('Assistant is thinking…')}</Typing>}
+            {error && (
+              <Typography.Text type="danger" data-test="ai-error">
+                {error}
+              </Typography.Text>
+            )}
+          </>
         )}
       </Body>
 

@@ -24,12 +24,18 @@ import {
   waitFor,
 } from 'spec/helpers/testing-library';
 import AskAIPanel from './components/AskAIPanel';
-import { askAi } from './api';
+import { askAi, getConversation, listConversations } from './api';
 import { AskResponse } from './types';
 
 jest.mock('./api');
 
 const mockedAskAi = askAi as jest.MockedFunction<typeof askAi>;
+const mockedList = listConversations as jest.MockedFunction<
+  typeof listConversations
+>;
+const mockedGet = getConversation as jest.MockedFunction<
+  typeof getConversation
+>;
 
 const buildResponse = (answer: string): AskResponse => ({
   answer,
@@ -95,4 +101,36 @@ test('shows an error message when the request fails', async () => {
   expect(
     await screen.findByText('AI request failed (503)'),
   ).toBeInTheDocument();
+});
+
+test('opens history and loads a past conversation', async () => {
+  mockedList.mockResolvedValue([
+    { id: 'c1', title: 'Doanh thu 2024', updated_at: 1, message_count: 2 },
+  ]);
+  mockedGet.mockResolvedValue({
+    id: 'c1',
+    messages: [
+      { role: 'user', text: 'Doanh thu 2024' },
+      { role: 'assistant', text: 'Tổng doanh thu là 1 tỷ.' },
+    ],
+  });
+  render(<AskAIPanel onClose={jest.fn()} />);
+
+  await userEvent.click(screen.getByRole('button', { name: 'History' }));
+  const entry = await screen.findByText('Doanh thu 2024');
+  await userEvent.click(entry);
+
+  expect(
+    await screen.findByText('Tổng doanh thu là 1 tỷ.'),
+  ).toBeInTheDocument();
+  // Continuing the loaded conversation sends its id back to the API.
+  mockedAskAi.mockResolvedValue(buildResponse('Còn tăng trưởng 10%.'));
+  await userEvent.type(
+    screen.getByLabelText('Ask a question about your data…'),
+    'Tăng trưởng?',
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+  await waitFor(() =>
+    expect(mockedAskAi).toHaveBeenCalledWith('Tăng trưởng?', 'c1'),
+  );
 });

@@ -88,6 +88,14 @@ class LlmClient(Protocol):
         """Build a provider-native user turn carrying plain text."""
         ...
 
+    def assistant_message(self, text: str) -> dict[str, Any]:
+        """Build a provider-native assistant turn carrying plain text.
+
+        Used to replay prior turns from stored history so the model has
+        conversational context on follow-up questions.
+        """
+        ...
+
     def tool_result_message(self, results: list[ToolResult]) -> list[dict[str, Any]]:
         """Build the provider-native message(s) carrying tool results."""
         ...

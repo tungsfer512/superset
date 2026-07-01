@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { askAi } from '../api';
+import { askAi, getConversation } from '../api';
 import { AiStatus, ChatMessage } from '../types';
 
 export interface UseAskAi {
@@ -27,6 +27,8 @@ export interface UseAskAi {
   error: string | null;
   send: (question: string) => Promise<void>;
   reset: () => void;
+  /** Load a past conversation by id so it can be reviewed and continued. */
+  openConversation: (conversationId: string) => Promise<void>;
 }
 
 const STORAGE_KEY = 'superset-ai-conversation';
@@ -136,5 +138,29 @@ export function useAskAi(): UseAskAi {
     }
   }, []);
 
-  return { messages, status, error, send, reset };
+  const openConversation = useCallback(
+    async (id: string) => {
+      setStatus('loading');
+      setError(null);
+      try {
+        const detail = await getConversation(id);
+        counter.current = 0;
+        const loaded = detail.messages.map(message => ({
+          id: nextId(message.role),
+          role: message.role,
+          text: message.text,
+          artifacts: message.artifacts,
+        }));
+        conversationId.current = detail.id;
+        setMessages(loaded);
+        setStatus('idle');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setStatus('error');
+      }
+    },
+    [nextId],
+  );
+
+  return { messages, status, error, send, reset, openConversation };
 }

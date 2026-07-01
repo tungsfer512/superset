@@ -64,3 +64,24 @@ export interface ChatMessage {
 }
 
 export type AiStatus = 'idle' | 'loading' | 'error';
+
+/** A row in the conversation history list (`GET /conversations`). */
+export interface ConversationSummary {
+  id: string;
+  title: string | null;
+  updated_at: number;
+  message_count: number;
+}
+
+/** A stored message as returned by `GET /conversations/{id}`. */
+export interface StoredMessage {
+  role: ChatRole;
+  text: string;
+  artifacts?: Artifact[];
+}
+
+/** Full conversation detail (`GET /conversations/{id}`). */
+export interface ConversationDetail {
+  id: string;
+  messages: StoredMessage[];
+}

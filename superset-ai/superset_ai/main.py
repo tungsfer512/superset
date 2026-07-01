@@ -28,7 +28,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from superset_ai import __version__
-from superset_ai.api import ask, data, health, schema, sql
+from superset_ai.api import ask, conversations, data, health, schema, sql
 from superset_ai.config import Settings, get_settings
 from superset_ai.deps import RateLimitDep
 from superset_ai.llm.factory import create_llm
@@ -36,8 +36,10 @@ from superset_ai.ratelimit import RateLimiter, RedisRateLimiter
 from superset_ai.smart.grounding import GroundingService
 from superset_ai.smart.schema_indexer import SchemaIndexer
 from superset_ai.smart.semantic_layer import Glossary
-from superset_ai.store import InMemoryConversationStore
-from superset_ai.store.redis_store import RedisConversationStore
+from superset_ai.store import (
+    InMemoryConversationStore,
+    SqliteConversationStore,
+)
 from superset_ai.superset_client import SupersetClient
 
 logger = logging.getLogger("superset_ai")
@@ -50,14 +52,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.superset_client = SupersetClient(
         settings.superset_base_url, timeout=settings.superset_api_timeout
     )
+    # Durable, queryable chat history in a SQLite file (falls back to memory).
+    if settings.conversation_db_path:
+        app.state.store = SqliteConversationStore(settings.conversation_db_path)
+        logger.info(
+            "Conversation history persisted to %s", settings.conversation_db_path
+        )
+    else:
+        app.state.store = InMemoryConversationStore()
     if settings.redis_url:
-        app.state.store = RedisConversationStore(settings.redis_url)
         app.state.rate_limiter = RedisRateLimiter(
             settings.rate_limit_per_min, settings.redis_url
         )
-        logger.info("Using Redis backend for conversations and rate limiting.")
+        logger.info("Using Redis backend for rate limiting.")
     else:
-        app.state.store = InMemoryConversationStore()
         app.state.rate_limiter = RateLimiter(settings.rate_limit_per_min)
     app.state.grounding = None
     if settings.enable_grounding:
@@ -138,6 +146,7 @@ def create_app() -> FastAPI:
     app.include_router(ask.router, dependencies=[RateLimitDep])
     app.include_router(sql.router, dependencies=[RateLimitDep])
     app.include_router(schema.router, dependencies=[RateLimitDep])
+    app.include_router(conversations.router, dependencies=[RateLimitDep])
     return app
 
 

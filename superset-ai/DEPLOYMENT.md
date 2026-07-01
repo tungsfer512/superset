@@ -20,6 +20,8 @@ hỏng Superset; Superset cũng không nạp thêm thư viện AI nào.
 | `SCHEMA_CACHE_TTL` | `300` | TTL cache schema (giây) |
 | `GLOSSARY_PATH` | — | Đường dẫn JSON glossary vi↔db |
 | `EXTRA_CORS_ORIGINS` | — | Origin trình duyệt thêm (phẩy ngăn cách) |
+| `CONVERSATION_DB_PATH` | `data/conversations.db` | File SQLite lưu lịch sử chat (để trống = lưu tạm trong RAM) |
+| `REDIS_URL` | — | Bật rate limit dùng Redis (đa worker) |
 
 ## 2. Chạy
 
@@ -72,8 +74,18 @@ location / {
 
 - `GET /health` cho liveness/readiness (đã có healthcheck trong compose).
 - Access log: mỗi request ghi `method path -> status (ms)`, **không** kèm secret.
-- Scale: nhiều worker → thay `InMemoryConversationStore` và `RateLimiter`
-  bằng bản nền Redis (interface đã tách sẵn).
+- Scale: nhiều worker → đặt `REDIS_URL` cho rate limit; lịch sử chat có thể
+  chuyển sang `RedisConversationStore` (cùng interface) hoặc dùng volume SQLite.
+
+### Lịch sử hội thoại (lưu bền, xem lại, chat tiếp)
+
+- Mặc định lưu vào SQLite tại `CONVERSATION_DB_PATH`. Compose mount volume
+  `superset_ai_data:/app/data` nên **lịch sử sống sót qua restart/rebuild**.
+- Mỗi hội thoại được **gán theo người dùng** (theo cookie/Authorization) — user
+  chỉ thấy lịch sử của chính mình.
+- Endpoint: `GET /conversations` (danh sách), `GET /conversations/{id}` (nội
+  dung để xem lại), và `POST /ask` với `conversation_id` để **chat tiếp** —
+  các lượt trước được phát lại làm ngữ cảnh (context đa lượt).
 
 ## 6. Frontend
 

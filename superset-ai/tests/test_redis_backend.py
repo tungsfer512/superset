@@ -43,12 +43,18 @@ class FakeRedis:
 
 def test_redis_conversation_store_round_trip():
     store = RedisConversationStore(client=FakeRedis())
-    assert store.get("c1") == []
-    store.append("c1", [{"role": "user", "content": "hi"}])
-    store.append("c1", [{"role": "assistant", "content": "hello"}])
-    transcript = store.get("c1")
+    assert store.get_messages("c1", "u1") == []
+    store.append_messages("c1", "u1", [{"role": "user", "text": "hi"}])
+    store.append_messages("c1", "u1", [{"role": "assistant", "text": "hello"}])
+    transcript = store.get_messages("c1", "u1")
     assert len(transcript) == 2
-    assert transcript[0]["content"] == "hi"
+    assert transcript[0]["text"] == "hi"
+    # Scoped by user: a different user cannot read it.
+    assert store.get_messages("c1", "other") == []
+    listing = store.list_conversations("u1")
+    assert len(listing) == 1
+    assert listing[0]["id"] == "c1"
+    assert listing[0]["title"] == "hi"
 
 
 def test_redis_rate_limiter():

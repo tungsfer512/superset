@@ -43,6 +43,9 @@ class FakeLLM:
     def user_message(self, text):
         return {"role": "user", "content": text}
 
+    def assistant_message(self, text):
+        return {"role": "assistant", "content": text}
+
     def tool_result_message(self, results):
         return [
             {

@@ -111,6 +111,9 @@ class AnthropicClient:
     def user_message(self, text: str) -> dict[str, Any]:
         return {"role": "user", "content": text}
 
+    def assistant_message(self, text: str) -> dict[str, Any]:
+        return {"role": "assistant", "content": text}
+
     def tool_result_message(self, results: list[ToolResult]) -> list[dict[str, Any]]:
         return [
             {

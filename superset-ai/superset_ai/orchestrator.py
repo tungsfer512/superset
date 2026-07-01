@@ -198,6 +198,26 @@ async def _run_events(
     yield "done", {"artifacts": artifacts}
 
 
+def _history_to_llm(
+    llm: LlmClient, history: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Replay stored display messages as plain-text turns for conversation context.
+
+    Only the human-readable text is replayed (not tool_use blocks), which is
+    enough for follow-up context and works across any provider.
+    """
+    replayed: list[dict[str, Any]] = []
+    for message in history:
+        text = message.get("text")
+        if not text:
+            continue
+        if message.get("role") == "user":
+            replayed.append(llm.user_message(text))
+        else:
+            replayed.append(llm.assistant_message(text))
+    return replayed
+
+
 async def ask(
     llm: LlmClient,
     client: SupersetClient,
@@ -211,10 +231,13 @@ async def ask(
 ) -> AskResult:
     """Answer a question, running tools as needed; persists the transcript."""
     cid = conversation_id or uuid4().hex
-    history = store.get(cid)
+    user_key = auth.identity()
+    history = store.get_messages(cid, user_key)
     grounded = await _ground_question(grounding, client, auth, question)
-    messages: list[dict[str, Any]] = [*history, llm.user_message(grounded)]
-    base_len = len(history)
+    messages: list[dict[str, Any]] = [
+        *_history_to_llm(llm, history),
+        llm.user_message(grounded),
+    ]
 
     answer = ""
     artifacts: list[dict[str, Any]] = []
@@ -227,7 +250,14 @@ async def ask(
         elif event_type == "done":
             artifacts = payload["artifacts"]
 
-    store.append(cid, messages[base_len:])
+    store.append_messages(
+        cid,
+        user_key,
+        [
+            {"role": "user", "text": question, "artifacts": []},
+            {"role": "assistant", "text": answer, "artifacts": artifacts},
+        ],
+    )
     return AskResult(
         answer=answer,
         conversation_id=cid,
@@ -249,18 +279,34 @@ async def stream_ask(
 ) -> AsyncIterator[tuple[str, dict[str, Any]]]:
     """Stream the same flow as :func:`ask` as (event_type, payload) tuples."""
     cid = conversation_id or uuid4().hex
-    history = store.get(cid)
+    user_key = auth.identity()
+    history = store.get_messages(cid, user_key)
     grounded = await _ground_question(grounding, client, auth, question)
-    messages: list[dict[str, Any]] = [*history, llm.user_message(grounded)]
-    base_len = len(history)
+    messages: list[dict[str, Any]] = [
+        *_history_to_llm(llm, history),
+        llm.user_message(grounded),
+    ]
 
     yield "start", {"conversation_id": cid}
+    answer = ""
+    artifacts: list[dict[str, Any]] = []
     async for event_type, payload in _run_events(
         llm, client, auth, settings, messages, stream=True
     ):
+        if event_type == "answer":
+            answer = payload["text"]
+        elif event_type == "done":
+            artifacts = payload["artifacts"]
         yield event_type, payload
 
-    store.append(cid, messages[base_len:])
+    store.append_messages(
+        cid,
+        user_key,
+        [
+            {"role": "user", "text": question, "artifacts": []},
+            {"role": "assistant", "text": answer, "artifacts": artifacts},
+        ],
+    )
 
 
 async def generate_sql(

@@ -18,7 +18,7 @@
  */
 
 import { getSidecarBaseUrl } from './config';
-import { AskResponse } from './types';
+import { AskResponse, ConversationDetail, ConversationSummary } from './types';
 
 /**
  * Extract the sidecar's `detail` message (falling back to the status).
@@ -60,4 +60,34 @@ export async function askAi(
     throw new Error(await errorMessage(response));
   }
   return (await response.json()) as AskResponse;
+}
+
+/** List the current user's saved conversations (most recent first). */
+export async function listConversations(
+  signal?: AbortSignal,
+): Promise<ConversationSummary[]> {
+  const response = await fetch(`${getSidecarBaseUrl()}/conversations`, {
+    method: 'GET',
+    credentials: 'include',
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(await errorMessage(response));
+  }
+  return (await response.json()) as ConversationSummary[];
+}
+
+/** Load a single conversation's messages so it can be reviewed and continued. */
+export async function getConversation(
+  conversationId: string,
+  signal?: AbortSignal,
+): Promise<ConversationDetail> {
+  const response = await fetch(
+    `${getSidecarBaseUrl()}/conversations/${encodeURIComponent(conversationId)}`,
+    { method: 'GET', credentials: 'include', signal },
+  );
+  if (!response.ok) {
+    throw new Error(await errorMessage(response));
+  }
+  return (await response.json()) as ConversationDetail;
 }

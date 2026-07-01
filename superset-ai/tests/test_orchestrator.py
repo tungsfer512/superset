@@ -62,7 +62,7 @@ def test_ask_runs_tool_then_answers():
     assert "LIMIT" in (client.last_sql or "").upper()  # limit enforced
     assert client.last_auth.authorization == "Bearer caller"  # pass-through
     # The transcript was persisted under the generated conversation id.
-    assert store.get(result.conversation_id)
+    assert store.get_messages(result.conversation_id, AUTH.identity())
 
 
 def test_ask_continues_after_tool_error():

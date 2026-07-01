@@ -163,8 +163,13 @@ services:
       SUPERSET_AI_EXTRA_CORS_ORIGINS: http://localhost:8088,http://127.0.0.1:8088
       # Allow the assistant to create charts (write). Deletes are never exposed.
       SUPERSET_AI_ALLOW_WRITE_TOOLS: "true"
+      # Persist chat history to a SQLite file on the mounted volume below.
+      SUPERSET_AI_CONVERSATION_DB_PATH: /app/data/conversations.db
     ports:
       - 8800:8800
+    volumes:
+      # Durable chat history — survives container restarts/rebuilds.
+      - superset_ai_data:/app/data
     depends_on:
       superset:
         condition: service_started
@@ -180,6 +185,8 @@ services:
 
 volumes:
   superset_home:
+    external: false
+  superset_ai_data:
     external: false
   db_home:
     external: false
