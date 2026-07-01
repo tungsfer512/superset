@@ -50,13 +50,13 @@ beforeEach(() => {
 });
 
 test('shows suggested prompts when empty', () => {
-  render(<AskAIPanel open onClose={jest.fn()} />);
-  expect(screen.getByText('Try asking')).toBeInTheDocument();
+  render(<AskAIPanel onClose={jest.fn()} />);
+  expect(screen.getByText('Gợi ý câu hỏi')).toBeInTheDocument();
 });
 
 test('sends a question and renders the answer with SQL', async () => {
   mockedAskAi.mockResolvedValue(buildResponse('Có 1 đơn hàng.'));
-  render(<AskAIPanel open onClose={jest.fn()} />);
+  render(<AskAIPanel onClose={jest.fn()} />);
 
   await userEvent.type(
     screen.getByLabelText('Ask a question about your data…'),
@@ -73,7 +73,7 @@ test('sends a question and renders the answer with SQL', async () => {
 
 test('clicking a suggested prompt triggers a request', async () => {
   mockedAskAi.mockResolvedValue(buildResponse('Đây là kết quả.'));
-  render(<AskAIPanel open onClose={jest.fn()} />);
+  render(<AskAIPanel onClose={jest.fn()} />);
 
   await userEvent.click(screen.getByText('Có những dataset nào tôi xem được?'));
 
@@ -83,7 +83,7 @@ test('clicking a suggested prompt triggers a request', async () => {
 
 test('shows an error message when the request fails', async () => {
   mockedAskAi.mockRejectedValue(new Error('AI request failed (503)'));
-  render(<AskAIPanel open onClose={jest.fn()} />);
+  render(<AskAIPanel onClose={jest.fn()} />);
 
   await userEvent.type(
     screen.getByLabelText('Ask a question about your data…'),

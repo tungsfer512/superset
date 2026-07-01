@@ -17,35 +17,104 @@
  * under the License.
  */
 
-import { FC, useState } from 'react';
-import { t } from '@superset-ui/core';
-import {
-  Button,
-  Drawer,
-  Flex,
-  Input,
-  Typography,
-} from '@superset-ui/core/components';
+import { FC, useEffect, useRef, useState } from 'react';
+import { styled, t } from '@superset-ui/core';
+import { Button, Input, Typography } from '@superset-ui/core/components';
+import { Icons } from '@superset-ui/core/components/Icons';
 import { useAskAi } from '../hooks/useAskAi';
 import ChatMessage from './ChatMessage';
 import SuggestedPrompts from './SuggestedPrompts';
 
 export interface AskAIPanelProps {
-  open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const DEFAULT_PROMPTS = [
   t('Có những dataset nào tôi xem được?'),
-  t('Tổng số dòng trong dataset đầu tiên là bao nhiêu?'),
-  t('Liệt kê 5 bản ghi mới nhất.'),
+  t('Đếm số dòng trong dataset đầu tiên.'),
+  t('Vẽ biểu đồ cột từ một dataset và đưa link.'),
 ];
 
-/** Slide-out chat panel that talks to the superset-ai sidecar. */
-export const AskAIPanel: FC<AskAIPanelProps> = ({ open, onClose }) => {
-  const { messages, status, error, send } = useAskAi();
+const Panel = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: calc(100vw - ${({ theme }) => theme.sizeUnit * 8}px);
+  height: min(640px, 78vh);
+  background: ${({ theme }) => theme.colorBgContainer};
+  border: 1px solid ${({ theme }) => theme.colorBorderSecondary};
+  border-radius: ${({ theme }) => theme.borderRadiusLG}px;
+  box-shadow: ${({ theme }) => theme.boxShadowSecondary};
+  overflow: hidden;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.sizeUnit * 2}px;
+  padding: ${({ theme }) => theme.sizeUnit * 3}px;
+  background: ${({ theme }) => theme.colorPrimary};
+  color: ${({ theme }) => theme.colorTextLightSolid};
+`;
+
+const HeaderTitle = styled.div`
+  flex: 1;
+  font-weight: ${({ theme }) => theme.fontWeightStrong};
+  font-size: ${({ theme }) => theme.fontSizeLG}px;
+  line-height: 1.2;
+`;
+
+const Avatar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ theme }) => theme.sizeUnit * 8}px;
+  height: ${({ theme }) => theme.sizeUnit * 8}px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colorPrimaryHover};
+`;
+
+const Body = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: ${({ theme }) => theme.sizeUnit * 4}px;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.sizeUnit * 3}px;
+  background: ${({ theme }) => theme.colorBgLayout};
+`;
+
+const Footer = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.sizeUnit * 2}px;
+  padding: ${({ theme }) => theme.sizeUnit * 3}px;
+  border-top: 1px solid ${({ theme }) => theme.colorBorderSecondary};
+  background: ${({ theme }) => theme.colorBgContainer};
+`;
+
+const Typing = styled.div`
+  align-self: flex-start;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
+  font-style: italic;
+`;
+
+const iconButtonStyle = { color: 'inherit' } as const;
+
+/** The chat window body: header, scrolling message list and input. */
+export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
+  const { messages, status, error, send, reset } = useAskAi();
   const [draft, setDraft] = useState('');
+  const bodyRef = useRef<HTMLDivElement>(null);
   const isLoading = status === 'loading';
+
+  useEffect(() => {
+    // Auto-scroll to the latest message.
+    const node = bodyRef.current;
+    if (node) {
+      node.scrollTop = node.scrollHeight;
+    }
+  }, [messages, isLoading]);
 
   const submit = () => {
     const question = draft.trim();
@@ -57,59 +126,77 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ open, onClose }) => {
   };
 
   return (
-    <Drawer
-      open={open}
-      onClose={onClose}
-      title={t('Ask AI')}
-      width={480}
-      data-test="ask-ai-panel"
-    >
-      <Flex vertical gap="middle" style={{ height: '100%' }}>
-        <Flex vertical gap="middle" style={{ flex: 1, overflowY: 'auto' }}>
-          {messages.length === 0 ? (
-            <SuggestedPrompts prompts={DEFAULT_PROMPTS} onSelect={send} />
-          ) : (
-            messages.map(message => (
-              <ChatMessage key={message.id} message={message} />
-            ))
-          )}
-          {isLoading && (
-            <Typography.Text type="secondary">
-              {t('Assistant is thinking…')}
-            </Typography.Text>
-          )}
-          {error && (
-            <Typography.Text type="danger" data-test="ai-error">
-              {error}
-            </Typography.Text>
-          )}
-        </Flex>
-        <Flex gap="small">
-          <Input.TextArea
-            value={draft}
-            onChange={event => setDraft(event.target.value)}
-            onPressEnter={event => {
-              if (!event.shiftKey) {
-                event.preventDefault();
-                submit();
-              }
-            }}
-            placeholder={t('Ask a question about your data…')}
-            autoSize={{ minRows: 1, maxRows: 4 }}
-            aria-label={t('Ask a question about your data…')}
-            disabled={isLoading}
-          />
+    <Panel data-test="ask-ai-panel" role="dialog" aria-label={t('Ask AI')}>
+      <Header>
+        <Avatar>
+          <Icons.CommentOutlined />
+        </Avatar>
+        <HeaderTitle>{t('Ask AI')}</HeaderTitle>
+        <Button
+          type="text"
+          size="small"
+          icon={<Icons.PlusOutlined style={iconButtonStyle} />}
+          onClick={reset}
+          aria-label={t('New chat')}
+          title={t('New chat')}
+          style={iconButtonStyle}
+        />
+        {onClose && (
           <Button
-            type="primary"
-            onClick={submit}
-            loading={isLoading}
-            disabled={!draft.trim()}
-          >
-            {t('Send')}
-          </Button>
-        </Flex>
-      </Flex>
-    </Drawer>
+            type="text"
+            size="small"
+            icon={<Icons.CloseOutlined style={iconButtonStyle} />}
+            onClick={onClose}
+            aria-label={t('Close')}
+            title={t('Close')}
+            style={iconButtonStyle}
+          />
+        )}
+      </Header>
+
+      <Body ref={bodyRef}>
+        {messages.length === 0 ? (
+          <SuggestedPrompts prompts={DEFAULT_PROMPTS} onSelect={send} />
+        ) : (
+          messages.map(message => (
+            <ChatMessage key={message.id} message={message} />
+          ))
+        )}
+        {isLoading && <Typing>{t('Assistant is thinking…')}</Typing>}
+        {error && (
+          <Typography.Text type="danger" data-test="ai-error">
+            {error}
+          </Typography.Text>
+        )}
+      </Body>
+
+      <Footer>
+        <Input.TextArea
+          value={draft}
+          onChange={event => setDraft(event.target.value)}
+          onPressEnter={event => {
+            if (!event.shiftKey) {
+              event.preventDefault();
+              submit();
+            }
+          }}
+          placeholder={t('Ask a question about your data…')}
+          autoSize={{ minRows: 1, maxRows: 4 }}
+          aria-label={t('Ask a question about your data…')}
+          disabled={isLoading}
+        />
+        <Button
+          type="primary"
+          onClick={submit}
+          loading={isLoading}
+          disabled={!draft.trim()}
+          icon={<Icons.ArrowRightOutlined />}
+          aria-label={t('Send')}
+        >
+          {t('Send')}
+        </Button>
+      </Footer>
+    </Panel>
   );
 };
 

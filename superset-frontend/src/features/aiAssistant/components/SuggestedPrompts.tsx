@@ -18,33 +18,70 @@
  */
 
 import { FC } from 'react';
-import { t } from '@superset-ui/core';
-import { Button, Flex, Typography } from '@superset-ui/core/components';
+import { styled, t } from '@superset-ui/core';
 
 export interface SuggestedPromptsProps {
   prompts: string[];
   onSelect: (prompt: string) => void;
 }
 
-/** Clickable starter questions shown when the conversation is empty. */
+const Wrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.sizeUnit * 3}px;
+`;
+
+const Greeting = styled.div`
+  padding: ${({ theme }) => theme.sizeUnit * 2}px 0;
+  color: ${({ theme }) => theme.colorText};
+  font-size: ${({ theme }) => theme.fontSizeLG}px;
+  font-weight: ${({ theme }) => theme.fontWeightStrong};
+`;
+
+const Hint = styled.div`
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
+  margin-bottom: ${({ theme }) => theme.sizeUnit}px;
+`;
+
+const PromptCard = styled.button`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: ${({ theme }) => theme.sizeUnit * 3}px
+    ${({ theme }) => theme.sizeUnit * 4}px;
+  border: 1px solid ${({ theme }) => theme.colorBorder};
+  border-radius: ${({ theme }) => theme.borderRadiusLG}px;
+  background: ${({ theme }) => theme.colorBgContainer};
+  color: ${({ theme }) => theme.colorText};
+  font-size: ${({ theme }) => theme.fontSize}px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colorPrimary};
+    background: ${({ theme }) => theme.colorPrimaryBg};
+  }
+`;
+
+/** Friendly empty-state with clickable starter questions. */
 export const SuggestedPrompts: FC<SuggestedPromptsProps> = ({
   prompts,
   onSelect,
 }) => (
-  <Flex vertical gap="small">
-    <Typography.Text type="secondary">{t('Try asking')}</Typography.Text>
+  <Wrap>
+    <Greeting>{t('👋 Xin chào! Tôi có thể giúp gì cho bạn?')}</Greeting>
+    <Hint>{t('Gợi ý câu hỏi')}</Hint>
     {prompts.map(prompt => (
-      <Button
-        key={prompt}
-        type="dashed"
-        block
-        onClick={() => onSelect(prompt)}
-        style={{ textAlign: 'left', height: 'auto', whiteSpace: 'normal' }}
-      >
+      <PromptCard key={prompt} type="button" onClick={() => onSelect(prompt)}>
         {prompt}
-      </Button>
+      </PromptCard>
     ))}
-  </Flex>
+  </Wrap>
 );
 
 export default SuggestedPrompts;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { default as AskAIButton } from './components/AskAIButton';
+export { default as AskAIWidget } from './components/AskAIWidget';
 export { default as AskAIPanel } from './components/AskAIPanel';
 export { useAskAi } from './hooks/useAskAi';
 export type { AskResponse, ChatMessage, SqlArtifact } from './types';
