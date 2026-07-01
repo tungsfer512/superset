@@ -43,7 +43,7 @@ from superset_ai.prompts.system import (
 from superset_ai.sql.guard import assert_select_only
 from superset_ai.superset_client import SupersetClient
 from superset_ai.tools import data_tools
-from superset_ai.tools.registry import TOOL_SCHEMAS, execute_tool
+from superset_ai.tools.registry import execute_tool, get_tool_schemas
 
 _FENCE_RE = re.compile(r"^```[a-zA-Z]*\n?|\n?```$")
 
@@ -92,11 +92,12 @@ async def _turn(
     Yields ``("token", {...})`` deltas (only when streaming) and finally the
     :class:`LlmResult` for that turn.
     """
+    tools = get_tool_schemas(settings.allow_write_tools)
     if stream and hasattr(llm, "complete_stream"):
         async for chunk in llm.complete_stream(
             system=ASK_SYSTEM_PROMPT,
             messages=messages,
-            tools=TOOL_SCHEMAS,
+            tools=tools,
             max_tokens=settings.llm_max_tokens,
         ):
             if isinstance(chunk, TextDelta):
@@ -107,7 +108,7 @@ async def _turn(
     yield await llm.complete(
         system=ASK_SYSTEM_PROMPT,
         messages=messages,
-        tools=TOOL_SCHEMAS,
+        tools=tools,
         max_tokens=settings.llm_max_tokens,
     )
 
@@ -149,7 +150,10 @@ async def _run_events(
                 auth=auth,
                 settings=settings,
             )
-            if tool_use.name == "run_select_sql" and "error" not in output:
+            if (
+                tool_use.name in ("run_select_sql", "create_chart", "create_dashboard")
+                and "error" not in output
+            ):
                 artifacts.append(output)
             tool_results.append(
                 ToolResult(

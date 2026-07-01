@@ -161,6 +161,8 @@ services:
       # Allow the browser (served from Superset at :8088) to call the sidecar
       # cross-origin with the session cookie.
       SUPERSET_AI_EXTRA_CORS_ORIGINS: http://localhost:8088,http://127.0.0.1:8088
+      # Allow the assistant to create charts (write). Deletes are never exposed.
+      SUPERSET_AI_ALLOW_WRITE_TOOLS: "true"
     ports:
       - 8800:8800
     depends_on:

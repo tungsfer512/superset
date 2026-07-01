@@ -118,3 +118,46 @@ class FakeSupersetClient:
         self.last_auth = auth
         self.last_sql = sql
         return {"columns": [{"name": "n"}], "data": [{"n": 1}]}
+
+    async def create_chart(
+        self,
+        auth,
+        *,
+        slice_name,
+        datasource_id,
+        viz_type,
+        params,
+        dashboards=None,
+        **_kwargs,
+    ):
+        self.last_auth = auth
+        self.last_chart = {
+            "slice_name": slice_name,
+            "viz_type": viz_type,
+            "params": params,
+            "dashboards": dashboards,
+        }
+        return {"id": 42}
+
+    # -- generic REST helpers ---------------------------------------------
+
+    async def api_get(self, auth, path, *, params=None):
+        self.last_auth = auth
+        self.last_call = ("GET", path, params)
+        return {"count": 1, "result": [{"id": 1}], "id": 1}
+
+    async def api_post(self, auth, path, body):
+        self.last_auth = auth
+        self.last_call = ("POST", path, body)
+        self.last_post = body
+        return {"id": 99, "result": body}
+
+    async def api_put(self, auth, path, body):
+        self.last_auth = auth
+        self.last_call = ("PUT", path, body)
+        return {"result": body}
+
+    async def api_delete(self, auth, path):
+        self.last_auth = auth
+        self.last_call = ("DELETE", path, None)
+        return {"message": "OK"}

@@ -28,6 +28,20 @@ export interface SqlArtifact {
   row_count: number;
 }
 
+export interface ChartArtifact {
+  chart_id?: number | null;
+  chart_name?: string;
+  // Dashboards reuse this shape (title instead of chart_name).
+  title?: string;
+  url: string | null;
+}
+
+export type Artifact = SqlArtifact | ChartArtifact;
+
+export function isChartArtifact(artifact: Artifact): artifact is ChartArtifact {
+  return 'url' in artifact;
+}
+
 export interface ToolTraceEntry {
   name: string;
 }
@@ -36,7 +50,7 @@ export interface ToolTraceEntry {
 export interface AskResponse {
   answer: string;
   conversation_id: string;
-  artifacts: SqlArtifact[];
+  artifacts: Artifact[];
   tool_trace: ToolTraceEntry[];
 }
 
@@ -46,7 +60,7 @@ export interface ChatMessage {
   id: string;
   role: ChatRole;
   text: string;
-  artifacts?: SqlArtifact[];
+  artifacts?: Artifact[];
 }
 
 export type AiStatus = 'idle' | 'loading' | 'error';

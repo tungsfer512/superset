@@ -21,6 +21,21 @@ import { getSidecarBaseUrl } from './config';
 import { AskResponse } from './types';
 
 /**
+ * Extract the sidecar's `detail` message (falling back to the status).
+ */
+async function errorMessage(response: Response): Promise<string> {
+  try {
+    const body = (await response.json()) as { detail?: string };
+    if (body.detail) {
+      return body.detail;
+    }
+  } catch {
+    // non-JSON body; fall through to the generic message
+  }
+  return `AI request failed (${response.status})`;
+}
+
+/**
  * Call the sidecar `POST /ask`. Credentials are included so that, behind a
  * same-origin reverse proxy, Superset's session cookie is forwarded and the
  * query runs as the current user (preserving RBAC/RLS).
@@ -45,17 +60,4 @@ export async function askAi(
     throw new Error(await errorMessage(response));
   }
   return (await response.json()) as AskResponse;
-}
-
-/** Extract the sidecar's `detail` message (falling back to the status). */
-async function errorMessage(response: Response): Promise<string> {
-  try {
-    const body = (await response.json()) as { detail?: string };
-    if (body.detail) {
-      return body.detail;
-    }
-  } catch {
-    // non-JSON body; fall through to the generic message
-  }
-  return `AI request failed (${response.status})`;
 }

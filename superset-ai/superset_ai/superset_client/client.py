@@ -23,6 +23,7 @@ sessions automatically fetch a CSRF token before unsafe (POST) requests.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import httpx
@@ -35,6 +36,7 @@ CSRF_PATH = "/api/v1/security/csrf_token/"
 DATASET_PATH = "/api/v1/dataset/"
 DATABASE_PATH = "/api/v1/database/"
 SQLLAB_EXECUTE_PATH = "/api/v1/sqllab/execute/"
+CHART_PATH = "/api/v1/chart/"
 
 
 class SupersetClient:
@@ -146,3 +148,54 @@ class SupersetClient:
         return await self._request(
             "POST", SQLLAB_EXECUTE_PATH, auth, json=body, needs_csrf=True
         )
+
+    # -- generic REST helpers (used by the resource bridge) ---------------
+
+    async def api_get(
+        self,
+        auth: SupersetAuth,
+        path: str,
+        *,
+        params: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        """GET an arbitrary Superset API path."""
+        return await self._request("GET", path, auth, params=params)
+
+    async def api_post(
+        self, auth: SupersetAuth, path: str, body: dict[str, Any]
+    ) -> dict[str, Any]:
+        """POST to an arbitrary Superset API path (with CSRF)."""
+        return await self._request("POST", path, auth, json=body, needs_csrf=True)
+
+    async def api_put(
+        self, auth: SupersetAuth, path: str, body: dict[str, Any]
+    ) -> dict[str, Any]:
+        """PUT to an arbitrary Superset API path (with CSRF)."""
+        return await self._request("PUT", path, auth, json=body, needs_csrf=True)
+
+    async def api_delete(self, auth: SupersetAuth, path: str) -> dict[str, Any]:
+        """DELETE an arbitrary Superset API path (with CSRF)."""
+        return await self._request("DELETE", path, auth, needs_csrf=True)
+
+    async def create_chart(
+        self,
+        auth: SupersetAuth,
+        *,
+        slice_name: str,
+        datasource_id: int,
+        viz_type: str,
+        params: dict[str, Any],
+        datasource_type: str = "table",
+        dashboards: list[int] | None = None,
+    ) -> dict[str, Any]:
+        """Create a chart (slice). ``POST /api/v1/chart/`` (runs as the user)."""
+        body: dict[str, Any] = {
+            "slice_name": slice_name,
+            "datasource_id": datasource_id,
+            "datasource_type": datasource_type,
+            "viz_type": viz_type,
+            "params": json.dumps(params),
+        }
+        if dashboards:
+            body["dashboards"] = dashboards
+        return await self._request("POST", CHART_PATH, auth, json=body, needs_csrf=True)

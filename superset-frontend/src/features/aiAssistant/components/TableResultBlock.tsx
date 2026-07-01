@@ -36,14 +36,14 @@ export const TableResultBlock: FC<TableResultBlockProps> = ({
   artifact,
   maxRows = 50,
 }) => {
-  const columns = artifact.columns.map(col => ({
+  const columns = (artifact.columns ?? []).map(col => ({
     title: col.name,
     dataIndex: col.name,
     key: col.name,
     render: (value: unknown) => renderCell(value),
   }));
 
-  const data = artifact.rows.slice(0, maxRows).map((row, index) => ({
+  const data = (artifact.rows ?? []).slice(0, maxRows).map((row, index) => ({
     key: index,
     ...row,
   }));

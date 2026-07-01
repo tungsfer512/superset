@@ -20,7 +20,7 @@
 import { FC } from 'react';
 import { t } from '@superset-ui/core';
 import { Card, Flex, Typography } from '@superset-ui/core/components';
-import { ChatMessage as ChatMessageType } from '../types';
+import { ChatMessage as ChatMessageType, isChartArtifact } from '../types';
 import SqlResultBlock from './SqlResultBlock';
 import TableResultBlock from './TableResultBlock';
 
@@ -55,9 +55,21 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
             gap="middle"
             style={{ marginTop: 12 }}
           >
-            <SqlResultBlock sql={artifact.executed_sql} />
-            {artifact.rows.length > 0 && (
-              <TableResultBlock artifact={artifact} />
+            {isChartArtifact(artifact) ? (
+              artifact.url && (
+                <Typography.Link href={artifact.url} target="_blank">
+                  {t('Open: %s', artifact.chart_name ?? artifact.title ?? '')}
+                </Typography.Link>
+              )
+            ) : (
+              <>
+                {artifact.executed_sql && (
+                  <SqlResultBlock sql={artifact.executed_sql} />
+                )}
+                {(artifact.rows?.length ?? 0) > 0 && (
+                  <TableResultBlock artifact={artifact} />
+                )}
+              </>
             )}
           </Flex>
         ))}
