@@ -112,3 +112,18 @@ def test_generate_sql_rejects_non_select():
                 llm, FakeSupersetClient(), AUTH, SETTINGS, question="xoá"
             )
         )
+
+
+def test_clean_answer_strips_links():
+    from superset_ai.orchestrator import _clean_answer
+
+    # markdown link -> keep label, drop url
+    assert _clean_answer("Xem [Biểu đồ A](/explore/?slice_id=5) nhé") == (
+        "Xem Biểu đồ A nhé"
+    )
+    # bare url / superset path removed
+    out = _clean_answer("Dashboard tại /superset/dashboard/16/ đã tạo")
+    assert "/superset/dashboard" not in out
+    assert "http" not in _clean_answer("Link http://x:8088/explore/?slice_id=1 ok")
+    # plain text untouched
+    assert _clean_answer("Bảng orders có 10 dòng.") == "Bảng orders có 10 dòng."

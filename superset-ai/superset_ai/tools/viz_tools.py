@@ -19,10 +19,13 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from superset_ai.auth.passthrough import SupersetAuth
 from superset_ai.superset_client import SupersetClient
+
+_AGG_RE = re.compile(r"^(SUM|AVG|MIN|MAX|COUNT)\s*\(\s*(.+?)\s*\)$", re.IGNORECASE)
 
 # Charts that plot a metric over an x axis; they need `x_axis` to build a query.
 _TIMESERIES_VIZ = {
@@ -294,6 +297,99 @@ def _dedupe_dimensions(form_data: dict[str, Any]) -> None:
         form_data["groupby"] = deduped
 
 
+async def _dataset_meta(
+    client: SupersetClient, auth: SupersetAuth, dataset_id: int
+) -> tuple[set[str], set[str]]:
+    """Return (column names, saved metric names) for a dataset; empty on error."""
+    try:
+        detail = await client.get_dataset(auth, dataset_id)
+    except Exception:  # noqa: BLE001 - validation is best effort
+        return set(), set()
+    result = detail.get("result", {}) if isinstance(detail, dict) else {}
+    columns = {
+        c.get("column_name") for c in result.get("columns", []) if c.get("column_name")
+    }
+    metrics = {
+        m.get("metric_name") for m in result.get("metrics", []) if m.get("metric_name")
+    }
+    return columns, metrics
+
+
+def _adhoc_sql(expression: str, label: str) -> dict[str, Any]:
+    return {
+        "expressionType": "SQL",
+        "sqlExpression": expression,
+        "label": label,
+        "hasCustomLabel": True,
+    }
+
+
+def _adhoc_simple(aggregate: str, column: str, label: str) -> dict[str, Any]:
+    return {
+        "expressionType": "SIMPLE",
+        "aggregate": aggregate,
+        "column": {"column_name": column},
+        "label": label,
+        "hasCustomLabel": True,
+    }
+
+
+def _normalize_metric(metric: Any, saved: set[str], columns: set[str]) -> Any:
+    """Turn a metric that isn't a saved metric into a valid adhoc metric.
+
+    Prevents "metric does not exist" errors when the model passes a saved-metric
+    name (e.g. "count") that the dataset doesn't actually define.
+    """
+    if isinstance(metric, dict):
+        return metric  # already an adhoc/structured metric
+    text = str(metric).strip()
+    if text in saved:
+        return text  # a real saved metric
+    compact = text.lower().replace(" ", "")
+    if compact in ("count", "count(*)", "count(1)", "*"):
+        return _adhoc_sql("COUNT(*)", "count")
+    match = _AGG_RE.match(text)
+    if match:
+        agg, col = match.group(1).upper(), match.group(2).strip().strip('"')
+        if col == "*":
+            return _adhoc_sql(f"{agg}(*)", text)
+        if col in columns:
+            return _adhoc_simple(agg, col, text)
+        return _adhoc_sql(text, text)  # custom SQL over unknown token
+    if text in columns:
+        # A bare column as a metric: COUNT it (valid for any column type).
+        return _adhoc_simple("COUNT", text, f"COUNT({text})")
+    # Anything else: treat as a custom SQL expression.
+    return _adhoc_sql(text, text)
+
+
+def _normalize_metrics(
+    form_data: dict[str, Any], saved: set[str], columns: set[str]
+) -> None:
+    if isinstance(form_data.get("metrics"), list):
+        form_data["metrics"] = [
+            _normalize_metric(m, saved, columns) for m in form_data["metrics"]
+        ]
+    if form_data.get("metric") is not None:
+        form_data["metric"] = _normalize_metric(form_data["metric"], saved, columns)
+
+
+def _invalid_columns(form_data: dict[str, Any], columns: set[str]) -> dict[str, Any]:
+    """Return the referenced columns that don't exist in the dataset."""
+    bad: dict[str, Any] = {}
+    for key in ("x_axis", "entity", "column"):
+        value = form_data.get(key)
+        if isinstance(value, str) and value and value not in columns:
+            bad[key] = value
+    for key in ("groupby", "all_columns"):
+        value = form_data.get(key)
+        if isinstance(value, list):
+            missing = [c for c in value if c not in columns]
+            if missing:
+                bad[key] = missing
+    return bad
+
+
 async def create_chart(
     client: SupersetClient,
     auth: SupersetAuth,
@@ -304,14 +400,26 @@ async def create_chart(
     params: dict[str, Any] | None = None,
     dashboard_ids: list[int] | None = None,
 ) -> dict[str, Any]:
-    """Create a Superset chart and return its id plus an Explore link.
+    """Create a Superset chart, validating the config first.
 
-    ``params`` is the viz configuration (metrics, groupby, ...). ``datasource``
-    and ``viz_type`` are injected automatically so the chart renders. Optionally
-    add the chart to dashboards.
+    Columns are checked against the dataset (returns an error to retry if any
+    are wrong), and metrics that aren't saved metrics are converted to valid
+    adhoc metrics so the chart never fails on a missing saved metric.
     """
     viz_type = normalize_viz_type(viz_type)
+    columns, saved = await _dataset_meta(client, auth, dataset_id)
     form_data = _build_form_data(dataset_id, viz_type, params)
+
+    if columns:
+        invalid = _invalid_columns(form_data, columns)
+        if invalid:
+            return {
+                "error": ("These columns are not in the dataset — fix them and retry."),
+                "invalid_columns": invalid,
+                "valid_columns": sorted(columns),
+            }
+        _normalize_metrics(form_data, saved, columns)
+
     payload = await client.create_chart(
         auth,
         slice_name=chart_name,

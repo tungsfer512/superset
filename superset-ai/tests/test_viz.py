@@ -152,6 +152,46 @@ def test_no_duplicate_entity_in_groupby():
     assert "country" not in (fd.get("groupby") or [])
 
 
+def test_unsaved_metric_becomes_adhoc_sql():
+    # "revenue" is neither a saved metric nor a column -> custom SQL adhoc.
+    fd = _form_data_for("pie", {"groupby": ["country"], "metric": "revenue"})
+    metric = fd["metric"]
+    assert isinstance(metric, dict)
+    assert metric["expressionType"] == "SQL"
+
+
+def test_aggregation_metric_becomes_simple():
+    fd = _form_data_for("big_number_total", {"metric": "SUM(amount)"})
+    metric = fd["metric"]
+    assert isinstance(metric, dict)
+    assert metric["expressionType"] == "SIMPLE"
+    assert metric["aggregate"] == "SUM"
+    assert metric["column"]["column_name"] == "amount"
+
+
+def test_saved_metric_kept_as_is():
+    # "count" IS a saved metric on the fake dataset -> stays a string.
+    fd = _form_data_for("big_number_total", {"metric": "count"})
+    assert fd["metric"] == "count"
+
+
+def test_invalid_column_blocks_creation():
+    client = FakeSupersetClient()
+    result = asyncio.run(
+        viz_tools.create_chart(
+            client,
+            AUTH,
+            dataset_id=1,
+            chart_name="x",
+            viz_type="echarts_timeseries_bar",
+            params={"x_axis": "does_not_exist", "metrics": ["count"]},
+        )
+    )
+    assert "error" in result
+    assert result["invalid_columns"]["x_axis"] == "does_not_exist"
+    assert client.last_chart is None  # nothing created
+
+
 def test_list_viz_types_covers_supported():
     specs = viz_tools.supported_viz_types()
     assert "histogram_v2" in specs

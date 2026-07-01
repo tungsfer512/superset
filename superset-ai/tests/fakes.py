@@ -88,6 +88,8 @@ class FakeSupersetClient:
     def __init__(self):
         self.last_auth = None
         self.last_sql = None
+        self.last_chart = None
+        self.last_call = None
 
     async def list_datasets(self, auth, *, search=None, page=0, page_size=100):
         self.last_auth = auth
@@ -105,12 +107,31 @@ class FakeSupersetClient:
 
     async def get_dataset(self, auth, dataset_id):
         self.last_auth = auth
+        col_names = [
+            "id",
+            "country",
+            "country_code",
+            "region",
+            "year",
+            "age",
+            "team",
+            "has_2fa",
+            "role",
+            "tz",
+            "amount",
+            "a",
+            "b",
+        ]
         return {
             "result": {
                 "table_name": "orders",
                 "schema": "public",
                 "database": {"id": 7, "backend": "mysql"},
-                "columns": [{"column_name": "id", "type": "INT", "description": None}],
+                "columns": [
+                    {"column_name": name, "type": "VARCHAR", "description": None}
+                    for name in col_names
+                ],
+                "metrics": [{"metric_name": "count"}],
             }
         }
 

@@ -47,6 +47,25 @@ from superset_ai.tools.registry import execute_tool, get_tool_schemas
 
 _FENCE_RE = re.compile(r"^```[a-zA-Z]*\n?|\n?```$")
 
+# Markdown link [label](url) -> keep just the label.
+_MD_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
+# Bare URLs / Superset paths anywhere in the text.
+_BARE_URL_RE = re.compile(
+    r"\(?<?(?:https?://\S+|/(?:explore|superset|chart|dashboard)/\S*)>?\)?",
+    re.IGNORECASE,
+)
+
+
+def _clean_answer(text: str) -> str:
+    """Strip links from the answer text; links belong in artifacts only."""
+    cleaned = _MD_LINK_RE.sub(r"\1", text)
+    cleaned = _BARE_URL_RE.sub("", cleaned)
+    # Tidy leftover whitespace/empty parentheses.
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)
+    cleaned = re.sub(r"[ \t]{2,}", " ", cleaned)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
+
 
 @dataclass
 class AskResult:
@@ -136,7 +155,7 @@ async def _run_events(
         messages.append(result.assistant_message)
 
         if result.stop_reason != "tool_use" or not result.tool_uses:
-            yield "answer", {"text": result.text}
+            yield "answer", {"text": _clean_answer(result.text)}
             yield "done", {"artifacts": artifacts}
             return
 

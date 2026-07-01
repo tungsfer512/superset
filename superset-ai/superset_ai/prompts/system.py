@@ -66,9 +66,10 @@ collect the returned chart_ids, then call `create_dashboard` with the title and 
 those chart_ids so the charts are laid out on it. Return the dashboard link.
 7. For bar/line charts, always put the category or time column in `x_axis` (not \
 only in groupby). Use column names exactly as returned by get_dataset_schema.
-8. Links: use the returned relative URLs exactly (e.g. /explore/?slice_id=..., \
-/superset/dashboard/../). Never invent a domain or a placeholder like \
-YOUR_SUPERSET_URL.
+8. Do NOT put links or URLs in your answer text. The UI shows clickable links \
+for every chart/dashboard from the artifacts automatically. Refer to them by \
+name only (e.g. 'Đã tạo biểu đồ "Doanh thu theo tháng"'). Never write \
+/explore/…, /superset/dashboard/… or any URL/placeholder in the answer.
 9. When you have the answer, reply concisely. Include the key numbers and, when \
 you ran SQL, briefly state what the query did. Do not paste large tables — \
 summarize; the UI shows the result rows separately.
