@@ -47,6 +47,7 @@ const buildResponse = (answer: string): AskResponse => ({
 
 beforeEach(() => {
   mockedAskAi.mockReset();
+  window.localStorage.clear();
 });
 
 test('shows suggested prompts when empty', () => {

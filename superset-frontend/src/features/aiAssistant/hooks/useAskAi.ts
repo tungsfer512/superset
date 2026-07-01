@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { askAi } from '../api';
 import { AiStatus, ChatMessage } from '../types';
 
@@ -29,13 +29,60 @@ export interface UseAskAi {
   reset: () => void;
 }
 
-/** Local conversation state for the Ask AI panel (no global Redux needed). */
+const STORAGE_KEY = 'superset-ai-conversation';
+
+interface StoredConversation {
+  conversationId?: string;
+  messages: ChatMessage[];
+}
+
+function loadStored(): StoredConversation {
+  if (typeof window === 'undefined') {
+    return { messages: [] };
+  }
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      return JSON.parse(raw) as StoredConversation;
+    }
+  } catch {
+    // ignore corrupt/unavailable storage
+  }
+  return { messages: [] };
+}
+
+/**
+ * Local conversation state for the Ask AI panel. Persists the current
+ * conversation to localStorage so it survives reloads (review recent chat).
+ */
 export function useAskAi(): UseAskAi {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const initial = useRef<StoredConversation>(loadStored());
+  const [messages, setMessages] = useState<ChatMessage[]>(
+    initial.current.messages,
+  );
   const [status, setStatus] = useState<AiStatus>('idle');
   const [error, setError] = useState<string | null>(null);
-  const conversationId = useRef<string | undefined>(undefined);
-  const counter = useRef(0);
+  const conversationId = useRef<string | undefined>(
+    initial.current.conversationId,
+  );
+  const counter = useRef(initial.current.messages.length);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          conversationId: conversationId.current,
+          messages,
+        }),
+      );
+    } catch {
+      // storage full/unavailable — non-fatal
+    }
+  }, [messages]);
 
   const nextId = useCallback((role: string) => {
     counter.current += 1;
@@ -80,6 +127,13 @@ export function useAskAi(): UseAskAi {
     setStatus('idle');
     setError(null);
     conversationId.current = undefined;
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    }
   }, []);
 
   return { messages, status, error, send, reset };

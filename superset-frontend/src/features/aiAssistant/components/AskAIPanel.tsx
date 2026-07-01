@@ -17,7 +17,15 @@
  * under the License.
  */
 
-import { FC, useEffect, useRef, useState } from 'react';
+import {
+  CSSProperties,
+  FC,
+  MouseEvent as ReactMouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { styled, t } from '@superset-ui/core';
 import { Button, Input, Typography } from '@superset-ui/core/components';
 import { Icons } from '@superset-ui/core/components/Icons';
@@ -35,17 +43,30 @@ const DEFAULT_PROMPTS = [
   t('Vẽ biểu đồ cột từ một dataset và đưa link.'),
 ];
 
+const SIZE_KEY = 'superset-ai-panel-size';
+const MIN_W = 320;
+const MIN_H = 380;
+const DEFAULT_SIZE = { width: 400, height: 640 };
+
 const Panel = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
-  width: 400px;
-  max-width: calc(100vw - ${({ theme }) => theme.sizeUnit * 8}px);
-  height: min(640px, 78vh);
   background: ${({ theme }) => theme.colorBgContainer};
   border: 1px solid ${({ theme }) => theme.colorBorderSecondary};
   border-radius: ${({ theme }) => theme.borderRadiusLG}px;
   box-shadow: ${({ theme }) => theme.boxShadowSecondary};
   overflow: hidden;
+`;
+
+const ResizeHandle = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: ${({ theme }) => theme.sizeUnit * 4}px;
+  height: ${({ theme }) => theme.sizeUnit * 4}px;
+  cursor: nwse-resize;
+  z-index: 2;
 `;
 
 const Header = styled.div`
@@ -101,20 +122,79 @@ const Typing = styled.div`
 
 const iconButtonStyle = { color: 'inherit' } as const;
 
-/** The chat window body: header, scrolling message list and input. */
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
+
+function loadSize(): { width: number; height: number } {
+  if (typeof window === 'undefined') {
+    return DEFAULT_SIZE;
+  }
+  try {
+    const raw = window.localStorage.getItem(SIZE_KEY);
+    if (raw) {
+      return JSON.parse(raw) as { width: number; height: number };
+    }
+  } catch {
+    // ignore
+  }
+  return DEFAULT_SIZE;
+}
+
+/** The chat window body: resizable/fullscreen, header, message list and input. */
 export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
   const { messages, status, error, send, reset } = useAskAi();
   const [draft, setDraft] = useState('');
+  const [fullscreen, setFullscreen] = useState(false);
+  const [size, setSize] = useState(loadSize);
   const bodyRef = useRef<HTMLDivElement>(null);
   const isLoading = status === 'loading';
 
   useEffect(() => {
-    // Auto-scroll to the latest message.
     const node = bodyRef.current;
     if (node) {
       node.scrollTop = node.scrollHeight;
     }
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SIZE_KEY, JSON.stringify(size));
+    } catch {
+      // ignore
+    }
+  }, [size]);
+
+  const startResize = useCallback(
+    (event: ReactMouseEvent) => {
+      event.preventDefault();
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const startW = size.width;
+      const startH = size.height;
+      const onMove = (moveEvent: MouseEvent) => {
+        // Anchored bottom-right: dragging up-left grows the window.
+        setSize({
+          width: clamp(
+            startW + (startX - moveEvent.clientX),
+            MIN_W,
+            window.innerWidth - 40,
+          ),
+          height: clamp(
+            startH + (startY - moveEvent.clientY),
+            MIN_H,
+            window.innerHeight - 40,
+          ),
+        });
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+    [size],
+  );
 
   const submit = () => {
     const question = draft.trim();
@@ -125,8 +205,33 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
     send(question);
   };
 
+  const panelStyle: CSSProperties = fullscreen
+    ? {
+        position: 'fixed',
+        inset: 16,
+        width: 'auto',
+        height: 'auto',
+        zIndex: 1001,
+      }
+    : {
+        width: size.width,
+        height: Math.min(size.height, window.innerHeight - 40),
+      };
+
   return (
-    <Panel data-test="ask-ai-panel" role="dialog" aria-label={t('Ask AI')}>
+    <Panel
+      data-test="ask-ai-panel"
+      role="dialog"
+      aria-label={t('Ask AI')}
+      style={panelStyle}
+    >
+      {!fullscreen && (
+        <ResizeHandle
+          onMouseDown={startResize}
+          data-test="ask-ai-resize"
+          aria-hidden
+        />
+      )}
       <Header>
         <Avatar>
           <Icons.CommentOutlined />
@@ -139,6 +244,21 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
           onClick={reset}
           aria-label={t('New chat')}
           title={t('New chat')}
+          style={iconButtonStyle}
+        />
+        <Button
+          type="text"
+          size="small"
+          icon={
+            fullscreen ? (
+              <Icons.CompressOutlined style={iconButtonStyle} />
+            ) : (
+              <Icons.ExpandOutlined style={iconButtonStyle} />
+            )
+          }
+          onClick={() => setFullscreen(prev => !prev)}
+          aria-label={fullscreen ? t('Exit fullscreen') : t('Fullscreen')}
+          title={fullscreen ? t('Exit fullscreen') : t('Fullscreen')}
           style={iconButtonStyle}
         />
         {onClose && (
