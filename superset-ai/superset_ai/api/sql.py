@@ -26,8 +26,15 @@ from superset_ai.auth.passthrough import SupersetAuth
 from superset_ai.config import get_settings
 from superset_ai.deps import AuthDep, ClientDep, LlmDep
 from superset_ai.llm.base import LlmClient
+from superset_ai.llm.errors import classify_llm_error
 from superset_ai.sql.guard import UnsafeSqlError
 from superset_ai.superset_client import SupersetClient
+
+
+def _llm_http_error(err: Exception) -> HTTPException:
+    status_code, message = classify_llm_error(err)
+    return HTTPException(status_code=status_code, detail=message)
+
 
 router = APIRouter(prefix="/sql", tags=["sql"])
 
@@ -71,6 +78,8 @@ async def generate(
         raise HTTPException(
             status_code=422, detail=f"Model did not return safe SQL: {err}"
         ) from err
+    except Exception as err:  # noqa: BLE001 - map provider errors to clean HTTP
+        raise _llm_http_error(err) from err
     return {"sql": sql}
 
 
@@ -80,9 +89,12 @@ async def explain(
     llm: LlmClient = LlmDep,
 ) -> dict[str, str]:
     """Explain a SQL query in natural language."""
-    explanation = await orchestrator.explain_sql(
-        llm, get_settings(), sql=body.sql, dialect=body.dialect
-    )
+    try:
+        explanation = await orchestrator.explain_sql(
+            llm, get_settings(), sql=body.sql, dialect=body.dialect
+        )
+    except Exception as err:  # noqa: BLE001 - map provider errors to clean HTTP
+        raise _llm_http_error(err) from err
     return {"explanation": explanation}
 
 
@@ -104,4 +116,6 @@ async def fix(
         raise HTTPException(
             status_code=422, detail=f"Model did not return safe SQL: {err}"
         ) from err
+    except Exception as err:  # noqa: BLE001 - map provider errors to clean HTTP
+        raise _llm_http_error(err) from err
     return {"sql": fixed}

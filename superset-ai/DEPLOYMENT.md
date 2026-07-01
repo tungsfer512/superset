@@ -23,10 +23,18 @@ hỏng Superset; Superset cũng không nạp thêm thư viện AI nào.
 
 ## 2. Chạy
 
+Service `superset-ai` đã được gộp vào **`docker-compose.yml` của Superset** (cùng
+network, trỏ `http://superset:8088`). Provider + API key đặt trong
+`superset-ai/.env` (gitignored).
+
 ```bash
-docker compose up -d --build
+# Từ thư mục gốc repo — chạy cùng toàn bộ stack Superset:
+docker compose up -d --build superset-ai
 curl -s http://localhost:8800/health | jq
 ```
+
+> `SUPERSET_AI_SUPERSET_BASE_URL` được compose override thành `http://superset:8088`
+> nên không cần sửa trong `.env`.
 
 ## 3. Reverse proxy (khuyến nghị) — giữ RBAC/RLS
 

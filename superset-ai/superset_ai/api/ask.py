@@ -22,7 +22,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -31,6 +31,7 @@ from superset_ai.auth.passthrough import SupersetAuth
 from superset_ai.config import get_settings
 from superset_ai.deps import AuthDep, ClientDep, GroundingDep, LlmDep, StoreDep
 from superset_ai.llm.base import LlmClient
+from superset_ai.llm.errors import classify_llm_error
 from superset_ai.smart.grounding import GroundingService
 from superset_ai.store import ConversationStore
 from superset_ai.superset_client import SupersetClient
@@ -64,16 +65,20 @@ async def ask(
     grounding: GroundingService | None = GroundingDep,
 ) -> AskResponse:
     """Answer a natural-language question (runs tools as needed)."""
-    result = await orchestrator.ask(
-        llm,
-        client,
-        auth,
-        get_settings(),
-        question=body.question,
-        store=store,
-        conversation_id=body.conversation_id,
-        grounding=grounding,
-    )
+    try:
+        result = await orchestrator.ask(
+            llm,
+            client,
+            auth,
+            get_settings(),
+            question=body.question,
+            store=store,
+            conversation_id=body.conversation_id,
+            grounding=grounding,
+        )
+    except Exception as err:  # noqa: BLE001 - map provider errors to clean HTTP
+        status_code, message = classify_llm_error(err)
+        raise HTTPException(status_code=status_code, detail=message) from err
     return AskResponse(
         answer=result.answer,
         conversation_id=result.conversation_id,
@@ -102,16 +107,20 @@ async def ask_stream(
     """
 
     async def event_stream() -> AsyncIterator[str]:
-        async for event_type, payload in orchestrator.stream_ask(
-            llm,
-            client,
-            auth,
-            get_settings(),
-            question=body.question,
-            store=store,
-            conversation_id=body.conversation_id,
-            grounding=grounding,
-        ):
-            yield _sse(event_type, payload)
+        try:
+            async for event_type, payload in orchestrator.stream_ask(
+                llm,
+                client,
+                auth,
+                get_settings(),
+                question=body.question,
+                store=store,
+                conversation_id=body.conversation_id,
+                grounding=grounding,
+            ):
+                yield _sse(event_type, payload)
+        except Exception as err:  # noqa: BLE001 - surface provider errors as an event
+            _, message = classify_llm_error(err)
+            yield _sse("error", {"detail": message})
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

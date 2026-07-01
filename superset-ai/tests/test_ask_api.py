@@ -48,6 +48,29 @@ def test_ask_returns_answer_and_artifacts():
     assert len(body["artifacts"]) == 1
 
 
+class RaisingLLM:
+    """An LLM whose calls fail like a provider quota error."""
+
+    def user_message(self, text):
+        return {"role": "user", "content": text}
+
+    async def complete(self, **_kwargs):
+        raise RuntimeError("429 RESOURCE_EXHAUSTED: quota exceeded")
+
+    def tool_result_message(self, _results):
+        return []
+
+
+def test_ask_maps_provider_quota_error_to_429():
+    app = create_app()
+    app.dependency_overrides[get_llm] = lambda: RaisingLLM()
+    app.dependency_overrides[get_superset_client] = lambda: FakeSupersetClient()
+    with TestClient(app, raise_server_exceptions=False) as client:
+        resp = client.post("/ask", json={"question": "x"}, headers=AUTH)
+    assert resp.status_code == 429
+    assert "rate limit" in resp.json()["detail"].lower()
+
+
 def test_ask_requires_llm_configured():
     # No override -> app.state.llm is None -> 503.
     app = create_app()

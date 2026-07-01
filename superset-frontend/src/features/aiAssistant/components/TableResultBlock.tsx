@@ -20,7 +20,7 @@
 import { FC } from 'react';
 import { t } from '@superset-ui/core';
 import { Flex, Typography } from '@superset-ui/core/components';
-import { Table } from '@superset-ui/core/components/Table';
+import { Table, TableSize } from '@superset-ui/core/components/Table';
 import { SqlArtifact } from '../types';
 
 export interface TableResultBlockProps {
@@ -53,7 +53,12 @@ export const TableResultBlock: FC<TableResultBlockProps> = ({
       <Typography.Text type="secondary">
         {t('%s row(s)', artifact.row_count)}
       </Typography.Text>
-      <Table size="small" columns={columns} data={data} pagination={false} />
+      <Table
+        size={TableSize.Small}
+        columns={columns}
+        data={data}
+        pagination={false}
+      />
     </Flex>
   );
 };

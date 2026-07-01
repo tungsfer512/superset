@@ -13,10 +13,19 @@ ngôn ngữ tự nhiên ngay trong Superset.
 
 ## Cấu hình URL sidecar
 
-Mặc định gọi `'/superset-ai'` (đường dẫn reverse proxy cùng domain). Đổi runtime:
+Panel **luôn gọi vào sidecar `superset-ai`**, không gọi Superset core.
+
+- **Mặc định:** sidecar trên cùng host, cổng `8800` (vd `http://localhost:8800`).
+  Đây là gọi cross-origin → sidecar phải cho phép origin của Superset qua
+  `SUPERSET_AI_EXTRA_CORS_ORIGINS` (vd `http://localhost:8088`).
+- **Sau reverse proxy cùng domain:** set `window.supersetAiBaseUrl = '/superset-ai'`
+  để gọi same-origin (cookie tự gửi, không cần CORS).
 
 ```js
-window.supersetAiBaseUrl = 'https://my-host:8800';
+// ví dụ override khi có proxy cùng domain:
+window.supersetAiBaseUrl = '/superset-ai';
+// hoặc trỏ host/cổng khác:
+window.supersetAiBaseUrl = 'https://ai.my-host.com';
 ```
 
 ## Gắn vào giao diện

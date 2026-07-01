@@ -18,17 +18,30 @@
  */
 
 /**
- * Base URL of the `superset-ai` sidecar. Defaults to a same-origin reverse
- * proxy path (recommended, so the Superset session cookie is forwarded). Set
- * `window.supersetAiBaseUrl` at runtime to point elsewhere.
+ * Base URL of the `superset-ai` sidecar — the panel always talks to the
+ * sidecar, never to Superset core.
+ *
+ * Resolution order:
+ *  1. `window.supersetAiBaseUrl` if set (e.g. `'/superset-ai'` when Superset is
+ *     served behind a reverse proxy that routes that path to the sidecar —
+ *     same-origin, so the session cookie flows automatically).
+ *  2. Otherwise the sidecar on the same host at its dedicated port (default
+ *     8800), e.g. `http://localhost:8800`. This is a cross-origin call, so the
+ *     sidecar must allow the Superset origin (SUPERSET_AI_EXTRA_CORS_ORIGINS)
+ *     and the request sends credentials.
  */
-const DEFAULT_BASE_URL = '/superset-ai';
+const DEFAULT_SIDECAR_PORT = '8800';
 
 type WindowWithSidecar = Window & { supersetAiBaseUrl?: string };
 
 export function getSidecarBaseUrl(): string {
   if (typeof window === 'undefined') {
-    return DEFAULT_BASE_URL;
+    return `:${DEFAULT_SIDECAR_PORT}`;
   }
-  return (window as WindowWithSidecar).supersetAiBaseUrl ?? DEFAULT_BASE_URL;
+  const override = (window as WindowWithSidecar).supersetAiBaseUrl;
+  if (override) {
+    return override;
+  }
+  const { protocol, hostname } = window.location;
+  return `${protocol}//${hostname}:${DEFAULT_SIDECAR_PORT}`;
 }

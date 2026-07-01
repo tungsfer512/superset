@@ -42,7 +42,20 @@ export async function askAi(
   });
 
   if (!response.ok) {
-    throw new Error(`AI request failed (${response.status})`);
+    throw new Error(await errorMessage(response));
   }
   return (await response.json()) as AskResponse;
+}
+
+/** Extract the sidecar's `detail` message (falling back to the status). */
+async function errorMessage(response: Response): Promise<string> {
+  try {
+    const body = (await response.json()) as { detail?: string };
+    if (body.detail) {
+      return body.detail;
+    }
+  } catch {
+    // non-JSON body; fall through to the generic message
+  }
+  return `AI request failed (${response.status})`;
 }
