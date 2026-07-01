@@ -16728,3 +16728,52 @@ msgstr "Tô theo series"
 
 msgid "Color by column (category)"
 msgstr "Tô theo cột (category)"
+
+#. AI assistant (Ask AI) panel — added for the AI Q&A integration.
+msgid "Ask AI"
+msgstr "Trợ lý AI"
+
+msgid "Ask a question about your data…"
+msgstr "Đặt câu hỏi về dữ liệu của bạn…"
+
+msgid "Assistant"
+msgstr "Trợ lý"
+
+msgid "Assistant is thinking…"
+msgstr "Trợ lý đang trả lời…"
+
+msgid "Chat"
+msgstr "Cuộc trò chuyện"
+
+msgid "Fullscreen"
+msgstr "Toàn màn hình"
+
+msgid "History"
+msgstr "Lịch sử"
+
+msgid "Loading history…"
+msgstr "Đang tải lịch sử…"
+
+msgid "messages"
+msgstr "tin nhắn"
+
+msgid "New chat"
+msgstr "Cuộc trò chuyện mới"
+
+msgid "No saved conversations yet."
+msgstr "Chưa có cuộc trò chuyện nào được lưu."
+
+msgid "Open: %s"
+msgstr "Mở: %s"
+
+msgid "Send"
+msgstr "Gửi"
+
+msgid "SQL executed"
+msgstr "Đã chạy SQL"
+
+msgid "%s row(s)"
+msgstr "%s dòng"
+
+msgid "You"
+msgstr "Bạn"
