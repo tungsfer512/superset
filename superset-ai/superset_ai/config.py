@@ -62,8 +62,9 @@ class Settings(BaseSettings):
     allow_write_tools: bool = False
     max_tool_iterations: int = 6
     rate_limit_per_min: int = 30
-    # Extra browser origins allowed to call the sidecar (comma-separated).
-    extra_cors_origins: str = ""
+    # Browser origins allowed to call the sidecar (comma-separated). Use "*" to
+    # allow ALL origins (works with cookies via origin echo). Defaults to "*".
+    extra_cors_origins: str = "*"
     # Optional Redis backend for rate limiting (multi-worker deployments).
     # If unset, an in-memory limiter is used (single worker only).
     redis_url: str | None = None

@@ -24,7 +24,12 @@ import {
   waitFor,
 } from 'spec/helpers/testing-library';
 import AskAIPanel from './components/AskAIPanel';
-import { askAi, getConversation, listConversations } from './api';
+import {
+  askAi,
+  getConversation,
+  getSuggestions,
+  listConversations,
+} from './api';
 import { AskResponse } from './types';
 
 jest.mock('./api');
@@ -35,6 +40,9 @@ const mockedList = listConversations as jest.MockedFunction<
 >;
 const mockedGet = getConversation as jest.MockedFunction<
   typeof getConversation
+>;
+const mockedSuggestions = getSuggestions as jest.MockedFunction<
+  typeof getSuggestions
 >;
 
 const buildResponse = (answer: string): AskResponse => ({
@@ -53,12 +61,18 @@ const buildResponse = (answer: string): AskResponse => ({
 
 beforeEach(() => {
   mockedAskAi.mockReset();
+  mockedList.mockReset();
+  mockedGet.mockReset();
+  mockedSuggestions.mockReset();
   window.localStorage.clear();
+  // Defaults: no history -> fresh chat; suggestions fall back to local defaults.
+  mockedList.mockResolvedValue([]);
+  mockedSuggestions.mockResolvedValue({ suggestions: [], generated: false });
 });
 
-test('shows suggested prompts when empty', () => {
+test('shows suggested prompts when empty', async () => {
   render(<AskAIPanel onClose={jest.fn()} />);
-  expect(screen.getByText('Gợi ý câu hỏi')).toBeInTheDocument();
+  expect(await screen.findByText('Gợi ý câu hỏi')).toBeInTheDocument();
 });
 
 test('sends a question and renders the answer with SQL', async () => {
@@ -82,7 +96,9 @@ test('clicking a suggested prompt triggers a request', async () => {
   mockedAskAi.mockResolvedValue(buildResponse('Đây là kết quả.'));
   render(<AskAIPanel onClose={jest.fn()} />);
 
-  await userEvent.click(screen.getByText('Có những dataset nào tôi xem được?'));
+  await userEvent.click(
+    await screen.findByText('Có những dataset nào tôi xem được?'),
+  );
 
   await waitFor(() => expect(mockedAskAi).toHaveBeenCalledTimes(1));
   expect(await screen.findByText('Đây là kết quả.')).toBeInTheDocument();
@@ -103,6 +119,31 @@ test('shows an error message when the request fails', async () => {
   ).toBeInTheDocument();
 });
 
+test('resumes the last conversation on open without fetching suggestions', async () => {
+  mockedList.mockResolvedValue([
+    { id: 'c1', title: 'Cũ', updated_at: 1, message_count: 2 },
+  ]);
+  mockedGet.mockResolvedValue({
+    id: 'c1',
+    messages: [{ role: 'assistant', text: 'Trả lời cũ' }],
+  });
+  mockedSuggestions.mockResolvedValue({
+    suggestions: ['Doanh thu theo quý?', 'Top sản phẩm bán chạy?'],
+    generated: true,
+  });
+  render(<AskAIPanel onClose={jest.fn()} />);
+
+  // The last session is restored automatically...
+  expect(await screen.findByText('Trả lời cũ')).toBeInTheDocument();
+  // ...and no (paid) suggestions call was made on open.
+  expect(mockedSuggestions).not.toHaveBeenCalled();
+
+  // Only "New chat" fetches history-based suggestions.
+  await userEvent.click(screen.getByRole('button', { name: 'New chat' }));
+  expect(await screen.findByText('Doanh thu theo quý?')).toBeInTheDocument();
+  expect(mockedSuggestions).toHaveBeenCalledTimes(1);
+});
+
 test('opens history and loads a past conversation', async () => {
   mockedList.mockResolvedValue([
     { id: 'c1', title: 'Doanh thu 2024', updated_at: 1, message_count: 2 },
@@ -110,7 +151,7 @@ test('opens history and loads a past conversation', async () => {
   mockedGet.mockResolvedValue({
     id: 'c1',
     messages: [
-      { role: 'user', text: 'Doanh thu 2024' },
+      { role: 'user', text: 'Xem doanh thu' },
       { role: 'assistant', text: 'Tổng doanh thu là 1 tỷ.' },
     ],
   });

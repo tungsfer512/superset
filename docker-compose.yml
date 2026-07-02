@@ -154,17 +154,6 @@ services:
     # stack still boots without it (AI endpoints then return 503).
     env_file:
       - path: superset-ai/.env
-        required: false
-    environment:
-      # Reach Superset over the compose network (overrides any .env value).
-      SUPERSET_AI_SUPERSET_BASE_URL: http://superset:8088
-      # Allow the browser (served from Superset at :8088) to call the sidecar
-      # cross-origin with the session cookie.
-      SUPERSET_AI_EXTRA_CORS_ORIGINS: http://localhost:8088,http://127.0.0.1:8088
-      # Allow the assistant to create charts (write). Deletes are never exposed.
-      SUPERSET_AI_ALLOW_WRITE_TOOLS: "true"
-      # Persist chat history to a SQLite file on the mounted volume below.
-      SUPERSET_AI_CONVERSATION_DB_PATH: /app/data/conversations.db
     ports:
       - 8800:8800
     volumes:

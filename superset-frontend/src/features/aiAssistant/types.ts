@@ -85,3 +85,10 @@ export interface ConversationDetail {
   id: string;
   messages: StoredMessage[];
 }
+
+/** Suggested prompts for the empty chat state (`GET /suggestions`). */
+export interface SuggestionsResponse {
+  suggestions: string[];
+  /** True when inferred from history by the LLM (vs history-derived/default). */
+  generated: boolean;
+}

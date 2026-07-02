@@ -21,6 +21,7 @@ import { styled, css, useTheme } from '@superset-ui/core';
 import { ensureStaticPrefix } from 'src/utils/assetUrl';
 import { ensureAppRoot } from 'src/utils/pathUtils';
 import { getUrlParam } from 'src/utils/urlUtils';
+import getBootstrapData from 'src/utils/getBootstrapData';
 import { MainNav, MenuItem } from '@superset-ui/core/components/Menu';
 import { Tooltip, Grid, Row, Col, Image } from '@superset-ui/core/components';
 import { GenericLink } from 'src/components';
@@ -199,6 +200,10 @@ export function Menu({
   const screens = useBreakpoint();
   const uiConfig = useUiConfig();
   const theme = useTheme();
+  // Master on/off switch for the AI assistant (AI_ASSISTANT_ENABLED env var).
+  // Defaults to enabled when the key is absent.
+  const aiAssistantEnabled =
+    getBootstrapData().common?.conf?.AI_ASSISTANT_ENABLED !== false;
 
   enum Paths {
     Explore = '/explore',
@@ -385,7 +390,8 @@ export function Menu({
         </Col>
       </StyledRow>
       {/* Floating Ask AI chat bubble (fixed, bottom-right). */}
-      <AskAIWidget />
+      {/* Toggled by the AI_ASSISTANT_ENABLED config (env var, defaults on). */}
+      {aiAssistantEnabled && <AskAIWidget />}
     </StyledHeader>
   );
 }

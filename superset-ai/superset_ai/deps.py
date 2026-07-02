@@ -46,6 +46,15 @@ def get_llm(request: Request) -> LlmClient:
     return llm
 
 
+def get_llm_optional(request: Request) -> LlmClient | None:
+    """Return the LLM client if configured, else None (no 503).
+
+    For best-effort features (e.g. suggestions) that degrade gracefully when no
+    provider key is set.
+    """
+    return getattr(request.app.state, "llm", None)
+
+
 def get_store(request: Request) -> ConversationStore:
     """Return the shared conversation store."""
     store: ConversationStore | None = getattr(request.app.state, "store", None)
@@ -85,6 +94,7 @@ def enforce_rate_limit(request: Request, auth: SupersetAuth = AuthDep) -> None:
 
 ClientDep = Depends(get_superset_client)
 LlmDep = Depends(get_llm)
+LlmOptionalDep = Depends(get_llm_optional)
 StoreDep = Depends(get_store)
 GroundingDep = Depends(get_grounding)
 RateLimitDep = Depends(enforce_rate_limit)

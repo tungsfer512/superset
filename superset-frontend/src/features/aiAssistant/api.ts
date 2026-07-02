@@ -18,7 +18,12 @@
  */
 
 import { getSidecarBaseUrl } from './config';
-import { AskResponse, ConversationDetail, ConversationSummary } from './types';
+import {
+  AskResponse,
+  ConversationDetail,
+  ConversationSummary,
+  SuggestionsResponse,
+} from './types';
 
 /**
  * Extract the sidecar's `detail` message (falling back to the status).
@@ -90,4 +95,19 @@ export async function getConversation(
     throw new Error(await errorMessage(response));
   }
   return (await response.json()) as ConversationDetail;
+}
+
+/** Fetch suggested prompts, inferred from the user's chat history when possible. */
+export async function getSuggestions(
+  signal?: AbortSignal,
+): Promise<SuggestionsResponse> {
+  const response = await fetch(`${getSidecarBaseUrl()}/suggestions`, {
+    method: 'GET',
+    credentials: 'include',
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(await errorMessage(response));
+  }
+  return (await response.json()) as SuggestionsResponse;
 }

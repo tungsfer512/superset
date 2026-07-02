@@ -19,12 +19,20 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from superset_ai.deps import get_llm, get_store, get_superset_client
+from superset_ai.auth.passthrough import SupersetAuth
+from superset_ai.deps import (
+    get_llm,
+    get_llm_optional,
+    get_store,
+    get_superset_client,
+)
 from superset_ai.main import create_app
 from superset_ai.store import InMemoryConversationStore, SqliteConversationStore
 from tests.fakes import FakeLLM, FakeSupersetClient, text_turn
 
 AUTH = {"Authorization": "Bearer caller"}
+# The store is keyed by the (hashed) caller identity, not the raw header.
+USER_KEY = SupersetAuth(authorization="Bearer caller").identity()
 
 
 @pytest.fixture(params=["memory", "sqlite"])
@@ -68,6 +76,7 @@ def test_store_is_user_scoped(store):
 def _app(llm, store):
     app = create_app()
     app.dependency_overrides[get_llm] = lambda: llm
+    app.dependency_overrides[get_llm_optional] = lambda: llm
     app.dependency_overrides[get_superset_client] = lambda: FakeSupersetClient()
     app.dependency_overrides[get_store] = lambda: store
     return app
@@ -92,6 +101,53 @@ def test_conversations_api_list_and_get():
         messages = detail.json()["messages"]
         assert messages[0]["text"] == "Xin chào"
         assert messages[1]["text"] == "Chào bạn."
+
+
+def test_suggestions_default_when_no_history():
+    store = InMemoryConversationStore()
+    llm = FakeLLM([])  # not consulted when there's no history
+    with TestClient(_app(llm, store)) as client:
+        resp = client.get("/suggestions", headers=AUTH)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["generated"] is False
+    assert len(body["suggestions"]) == 3
+
+
+def test_suggestions_inferred_from_history():
+    store = InMemoryConversationStore()
+    store.append_messages(
+        "c1", USER_KEY, [{"role": "user", "text": "Doanh thu theo tháng"}]
+    )
+    llm = FakeLLM(
+        [
+            text_turn(
+                '["Doanh thu theo quý?", "Top sản phẩm bán chạy?", "So sánh 2 năm?"]'
+            )
+        ]
+    )
+    with TestClient(_app(llm, store)) as client:
+        resp = client.get("/suggestions", headers=AUTH)
+    body = resp.json()
+    assert body["generated"] is True
+    assert "Doanh thu theo quý?" in body["suggestions"]
+    assert len(body["suggestions"]) == 3
+
+
+def test_suggestions_fall_back_to_titles_without_llm():
+    store = InMemoryConversationStore()
+    store.append_messages(
+        "c1", USER_KEY, [{"role": "user", "text": "Câu hỏi cũ của tôi"}]
+    )
+    app = create_app()
+    app.dependency_overrides[get_superset_client] = lambda: FakeSupersetClient()
+    app.dependency_overrides[get_store] = lambda: store
+    # No get_llm override -> app.state.llm is None -> re-surface past questions.
+    with TestClient(app) as client:
+        resp = client.get("/suggestions", headers=AUTH)
+    body = resp.json()
+    assert body["generated"] is False
+    assert body["suggestions"] == ["Câu hỏi cũ của tôi"]
 
 
 def test_followup_replays_prior_turns_for_context():

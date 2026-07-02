@@ -86,14 +86,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await app.state.superset_client.aclose()
 
 
-def _cors_origins(settings: Settings) -> list[str]:
-    origins = [settings.superset_base_url]
-    origins.extend(
+def _cors_origins(settings: Settings) -> tuple[list[str], str | None]:
+    """Resolve (allow_origins, allow_origin_regex) for the CORS middleware.
+
+    ``SUPERSET_AI_EXTRA_CORS_ORIGINS=*`` allows ALL origins. Because the sidecar
+    uses credentials (session cookies), a literal ``Access-Control-Allow-Origin:
+    *`` is rejected by browsers, so we use ``allow_origin_regex=".*"`` which
+    echoes the caller's origin back and works with credentials.
+    """
+    raw = [
         origin.strip()
         for origin in settings.extra_cors_origins.split(",")
         if origin.strip()
-    )
-    return origins
+    ]
+    if "*" in raw:
+        return [], ".*"
+    return [settings.superset_base_url, *raw], None
 
 
 def create_app() -> FastAPI:
@@ -108,9 +116,11 @@ def create_app() -> FastAPI:
     )
 
     # Allow the Superset frontend origin to call the sidecar from the browser.
+    allow_origins, allow_origin_regex = _cors_origins(settings)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=_cors_origins(settings),
+        allow_origins=allow_origins,
+        allow_origin_regex=allow_origin_regex,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

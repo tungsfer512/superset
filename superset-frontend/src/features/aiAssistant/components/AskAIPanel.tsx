@@ -26,9 +26,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { styled, t } from '@superset-ui/core';
+import { keyframes, styled, t } from '@superset-ui/core';
 import { Button, Input, Typography } from '@superset-ui/core/components';
 import { Icons } from '@superset-ui/core/components/Icons';
+import { getSuggestions, listConversations } from '../api';
 import { useAskAi } from '../hooks/useAskAi';
 import ChatMessage from './ChatMessage';
 import ConversationHistory from './ConversationHistory';
@@ -121,6 +122,42 @@ const Typing = styled.div`
   font-style: italic;
 `;
 
+const blink = keyframes`
+  0%, 80%, 100% { opacity: 0.2; }
+  40% { opacity: 1; }
+`;
+
+/** Animated three-dot "typing" indicator (shown while a request is pending). */
+const Dots = styled.div`
+  align-self: flex-start;
+  display: inline-flex;
+  gap: ${({ theme }) => theme.sizeUnit}px;
+  padding: ${({ theme }) => theme.sizeUnit * 2}px
+    ${({ theme }) => theme.sizeUnit * 3}px;
+
+  span {
+    width: ${({ theme }) => theme.sizeUnit * 2}px;
+    height: ${({ theme }) => theme.sizeUnit * 2}px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colorTextSecondary};
+    animation: ${blink} 1.4s infinite both;
+  }
+  span:nth-of-type(2) {
+    animation-delay: 0.2s;
+  }
+  span:nth-of-type(3) {
+    animation-delay: 0.4s;
+  }
+`;
+
+const LoadingDots: FC = () => (
+  <Dots data-test="ai-loading-dots" aria-label={t('Loading')}>
+    <span />
+    <span />
+    <span />
+  </Dots>
+);
+
 const iconButtonStyle = { color: 'inherit' } as const;
 
 const clamp = (value: number, min: number, max: number) =>
@@ -147,8 +184,13 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
   const [draft, setDraft] = useState('');
   const [fullscreen, setFullscreen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [prompts, setPrompts] = useState<string[]>(DEFAULT_PROMPTS);
+  const [promptStatus, setPromptStatus] = useState<'loading' | 'ready'>(
+    'loading',
+  );
   const [size, setSize] = useState(loadSize);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const bootstrapped = useRef(false);
   const isLoading = status === 'loading';
 
   useEffect(() => {
@@ -198,6 +240,61 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
     [size],
   );
 
+  // Fetch suggestions (an LLM call) ONLY when intentionally opening a blank
+  // chat — a brand-new user or an explicit "New chat". While it is in flight we
+  // show the typing dots rather than flashing the defaults then swapping them.
+  const startFreshChat = useCallback(() => {
+    reset();
+    setShowHistory(false);
+    setPromptStatus('loading');
+    getSuggestions()
+      .then(result => {
+        setPrompts(
+          result.suggestions?.length ? result.suggestions : DEFAULT_PROMPTS,
+        );
+        setPromptStatus('ready');
+      })
+      .catch(() => {
+        setPrompts(DEFAULT_PROMPTS);
+        setPromptStatus('ready');
+      });
+  }, [reset]);
+
+  // On open: resume the last session (from localStorage, else the most recent
+  // saved conversation) so we don't spend a suggestions call. Only fall back to
+  // a fresh chat (with suggestions) when there is genuinely no history.
+  useEffect(() => {
+    if (bootstrapped.current) {
+      return undefined;
+    }
+    bootstrapped.current = true;
+    if (messages.length > 0) {
+      setPromptStatus('ready');
+      return undefined;
+    }
+    let cancelled = false;
+    listConversations()
+      .then(list => {
+        if (cancelled) {
+          return;
+        }
+        if (list.length > 0) {
+          openConversation(list[0].id);
+        } else {
+          startFreshChat();
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          startFreshChat();
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const submit = () => {
     const question = draft.trim();
     if (!question || isLoading) {
@@ -243,10 +340,7 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
           type="text"
           size="small"
           icon={<Icons.PlusOutlined style={iconButtonStyle} />}
-          onClick={() => {
-            setShowHistory(false);
-            reset();
-          }}
+          onClick={startFreshChat}
           aria-label={t('New chat')}
           title={t('New chat')}
           style={iconButtonStyle}
@@ -299,13 +393,21 @@ export const AskAIPanel: FC<AskAIPanelProps> = ({ onClose }) => {
         ) : (
           <>
             {messages.length === 0 ? (
-              <SuggestedPrompts prompts={DEFAULT_PROMPTS} onSelect={send} />
+              // While resuming/loading suggestions, show the typing dots — never
+              // flash the defaults and then swap them out.
+              promptStatus === 'loading' ? (
+                <LoadingDots />
+              ) : (
+                <SuggestedPrompts prompts={prompts} onSelect={send} />
+              )
             ) : (
               messages.map(message => (
                 <ChatMessage key={message.id} message={message} />
               ))
             )}
-            {isLoading && <Typing>{t('Assistant is thinking…')}</Typing>}
+            {isLoading && messages.length > 0 && (
+              <Typing>{t('Assistant is thinking…')}</Typing>
+            )}
             {error && (
               <Typography.Text type="danger" data-test="ai-error">
                 {error}

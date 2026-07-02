@@ -1821,6 +1821,14 @@ DATABASE_OAUTH2_TIMEOUT = timedelta(seconds=30)
 # Enable/disable CSP warning
 CONTENT_SECURITY_POLICY_WARNING = True
 
+# --- AI assistant (Ask AI) ------------------------------------------------
+# Master on/off switch for the embedded AI assistant (the floating "Ask AI"
+# chat widget served by the superset-ai sidecar). Set the AI_ASSISTANT_ENABLED
+# environment variable to "false"/"0" to hide it everywhere. Defaults to on.
+AI_ASSISTANT_ENABLED = utils.cast_to_boolean(
+    os.environ.get("AI_ASSISTANT_ENABLED", True)
+)
+
 # Do you want Talisman enabled?
 TALISMAN_ENABLED = utils.cast_to_boolean(os.environ.get("TALISMAN_ENABLED", True))
 
