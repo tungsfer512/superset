@@ -381,14 +381,17 @@ if ENABLE_KEYCLOAK_SSO:
 
     import sqlalchemy as _sa
     from sqlalchemy.orm import relationship as _sa_relationship
+    from urllib.parse import quote as _url_quote
+
     from flask import flash, g, redirect, request
     from flask_appbuilder import BaseView, Model, ModelView, expose
     from flask_appbuilder._compat import as_unicode
     from flask_appbuilder.models.sqla.interface import SQLAInterface
     from flask_appbuilder.security.forms import LoginForm_db
     from flask_appbuilder.security.manager import AUTH_OAUTH
+    from flask_appbuilder.security.views import AuthOAuthView
     from flask_appbuilder.utils.base import get_safe_redirect
-    from flask_login import login_user
+    from flask_login import login_user, logout_user
 
     from superset.security import SupersetSecurityManager
 
@@ -414,8 +417,25 @@ if ENABLE_KEYCLOAK_SSO:
 
     _kc_base = os.getenv("KEYCLOAK_BASE_URL", "http://localhost:8080").rstrip("/")
     _kc_realm = os.getenv("KEYCLOAK_REALM", "master")
+    _kc_client_id = os.getenv("KEYCLOAK_CLIENT_ID", "superset")
     _kc_realm_url = f"{_kc_base}/realms/{_kc_realm}"
     _kc_oidc = f"{_kc_realm_url}/protocol/openid-connect"
+
+    class KeycloakAuthOAuthView(AuthOAuthView):
+        """Single Logout: clear the local Superset session AND end the Keycloak
+        SSO session, so logging out truly logs the user out (next login prompts
+        for credentials again instead of silently re-authenticating)."""
+
+        @expose("/logout/")
+        def logout(self):
+            logout_user()  # drop the local Flask/Superset session
+            # RP-initiated logout at Keycloak, returning to Superset afterwards.
+            post_logout = request.url_root
+            kc_logout = (
+                f"{_kc_oidc}/logout?client_id={_kc_client_id}"
+                f"&post_logout_redirect_uri={_url_quote(post_logout, safe='')}"
+            )
+            return redirect(kc_logout)
 
     AUTH_TYPE = AUTH_OAUTH
 
@@ -488,6 +508,9 @@ if ENABLE_KEYCLOAK_SSO:
     class KeycloakSecurityManager(SupersetSecurityManager):
         """Map Keycloak user info + roles onto Superset accounts and keep the
         database login working alongside the Keycloak SSO button."""
+
+        # Use the SLO-aware OAuth view so /logout/ also ends the Keycloak session.
+        authoauthview = KeycloakAuthOAuthView
 
         def register_views(self):
             super().register_views()
@@ -594,6 +617,48 @@ if ENABLE_KEYCLOAK_SSO:
                     "Keycloak role-mapping lookup failed: %s", ex
                 )
             return roles
+
+        def auth_user_oauth(self, userinfo):
+            """Auto-provision the Keycloak user on SSO login.
+
+            FAB only auto-creates OAuth users when AUTH_USER_REGISTRATION is
+            True. We keep that global flag False (so no OTHER path can
+            self-register) yet still create the account for anyone who
+            authenticates through Keycloak. This mirrors FAB's own
+            ``auth_user_oauth`` minus the registration gate.
+            """
+            username = userinfo.get("username") or userinfo.get("email")
+            if not username:
+                _kc_logging.getLogger(__name__).error(
+                    "Keycloak SSO: userinfo missing username/email: %s", userinfo
+                )
+                return None
+
+            user = self.find_user(username=username)
+            if user and not user.is_active:
+                return None
+
+            # Keep roles in sync for existing users (when enabled).
+            if user and self.auth_roles_sync_at_login:
+                user.roles = self._oauth_calculate_user_roles(userinfo)
+
+            # New user: create it regardless of AUTH_USER_REGISTRATION.
+            if not user:
+                user = self.add_user(
+                    username=username,
+                    first_name=userinfo.get("first_name", ""),
+                    last_name=userinfo.get("last_name", ""),
+                    email=userinfo.get("email", "") or f"{username}@email.notfound",
+                    role=self._oauth_calculate_user_roles(userinfo),
+                )
+                if not user:
+                    _kc_logging.getLogger(__name__).error(
+                        "Keycloak SSO: failed to auto-create user %s", username
+                    )
+                    return None
+
+            self.update_user_auth_stat(user)
+            return user
 
         def oauth_user_info(self, provider, response=None):
             if provider != "keycloak":
