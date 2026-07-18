@@ -29,8 +29,12 @@ export const SEPARATOR = ' : ';
 export const buildTimeRangeString = (since: string, until: string): string =>
   `${since}${SEPARATOR}${until}`;
 
+// Hide the time portion for day-boundary endpoints so a date range reads
+// cleanly (e.g. "… < 2026-07-18" instead of "… < 2026-07-18T23:59:59").
+// Genuine times (e.g. 01:00:00) are kept so precision isn't lost.
 const formatDateEndpoint = (dttm: string, isStart?: boolean): string =>
-  dttm.replace('T00:00:00', '') || (isStart ? '-∞' : '∞');
+  dttm.replace(/T(?:00:00:00|23:59:59)(?:\.\d+)?$/, '') ||
+  (isStart ? '-∞' : '∞');
 
 export const formatTimeRange = (
   timeRange: string,

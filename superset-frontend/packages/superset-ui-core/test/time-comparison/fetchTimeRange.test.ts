@@ -49,6 +49,10 @@ test('generates a readable time range', () => {
   expect(formatTimeRange('2010-07-30T01:00:00 : ')).toBe(
     '2010-07-30T01:00:00 ≤ col < ∞',
   );
+  // End-of-day upper bound is shown as a plain date (no 23:59:59).
+  expect(formatTimeRange('2026-07-11T00:00:00 : 2026-07-18T23:59:59')).toBe(
+    '2026-07-11 ≤ col < 2026-07-18',
+  );
   expect(formatTimeRange(' : 2020-07-30T00:00:00')).toBe(
     '-∞ ≤ col < 2020-07-30',
   );
