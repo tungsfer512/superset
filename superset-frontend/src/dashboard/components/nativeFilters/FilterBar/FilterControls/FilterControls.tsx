@@ -34,6 +34,7 @@ import {
   css,
   SupersetTheme,
   t,
+  isNativeFilter,
   isNativeFilterWithDataMask,
 } from '@superset-ui/core';
 import {
@@ -117,8 +118,38 @@ const FilterControls: FC<FilterControlsProps> = ({
 
   const filterIds = new Set(filtersWithValues.map(item => item.id));
 
-  const [filtersInScope, filtersOutOfScope] =
+  const [filtersInScopeAll, filtersOutOfScope] =
     useSelectFiltersInScope(filtersWithValues);
+
+  // A dependent (child) filter is only meaningful once its parent filter(s)
+  // have a value. Hide child filters until every parent they depend on is set,
+  // so the bar isn't cluttered with filters that can't yet be used.
+  const parentHasValue = useCallback(
+    (parentId: string) => {
+      const value =
+        dataMaskSelected[parentId]?.filterState?.value ??
+        dataMask[parentId]?.filterState?.value;
+      return (
+        value !== undefined &&
+        value !== null &&
+        !(Array.isArray(value) && value.length === 0)
+      );
+    },
+    [dataMaskSelected, dataMask],
+  );
+
+  const isFilterVisible = useCallback(
+    (filter: Filter | Divider) =>
+      !isNativeFilter(filter) ||
+      !filter.cascadeParentIds?.length ||
+      filter.cascadeParentIds.every(parentHasValue),
+    [parentHasValue],
+  );
+
+  const filtersInScope = useMemo(
+    () => filtersInScopeAll.filter(isFilterVisible),
+    [filtersInScopeAll, isFilterVisible],
+  );
 
   const hasRequiredFirst = useMemo(
     () => filtersWithValues.some(filter => filter.requiredFirst),
