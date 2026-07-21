@@ -1,0 +1,313 @@
+group_name,month,category,amount,orders
+Tập đoàn A,2025-01-01,Online,1130,6
+Tập đoàn A,2025-01-01,Offline,1580,9
+Tập đoàn A,2025-02-01,Online,1260,7
+Tập đoàn A,2025-02-01,Offline,1710,10
+Tập đoàn A,2025-03-01,Online,1390,8
+Tập đoàn A,2025-03-01,Offline,1840,11
+Tập đoàn A,2025-04-01,Online,1520,9
+Tập đoàn A,2025-04-01,Offline,1970,12
+Tập đoàn A,2025-05-01,Online,1650,10
+Tập đoàn A,2025-05-01,Offline,2100,13
+Tập đoàn A,2025-06-01,Online,1780,11
+Tập đoàn A,2025-06-01,Offline,2230,14
+Tập đoàn A,2025-07-01,Online,1910,12
+Tập đoàn A,2025-07-01,Offline,2360,15
+Tập đoàn A,2025-08-01,Online,2040,13
+Tập đoàn A,2025-08-01,Offline,2490,16
+Tập đoàn A,2025-09-01,Online,2170,14
+Tập đoàn A,2025-09-01,Offline,2620,17
+Tập đoàn A,2025-10-01,Online,2300,15
+Tập đoàn A,2025-10-01,Offline,2750,18
+Tập đoàn A,2025-11-01,Online,2430,16
+Tập đoàn A,2025-11-01,Offline,2880,19
+Tập đoàn A,2025-12-01,Online,2560,17
+Tập đoàn A,2025-12-01,Offline,3010,20
+Tập đoàn B,2025-01-01,Online,1167,7
+Tập đoàn B,2025-01-01,Offline,1617,10
+Tập đoàn B,2025-02-01,Online,1297,8
+Tập đoàn B,2025-02-01,Offline,1747,11
+Tập đoàn B,2025-03-01,Online,1427,9
+Tập đoàn B,2025-03-01,Offline,1877,12
+Tập đoàn B,2025-04-01,Online,1557,10
+Tập đoàn B,2025-04-01,Offline,2007,13
+Tập đoàn B,2025-05-01,Online,1687,11
+Tập đoàn B,2025-05-01,Offline,2137,14
+Tập đoàn B,2025-06-01,Online,1817,12
+Tập đoàn B,2025-06-01,Offline,2267,15
+Tập đoàn B,2025-07-01,Online,1947,13
+Tập đoàn B,2025-07-01,Offline,2397,16
+Tập đoàn B,2025-08-01,Online,2077,14
+Tập đoàn B,2025-08-01,Offline,2527,17
+Tập đoàn B,2025-09-01,Online,2207,15
+Tập đoàn B,2025-09-01,Offline,2657,18
+Tập đoàn B,2025-10-01,Online,2337,16
+Tập đoàn B,2025-10-01,Offline,2787,19
+Tập đoàn B,2025-11-01,Online,2467,17
+Tập đoàn B,2025-11-01,Offline,2917,20
+Tập đoàn B,2025-12-01,Online,2597,18
+Tập đoàn B,2025-12-01,Offline,3047,21
+Miền Bắc,2025-01-01,Online,1204,8
+Miền Bắc,2025-01-01,Offline,1654,11
+Miền Bắc,2025-02-01,Online,1334,9
+Miền Bắc,2025-02-01,Offline,1784,12
+Miền Bắc,2025-03-01,Online,1464,10
+Miền Bắc,2025-03-01,Offline,1914,13
+Miền Bắc,2025-04-01,Online,1594,11
+Miền Bắc,2025-04-01,Offline,2044,14
+Miền Bắc,2025-05-01,Online,1724,12
+Miền Bắc,2025-05-01,Offline,2174,15
+Miền Bắc,2025-06-01,Online,1854,13
+Miền Bắc,2025-06-01,Offline,2304,16
+Miền Bắc,2025-07-01,Online,1984,14
+Miền Bắc,2025-07-01,Offline,2434,17
+Miền Bắc,2025-08-01,Online,2114,15
+Miền Bắc,2025-08-01,Offline,2564,18
+Miền Bắc,2025-09-01,Online,2244,16
+Miền Bắc,2025-09-01,Offline,2694,19
+Miền Bắc,2025-10-01,Online,2374,17
+Miền Bắc,2025-10-01,Offline,2824,20
+Miền Bắc,2025-11-01,Online,2504,18
+Miền Bắc,2025-11-01,Offline,2954,21
+Miền Bắc,2025-12-01,Online,2634,19
+Miền Bắc,2025-12-01,Offline,3084,22
+Miền Nam,2025-01-01,Online,1241,9
+Miền Nam,2025-01-01,Offline,1691,12
+Miền Nam,2025-02-01,Online,1371,10
+Miền Nam,2025-02-01,Offline,1821,13
+Miền Nam,2025-03-01,Online,1501,11
+Miền Nam,2025-03-01,Offline,1951,14
+Miền Nam,2025-04-01,Online,1631,12
+Miền Nam,2025-04-01,Offline,2081,15
+Miền Nam,2025-05-01,Online,1761,13
+Miền Nam,2025-05-01,Offline,2211,16
+Miền Nam,2025-06-01,Online,1891,14
+Miền Nam,2025-06-01,Offline,2341,17
+Miền Nam,2025-07-01,Online,2021,15
+Miền Nam,2025-07-01,Offline,2471,18
+Miền Nam,2025-08-01,Online,2151,16
+Miền Nam,2025-08-01,Offline,2601,19
+Miền Nam,2025-09-01,Online,2281,17
+Miền Nam,2025-09-01,Offline,2731,20
+Miền Nam,2025-10-01,Online,2411,18
+Miền Nam,2025-10-01,Offline,2861,21
+Miền Nam,2025-11-01,Online,2541,19
+Miền Nam,2025-11-01,Offline,2991,22
+Miền Nam,2025-12-01,Online,2671,20
+Miền Nam,2025-12-01,Offline,3121,23
+Miền Trung,2025-01-01,Online,1278,10
+Miền Trung,2025-01-01,Offline,1728,13
+Miền Trung,2025-02-01,Online,1408,11
+Miền Trung,2025-02-01,Offline,1858,14
+Miền Trung,2025-03-01,Online,1538,12
+Miền Trung,2025-03-01,Offline,1988,15
+Miền Trung,2025-04-01,Online,1668,13
+Miền Trung,2025-04-01,Offline,2118,16
+Miền Trung,2025-05-01,Online,1798,14
+Miền Trung,2025-05-01,Offline,2248,17
+Miền Trung,2025-06-01,Online,1928,15
+Miền Trung,2025-06-01,Offline,2378,18
+Miền Trung,2025-07-01,Online,2058,16
+Miền Trung,2025-07-01,Offline,2508,19
+Miền Trung,2025-08-01,Online,2188,17
+Miền Trung,2025-08-01,Offline,2638,20
+Miền Trung,2025-09-01,Online,2318,18
+Miền Trung,2025-09-01,Offline,2768,21
+Miền Trung,2025-10-01,Online,2448,19
+Miền Trung,2025-10-01,Offline,2898,22
+Miền Trung,2025-11-01,Online,2578,20
+Miền Trung,2025-11-01,Offline,3028,23
+Miền Trung,2025-12-01,Online,2708,21
+Miền Trung,2025-12-01,Offline,3158,24
+Phòng Sale HN,2025-01-01,Online,1315,11
+Phòng Sale HN,2025-01-01,Offline,1765,14
+Phòng Sale HN,2025-02-01,Online,1445,12
+Phòng Sale HN,2025-02-01,Offline,1895,15
+Phòng Sale HN,2025-03-01,Online,1575,13
+Phòng Sale HN,2025-03-01,Offline,2025,16
+Phòng Sale HN,2025-04-01,Online,1705,14
+Phòng Sale HN,2025-04-01,Offline,2155,17
+Phòng Sale HN,2025-05-01,Online,1835,15
+Phòng Sale HN,2025-05-01,Offline,2285,18
+Phòng Sale HN,2025-06-01,Online,1965,16
+Phòng Sale HN,2025-06-01,Offline,2415,19
+Phòng Sale HN,2025-07-01,Online,2095,17
+Phòng Sale HN,2025-07-01,Offline,2545,20
+Phòng Sale HN,2025-08-01,Online,2225,18
+Phòng Sale HN,2025-08-01,Offline,2675,21
+Phòng Sale HN,2025-09-01,Online,2355,19
+Phòng Sale HN,2025-09-01,Offline,2805,22
+Phòng Sale HN,2025-10-01,Online,2485,20
+Phòng Sale HN,2025-10-01,Offline,2935,23
+Phòng Sale HN,2025-11-01,Online,2615,21
+Phòng Sale HN,2025-11-01,Offline,3065,24
+Phòng Sale HN,2025-12-01,Online,2745,22
+Phòng Sale HN,2025-12-01,Offline,3195,25
+Phòng CSKH HN,2025-01-01,Online,1352,12
+Phòng CSKH HN,2025-01-01,Offline,1802,15
+Phòng CSKH HN,2025-02-01,Online,1482,13
+Phòng CSKH HN,2025-02-01,Offline,1932,16
+Phòng CSKH HN,2025-03-01,Online,1612,14
+Phòng CSKH HN,2025-03-01,Offline,2062,17
+Phòng CSKH HN,2025-04-01,Online,1742,15
+Phòng CSKH HN,2025-04-01,Offline,2192,18
+Phòng CSKH HN,2025-05-01,Online,1872,16
+Phòng CSKH HN,2025-05-01,Offline,2322,19
+Phòng CSKH HN,2025-06-01,Online,2002,17
+Phòng CSKH HN,2025-06-01,Offline,2452,20
+Phòng CSKH HN,2025-07-01,Online,2132,18
+Phòng CSKH HN,2025-07-01,Offline,2582,21
+Phòng CSKH HN,2025-08-01,Online,2262,19
+Phòng CSKH HN,2025-08-01,Offline,2712,22
+Phòng CSKH HN,2025-09-01,Online,2392,20
+Phòng CSKH HN,2025-09-01,Offline,2842,23
+Phòng CSKH HN,2025-10-01,Online,2522,21
+Phòng CSKH HN,2025-10-01,Offline,2972,24
+Phòng CSKH HN,2025-11-01,Online,2652,22
+Phòng CSKH HN,2025-11-01,Offline,3102,25
+Phòng CSKH HN,2025-12-01,Online,2782,23
+Phòng CSKH HN,2025-12-01,Offline,3232,26
+Phòng Sale HCM,2025-01-01,Online,1389,13
+Phòng Sale HCM,2025-01-01,Offline,1839,16
+Phòng Sale HCM,2025-02-01,Online,1519,14
+Phòng Sale HCM,2025-02-01,Offline,1969,17
+Phòng Sale HCM,2025-03-01,Online,1649,15
+Phòng Sale HCM,2025-03-01,Offline,2099,18
+Phòng Sale HCM,2025-04-01,Online,1779,16
+Phòng Sale HCM,2025-04-01,Offline,2229,19
+Phòng Sale HCM,2025-05-01,Online,1909,17
+Phòng Sale HCM,2025-05-01,Offline,2359,20
+Phòng Sale HCM,2025-06-01,Online,2039,18
+Phòng Sale HCM,2025-06-01,Offline,2489,21
+Phòng Sale HCM,2025-07-01,Online,2169,19
+Phòng Sale HCM,2025-07-01,Offline,2619,22
+Phòng Sale HCM,2025-08-01,Online,2299,20
+Phòng Sale HCM,2025-08-01,Offline,2749,23
+Phòng Sale HCM,2025-09-01,Online,2429,21
+Phòng Sale HCM,2025-09-01,Offline,2879,24
+Phòng Sale HCM,2025-10-01,Online,2559,22
+Phòng Sale HCM,2025-10-01,Offline,3009,25
+Phòng Sale HCM,2025-11-01,Online,2689,23
+Phòng Sale HCM,2025-11-01,Offline,3139,26
+Phòng Sale HCM,2025-12-01,Online,2819,24
+Phòng Sale HCM,2025-12-01,Offline,3269,27
+Phòng Sale ĐN,2025-01-01,Online,1426,14
+Phòng Sale ĐN,2025-01-01,Offline,1876,17
+Phòng Sale ĐN,2025-02-01,Online,1556,15
+Phòng Sale ĐN,2025-02-01,Offline,2006,18
+Phòng Sale ĐN,2025-03-01,Online,1686,16
+Phòng Sale ĐN,2025-03-01,Offline,2136,19
+Phòng Sale ĐN,2025-04-01,Online,1816,17
+Phòng Sale ĐN,2025-04-01,Offline,2266,20
+Phòng Sale ĐN,2025-05-01,Online,1946,18
+Phòng Sale ĐN,2025-05-01,Offline,2396,21
+Phòng Sale ĐN,2025-06-01,Online,2076,19
+Phòng Sale ĐN,2025-06-01,Offline,2526,22
+Phòng Sale ĐN,2025-07-01,Online,2206,20
+Phòng Sale ĐN,2025-07-01,Offline,2656,23
+Phòng Sale ĐN,2025-08-01,Online,2336,21
+Phòng Sale ĐN,2025-08-01,Offline,2786,24
+Phòng Sale ĐN,2025-09-01,Online,2466,22
+Phòng Sale ĐN,2025-09-01,Offline,2916,25
+Phòng Sale ĐN,2025-10-01,Online,2596,23
+Phòng Sale ĐN,2025-10-01,Offline,3046,26
+Phòng Sale ĐN,2025-11-01,Online,2726,24
+Phòng Sale ĐN,2025-11-01,Offline,3176,27
+Phòng Sale ĐN,2025-12-01,Online,2856,25
+Phòng Sale ĐN,2025-12-01,Offline,3306,28
+Phòng Kỹ thuật ĐN,2025-01-01,Online,1463,15
+Phòng Kỹ thuật ĐN,2025-01-01,Offline,1913,18
+Phòng Kỹ thuật ĐN,2025-02-01,Online,1593,16
+Phòng Kỹ thuật ĐN,2025-02-01,Offline,2043,19
+Phòng Kỹ thuật ĐN,2025-03-01,Online,1723,17
+Phòng Kỹ thuật ĐN,2025-03-01,Offline,2173,20
+Phòng Kỹ thuật ĐN,2025-04-01,Online,1853,18
+Phòng Kỹ thuật ĐN,2025-04-01,Offline,2303,21
+Phòng Kỹ thuật ĐN,2025-05-01,Online,1983,19
+Phòng Kỹ thuật ĐN,2025-05-01,Offline,2433,22
+Phòng Kỹ thuật ĐN,2025-06-01,Online,2113,20
+Phòng Kỹ thuật ĐN,2025-06-01,Offline,2563,23
+Phòng Kỹ thuật ĐN,2025-07-01,Online,2243,21
+Phòng Kỹ thuật ĐN,2025-07-01,Offline,2693,24
+Phòng Kỹ thuật ĐN,2025-08-01,Online,2373,22
+Phòng Kỹ thuật ĐN,2025-08-01,Offline,2823,25
+Phòng Kỹ thuật ĐN,2025-09-01,Online,2503,23
+Phòng Kỹ thuật ĐN,2025-09-01,Offline,2953,26
+Phòng Kỹ thuật ĐN,2025-10-01,Online,2633,24
+Phòng Kỹ thuật ĐN,2025-10-01,Offline,3083,27
+Phòng Kỹ thuật ĐN,2025-11-01,Online,2763,25
+Phòng Kỹ thuật ĐN,2025-11-01,Offline,3213,28
+Phòng Kỹ thuật ĐN,2025-12-01,Online,2893,26
+Phòng Kỹ thuật ĐN,2025-12-01,Offline,3343,29
+Team A1,2025-01-01,Online,1500,16
+Team A1,2025-01-01,Offline,1950,19
+Team A1,2025-02-01,Online,1630,17
+Team A1,2025-02-01,Offline,2080,20
+Team A1,2025-03-01,Online,1760,18
+Team A1,2025-03-01,Offline,2210,21
+Team A1,2025-04-01,Online,1890,19
+Team A1,2025-04-01,Offline,2340,22
+Team A1,2025-05-01,Online,2020,20
+Team A1,2025-05-01,Offline,2470,23
+Team A1,2025-06-01,Online,2150,21
+Team A1,2025-06-01,Offline,2600,24
+Team A1,2025-07-01,Online,2280,22
+Team A1,2025-07-01,Offline,2730,25
+Team A1,2025-08-01,Online,2410,23
+Team A1,2025-08-01,Offline,2860,26
+Team A1,2025-09-01,Online,2540,24
+Team A1,2025-09-01,Offline,2990,27
+Team A1,2025-10-01,Online,2670,25
+Team A1,2025-10-01,Offline,3120,28
+Team A1,2025-11-01,Online,2800,26
+Team A1,2025-11-01,Offline,3250,29
+Team A1,2025-12-01,Online,2930,27
+Team A1,2025-12-01,Offline,3380,30
+Team A2,2025-01-01,Online,1537,17
+Team A2,2025-01-01,Offline,1987,20
+Team A2,2025-02-01,Online,1667,18
+Team A2,2025-02-01,Offline,2117,21
+Team A2,2025-03-01,Online,1797,19
+Team A2,2025-03-01,Offline,2247,22
+Team A2,2025-04-01,Online,1927,20
+Team A2,2025-04-01,Offline,2377,23
+Team A2,2025-05-01,Online,2057,21
+Team A2,2025-05-01,Offline,2507,24
+Team A2,2025-06-01,Online,2187,22
+Team A2,2025-06-01,Offline,2637,25
+Team A2,2025-07-01,Online,2317,23
+Team A2,2025-07-01,Offline,2767,26
+Team A2,2025-08-01,Online,2447,24
+Team A2,2025-08-01,Offline,2897,27
+Team A2,2025-09-01,Online,2577,25
+Team A2,2025-09-01,Offline,3027,28
+Team A2,2025-10-01,Online,2707,26
+Team A2,2025-10-01,Offline,3157,29
+Team A2,2025-11-01,Online,2837,27
+Team A2,2025-11-01,Offline,3287,30
+Team A2,2025-12-01,Online,2967,28
+Team A2,2025-12-01,Offline,3417,31
+Team S1,2025-01-01,Online,1574,18
+Team S1,2025-01-01,Offline,2024,21
+Team S1,2025-02-01,Online,1704,19
+Team S1,2025-02-01,Offline,2154,22
+Team S1,2025-03-01,Online,1834,20
+Team S1,2025-03-01,Offline,2284,23
+Team S1,2025-04-01,Online,1964,21
+Team S1,2025-04-01,Offline,2414,24
+Team S1,2025-05-01,Online,2094,22
+Team S1,2025-05-01,Offline,2544,25
+Team S1,2025-06-01,Online,2224,23
+Team S1,2025-06-01,Offline,2674,26
+Team S1,2025-07-01,Online,2354,24
+Team S1,2025-07-01,Offline,2804,27
+Team S1,2025-08-01,Online,2484,25
+Team S1,2025-08-01,Offline,2934,28
+Team S1,2025-09-01,Online,2614,26
+Team S1,2025-09-01,Offline,3064,29
+Team S1,2025-10-01,Online,2744,27
+Team S1,2025-10-01,Offline,3194,30
+Team S1,2025-11-01,Online,2874,28
+Team S1,2025-11-01,Offline,3324,31
+Team S1,2025-12-01,Online,3004,29
+Team S1,2025-12-01,Offline,3454,32
