@@ -16777,3 +16777,93 @@ msgstr "%s dòng"
 
 msgid "You"
 msgstr "Bạn"
+
+#. Hierarchical filter plugin — added strings.
+msgid "Hierarchical filter"
+msgstr "Bộ lọc phân cấp"
+
+msgid "Level %s"
+msgstr "Cấp %s"
+
+msgid "Select…"
+msgstr "Chọn…"
+
+msgid "No hierarchy data. Check the filter configuration."
+msgstr "Không có dữ liệu phân cấp. Hãy kiểm tra lại cấu hình bộ lọc."
+
+msgid "Map the six columns on the right to see the filter here."
+msgstr "Gán các cột ở panel bên phải để xem bộ lọc tại đây."
+
+msgid "A multi-level filter driven by a parent-child mapping table. Child levels are generated automatically from the data as you select a value at the level above."
+msgstr "Bộ lọc nhiều cấp dựa trên bảng ánh xạ cha-con. Cấp con được tự động sinh ra từ dữ liệu khi bạn chọn một giá trị ở cấp trên."
+
+#. Hierarchical filter — i18n (EN source + VI translation).
+
+msgid "How to set up the hierarchical filter"
+msgstr "Hướng dẫn cấu hình bộ lọc phân cấp"
+
+msgid "Create a mapping table/view with: an id (key) column, a parent-id column, a display-name column (and an optional level column). Column names are up to you. Use the buttons below to copy sample recursive SQL / CSV."
+msgstr "Tạo bảng/khung nhìn \"mapping\" gồm: 1 cột id (khóa), 1 cột id cha, 1 cột tên hiển thị (và cột level tùy chọn). Tên cột tùy ý. Bấm nút bên dưới để lấy SQL đệ quy / CSV mẫu."
+
+msgid "Go to Datasets → + Dataset and register that result as a dataset."
+msgstr "Vào Datasets → + Dataset, đăng ký kết quả đó thành một dataset."
+
+msgid "In this filter: pick that mapping dataset, then map the role columns on the right (id / parent id / label / level) and choose \"Filter by (value column)\"."
+msgstr "Ở bộ lọc này: chọn dataset mapping đó, rồi gán các cột theo vai trò ở bên phải (id / id cha / hiển thị / level) và chọn \"Lọc theo (cột giá trị)\"."
+
+msgid "Save. On the dashboard: pick a node at a parent level → child levels are generated automatically; charts are filtered by the deepest node you selected."
+msgstr "Lưu lại. Trên dashboard: chọn một node ở cấp cha → cấp con tự sinh ra; biểu đồ được lọc theo node sâu nhất bạn đã chọn."
+
+msgid "Column roles"
+msgstr "Vai trò các cột"
+
+msgid "Id (key) column: a unique id — used to build the tree, so duplicate labels never merge."
+msgstr "Cột id (khóa): id duy nhất — dùng để dựng cây (tránh gộp nhầm các node trùng tên)."
+
+msgid "Parent id column: the parent node id; empty / 0 / an id matching nothing means a root node."
+msgstr "Cột id cha: id của node cha; để trống / 0 / không khớp id nào = node gốc."
+
+msgid "Display column: the name shown to users."
+msgstr "Cột hiển thị: tên hiện cho người dùng."
+
+msgid "Filter by (value column): the column whose value becomes the filter condition, applied to the same-named column on the charts. If a chart names the column differently, fill \"Chart column to filter\" to override."
+msgstr "Lọc theo (cột giá trị): giá trị của cột này trở thành điều kiện lọc, áp lên cột cùng tên bên biểu đồ. Nếu biểu đồ đặt tên cột khác, điền \"Cột lọc trên biểu đồ\" để ghi đè."
+
+msgid "Example mapping table"
+msgstr "Ví dụ bảng mapping"
+
+msgid "Copy sample SQL"
+msgstr "Sao chép SQL mẫu"
+
+msgid "Copied SQL ✓"
+msgstr "Đã sao chép SQL ✓"
+
+msgid "Copy sample CSV"
+msgstr "Sao chép CSV mẫu"
+
+msgid "Copied CSV ✓"
+msgstr "Đã sao chép CSV ✓"
+
+msgid "Select a column…"
+msgstr "Chọn cột…"
+
+msgid "Id column (builds the tree)"
+msgstr "Cột id (dựng cây)"
+
+msgid "Parent id column"
+msgstr "Cột id cha"
+
+msgid "Display column (label)"
+msgstr "Cột hiển thị"
+
+msgid "Level column (optional)"
+msgstr "Cột cấp (tùy chọn)"
+
+msgid "Filter by (value column)"
+msgstr "Lọc theo (cột giá trị)"
+
+msgid "Chart column to filter — empty = use the value column's name"
+msgstr "Cột lọc trên biểu đồ — để trống = dùng tên cột giá trị"
+
+msgid "e.g. group_id (if the chart names the column differently)"
+msgstr "vd: group_id (nếu biểu đồ đặt tên cột khác)"

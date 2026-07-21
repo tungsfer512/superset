@@ -131,58 +131,63 @@ export default function HierarchyGuide() {
 
   return (
     <Guide className="hierarchy-filter-guide">
-      <h4>{t('Hướng dẫn cấu hình bộ lọc phân cấp')}</h4>
+      <h4>{t('How to set up the hierarchical filter')}</h4>
       <ol>
         <li>
           {t(
-            'Tạo bảng/khung nhìn "mapping" gồm: 1 cột id (khóa), 1 cột id cha, ' +
-              '1 cột tên hiển thị (và cột level tùy chọn). Tên cột tùy ý. ' +
-              'Bấm nút bên dưới để lấy SQL đệ quy / CSV mẫu.',
-          )}
-        </li>
-        <li>
-          {t('Vào Datasets → + Dataset, đăng ký kết quả đó thành một dataset.')}
-        </li>
-        <li>
-          {t(
-            'Ở bộ lọc này: chọn dataset mapping đó, rồi ở panel bên phải gán ' +
-              'các cột theo vai trò (id / id cha / hiển thị / level) và chọn ' +
-              '"Lọc theo (cột giá trị)".',
+            'Create a mapping table/view with: an id (key) column, a parent-id ' +
+              'column, a display-name column (and an optional level column). ' +
+              'Column names are up to you. Use the buttons below to copy sample ' +
+              'recursive SQL / CSV.',
           )}
         </li>
         <li>
           {t(
-            'Lưu lại. Trên dashboard: chọn một node ở cấp cha → hệ thống tự sinh ' +
-              'cấp con; biểu đồ được lọc theo node sâu nhất bạn đã chọn.',
+            'Go to Datasets → + Dataset and register that result as a dataset.',
+          )}
+        </li>
+        <li>
+          {t(
+            'In this filter: pick that mapping dataset, then map the role ' +
+              'columns on the right (id / parent id / label / level) and choose ' +
+              '"Filter by (value column)".',
+          )}
+        </li>
+        <li>
+          {t(
+            'Save. On the dashboard: pick a node at a parent level → child ' +
+              'levels are generated automatically; charts are filtered by the ' +
+              'deepest node you selected.',
           )}
         </li>
       </ol>
 
-      <div className="section-title">{t('Vai trò các cột')}</div>
+      <div className="section-title">{t('Column roles')}</div>
       <ul>
         <li>
           {t(
-            'Cột id (khóa): id duy nhất — dùng để dựng cây (tránh gộp nhầm ' +
-              'node trùng tên).',
+            'Id (key) column: a unique id — used to build the tree, so ' +
+              'duplicate labels never merge.',
           )}
         </li>
         <li>
           {t(
-            'Cột id cha: id của node cha; để trống / 0 / không khớp id nào = ' +
-              'node gốc.',
+            'Parent id column: the parent node id; empty / 0 / an id matching ' +
+              'nothing means a root node.',
           )}
         </li>
-        <li>{t('Cột hiển thị: tên hiện cho người dùng.')}</li>
+        <li>{t('Display column: the name shown to users.')}</li>
         <li>
           {t(
-            'Lọc theo (cột giá trị): chọn cột nào thì lấy giá trị cột đó làm ' +
-              'điều kiện lọc, VÀ lọc trên cột cùng tên bên biểu đồ. Nếu biểu ' +
-              'đồ đặt tên cột khác, điền "Cột lọc trên biểu đồ" để ghi đè.',
+            'Filter by (value column): the column whose value becomes the ' +
+              'filter condition, applied to the same-named column on the charts. ' +
+              'If a chart names the column differently, fill "Chart column to ' +
+              'filter" to override.',
           )}
         </li>
       </ul>
 
-      <div className="section-title">{t('Ví dụ bảng mapping')}</div>
+      <div className="section-title">{t('Example mapping table')}</div>
       <TableScroll>
         <ExampleTable>
           <thead>
@@ -212,14 +217,14 @@ export default function HierarchyGuide() {
           buttonSize="small"
           onClick={() => copy('sql')}
         >
-          {copied === 'sql' ? t('Đã sao chép SQL ✓') : t('Sao chép SQL mẫu')}
+          {copied === 'sql' ? t('Copied SQL ✓') : t('Copy sample SQL')}
         </Button>
         <Button
           buttonStyle="secondary"
           buttonSize="small"
           onClick={() => copy('csv')}
         >
-          {copied === 'csv' ? t('Đã sao chép CSV ✓') : t('Sao chép CSV mẫu')}
+          {copied === 'csv' ? t('Copied CSV ✓') : t('Copy sample CSV')}
         </Button>
       </ButtonRow>
     </Guide>

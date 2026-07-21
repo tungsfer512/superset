@@ -91,7 +91,7 @@ const HierarchyConfigFields: FC<HierarchyConfigFieldsProps> = ({
         allowClear={allowClear}
         options={options}
         onChange={onChange}
-        placeholder={t('Chọn cột…')}
+        placeholder={t('Select a column…')}
         ariaLabel={label}
       />
     </FormItem>
@@ -101,28 +101,28 @@ const HierarchyConfigFields: FC<HierarchyConfigFieldsProps> = ({
     <Fields>
       {columnSelect(
         'keyColumn',
-        t('Cột id (node_key) — dựng cây'),
+        t('Id column (builds the tree)'),
         initial?.keyColumn ?? keyGuess,
       )}
       {columnSelect(
         'parentColumn',
-        t('Cột id cha (parent_key)'),
+        t('Parent id column'),
         initial?.parentColumn ?? parentGuess,
       )}
       {columnSelect(
         'labelColumn',
-        t('Cột hiển thị (label)'),
+        t('Display column (label)'),
         initial?.labelColumn ?? labelGuess,
       )}
       {columnSelect(
         'levelColumn',
-        t('Cột cấp (level) — tùy chọn'),
+        t('Level column (optional)'),
         initial?.levelColumn ?? levelGuess,
         true,
       )}
       {columnSelect(
         'valueColumn',
-        t('Lọc theo (cột giá trị)'),
+        t('Filter by (value column)'),
         initial?.valueColumn ?? keyGuess,
       )}
       <FormItem
@@ -130,13 +130,15 @@ const HierarchyConfigFields: FC<HierarchyConfigFieldsProps> = ({
         initialValue={initial?.targetColumn}
         label={
           <Label>
-            {t('Cột lọc trên biểu đồ — để trống = dùng tên cột giá trị')}
+            {t("Chart column to filter — empty = use the value column's name")}
           </Label>
         }
       >
         <Input
           allowClear
-          placeholder={t('vd: group_id (nếu biểu đồ đặt tên cột khác)')}
+          placeholder={t(
+            'e.g. group_id (if the chart names the column differently)',
+          )}
           onChange={onChange}
         />
       </FormItem>
