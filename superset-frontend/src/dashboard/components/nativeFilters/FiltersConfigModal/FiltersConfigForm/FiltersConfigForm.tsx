@@ -88,6 +88,8 @@ import {
   mergeExtraFormData,
 } from 'src/dashboard/components/nativeFilters/utils';
 import { DatasetSelectLabel } from 'src/features/datasets/DatasetSelectLabel';
+import HierarchyGuide from 'src/filters/components/Hierarchy/HierarchyGuide';
+import HierarchyConfigFields from 'src/filters/components/Hierarchy/HierarchyConfigFields';
 import {
   ALLOW_DEPENDENCIES as TYPES_SUPPORT_DEPENDENCIES,
   getFiltersConfigModalTestId,
@@ -901,6 +903,26 @@ const FiltersConfigForm = (
                       Object.keys(mainControlItems).map(
                         key => mainControlItems[key].element,
                       )}
+                  </StyledRowContainer>
+                )}
+                {formFilter?.filterType === 'filter_hierarchy' && (
+                  <StyledRowContainer
+                    vertical
+                    gap={theme.sizeUnit * 2}
+                    style={{ paddingTop: 0 }}
+                  >
+                    <HierarchyGuide />
+                    <HierarchyConfigFields
+                      filterId={filterId}
+                      columns={(datasetDetails?.columns ?? []).map(
+                        (c: { column_name: string }) => c.column_name,
+                      )}
+                      initial={filterToEdit?.controlValues}
+                      onChange={() => {
+                        forceUpdate();
+                        formChanged();
+                      }}
+                    />
                   </StyledRowContainer>
                 )}
                 <Collapse

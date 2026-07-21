@@ -16,9 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { default as SelectFilterPlugin } from './Select';
-export { default as RangeFilterPlugin } from './Range';
-export { default as TimeFilterPlugin } from './Time';
-export { default as TimeColumnFilterPlugin } from './TimeColumn';
-export { default as TimeGrainFilterPlugin } from './TimeGrain';
-export { default as HierarchyFilterPlugin } from './Hierarchy';
+import { buildQueryContext, BuildQuery } from '@superset-ui/core';
+import { PluginFilterHierarchyQueryFormData } from './types';
+
+const buildQuery: BuildQuery<PluginFilterHierarchyQueryFormData> = formData => {
+  // Fetch every node once, from the columns the user mapped to each role.
+  const columns = Array.from(
+    new Set(
+      [
+        formData.keyColumn,
+        formData.parentColumn,
+        formData.labelColumn,
+        formData.levelColumn,
+        formData.valueColumn,
+      ].filter((c): c is string => Boolean(c)),
+    ),
+  );
+  return buildQueryContext(formData, baseQueryObject => [
+    {
+      ...baseQueryObject,
+      columns,
+      metrics: [],
+      groupby: columns,
+      row_limit: 100000,
+    },
+  ]);
+};
+
+export default buildQuery;
