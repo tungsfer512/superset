@@ -52,6 +52,19 @@ const LevelWrapper = styled.div<{ horizontal: boolean }>`
 const asString = (value: unknown): string =>
   value === undefined || value === null ? '' : String(value);
 
+// Normalize the stored filterState into per-level selections (string[][]).
+// Accepts the new shape (array of arrays) and the legacy single-path (string[]).
+function normalizeSelections(value: unknown): string[][] {
+  const arr = ensureIsArray(value);
+  if (arr.length === 0) {
+    return [];
+  }
+  if (Array.isArray(arr[0])) {
+    return arr as string[][];
+  }
+  return (arr as string[]).map(key => [key]);
+}
+
 interface ColumnRoles {
   keyColumn?: string;
   parentColumn?: string;
@@ -147,18 +160,37 @@ export default function HierarchyFilterPlugin(
     [nodes, nodeByKey],
   );
 
-  // The currently selected key at each depth (a path from the root).
-  const [path, setPath] = useState<string[]>(
-    () => (ensureIsArray(filterState?.value) as string[]) ?? [],
+  // Selected keys per level (multi-select). selections[d] = keys chosen at
+  // depth d; the next level shows the union of those nodes' children.
+  const [selections, setSelections] = useState<string[][]>(() =>
+    normalizeSelections(filterState?.value),
+  );
+
+  // Union of children of several parent keys (deduped), for the next level.
+  const childrenOf = useCallback(
+    (parentKeys: string[]) => {
+      const seen = new Set<string>();
+      const out: HierarchyNode[] = [];
+      parentKeys.forEach(k =>
+        (childrenByParent.get(k) ?? []).forEach(child => {
+          if (!seen.has(child.key)) {
+            seen.add(child.key);
+            out.push(child);
+          }
+        }),
+      );
+      return out;
+    },
+    [childrenByParent],
   );
 
   // Restore the UI from an externally applied value (e.g. cross-filter clear).
   const lastExternal = useRef<string>('');
   useEffect(() => {
-    const external = JSON.stringify(ensureIsArray(filterState?.value) ?? []);
+    const external = JSON.stringify(normalizeSelections(filterState?.value));
     if (external !== lastExternal.current) {
       lastExternal.current = external;
-      setPath((ensureIsArray(filterState?.value) as string[]) ?? []);
+      setSelections(normalizeSelections(filterState?.value));
     }
   }, [filterState?.value]);
 
@@ -188,28 +220,38 @@ export default function HierarchyFilterPlugin(
   );
 
   const emit = useCallback(
-    (nextPath: string[]) => {
-      const selectedNodes = nextPath
+    (nextSelections: string[][]) => {
+      const selectedKeys = new Set<string>();
+      nextSelections.forEach(level =>
+        level.forEach(key => selectedKeys.add(key)),
+      );
+
+      // "Frontier" = selected nodes that have no selected descendant. These are
+      // the most specific choices; each rolls up its whole subtree. So choosing
+      // a parent (and stopping) filters by all its children/grandchildren.
+      const hasSelectedDescendant = (key: string): boolean =>
+        (childrenByParent.get(key) ?? []).some(
+          child =>
+            selectedKeys.has(child.key) || hasSelectedDescendant(child.key),
+        );
+      const frontier = [...selectedKeys].filter(
+        key => !hasSelectedDescendant(key),
+      );
+      const values = Array.from(
+        new Set(frontier.flatMap(key => collectSubtreeValues(key))),
+      );
+      const frontierNodes = frontier
         .map(key => nodeByKey.get(key))
         .filter((n): n is HierarchyNode => Boolean(n));
 
-      // Filter by the deepest selected node AND all of its descendants
-      // (so choosing a parent rolls up every child underneath it).
-      const deepest = selectedNodes[selectedNodes.length - 1];
-      const values = deepest ? collectSubtreeValues(deepest.key) : [];
-
       let extraFormData: ExtraFormData = {};
-      if (deepest && effectiveTargetColumn && values.length) {
+      if (effectiveTargetColumn && values.length) {
         extraFormData = {
           filters: [
-            {
-              col: effectiveTargetColumn,
-              op: 'IN' as const,
-              val: values,
-            },
+            { col: effectiveTargetColumn, op: 'IN' as const, val: values },
           ],
         };
-      } else if (enableEmptyFilter && !selectedNodes.length) {
+      } else if (enableEmptyFilter && selectedKeys.size === 0) {
         extraFormData = {
           adhoc_filters: [
             {
@@ -224,12 +266,13 @@ export default function HierarchyFilterPlugin(
       setDataMask({
         extraFormData,
         filterState: {
-          value: selectedNodes.length ? nextPath : null,
-          label: selectedNodes.map(n => n.label).join(' > '),
+          value: selectedKeys.size ? nextSelections : null,
+          label: frontierNodes.map(n => n.label).join(', '),
         },
       });
     },
     [
+      childrenByParent,
       collectSubtreeValues,
       enableEmptyFilter,
       effectiveTargetColumn,
@@ -239,35 +282,35 @@ export default function HierarchyFilterPlugin(
   );
 
   const onLevelChange = useCallback(
-    (depth: number, value?: string) => {
-      const nextPath = path.slice(0, depth);
-      if (value !== undefined) {
-        nextPath[depth] = value;
-      }
-      lastExternal.current = JSON.stringify(nextPath);
-      setPath(nextPath);
-      emit(nextPath);
+    (depth: number, levelValues: string[]) => {
+      // Changing a level invalidates deeper levels (their parents changed).
+      const next = selections.slice(0, depth);
+      next[depth] = levelValues;
+      lastExternal.current = JSON.stringify(next);
+      setSelections(next);
+      emit(next);
     },
-    [emit, path],
+    [emit, selections],
   );
 
-  // Compute the visible levels: show a level only once its parent is chosen.
+  // Visible levels: level 0 = roots; each deeper level = children of the nodes
+  // selected above. A level shows only once the level above has a selection.
   const levels = useMemo(() => {
     const result: {
       depth: number;
       options: HierarchyNode[];
-      value?: string;
+      values: string[];
     }[] = [];
     for (let depth = 0; depth < nodes.length + 1; depth += 1) {
       const options =
-        depth === 0 ? roots : (childrenByParent.get(path[depth - 1]) ?? []);
+        depth === 0 ? roots : childrenOf(selections[depth - 1] ?? []);
       if (!options.length) break;
-      const value = path[depth];
-      result.push({ depth, options, value });
-      if (value === undefined) break; // no selection yet -> hide deeper levels
+      const values = selections[depth] ?? [];
+      result.push({ depth, options, values });
+      if (!values.length) break; // nothing chosen here -> hide deeper levels
     }
     return result;
-  }, [roots, childrenByParent, nodes.length, path]);
+  }, [roots, childrenOf, nodes.length, selections]);
 
   if (!nodes.length) {
     // The full how-to lives in the control panel (always visible while
@@ -291,14 +334,17 @@ export default function HierarchyFilterPlugin(
         <LevelWrapper key={level.depth} horizontal={horizontal}>
           <Select
             allowClear
+            mode="multiple"
             ariaLabel={t('Level %s', level.depth + 1)}
-            value={level.value}
+            value={level.values}
             options={level.options.map(n => ({
               label: n.label,
               value: n.key,
             }))}
-            onChange={val => onLevelChange(level.depth, val as string)}
-            onClear={() => onLevelChange(level.depth, undefined)}
+            onChange={val =>
+              onLevelChange(level.depth, (val as string[]) ?? [])
+            }
+            onClear={() => onLevelChange(level.depth, [])}
             placeholder={t('Select…')}
           />
         </LevelWrapper>
