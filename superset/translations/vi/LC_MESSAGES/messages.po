@@ -16867,3 +16867,6 @@ msgstr "Cột lọc trên biểu đồ — để trống = dùng tên cột giá
 
 msgid "e.g. group_id (if the chart names the column differently)"
 msgstr "vd: group_id (nếu biểu đồ đặt tên cột khác)"
+
+msgid "Save. On the dashboard: pick a node at a parent level → child levels are generated automatically; charts are filtered by the selected node and all of its descendants."
+msgstr "Lưu lại. Trên dashboard: chọn một node ở cấp cha → cấp con tự sinh ra; biểu đồ được lọc theo node đã chọn và toàn bộ node con-cháu của nó."

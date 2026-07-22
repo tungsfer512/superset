@@ -162,24 +162,50 @@ export default function HierarchyFilterPlugin(
     }
   }, [filterState?.value]);
 
+  // Values of a node plus every descendant (roll-up): selecting a parent
+  // filters by the whole subtree, not just the parent's own value.
+  const collectSubtreeValues = useCallback(
+    (startKey: string) => {
+      const values: string[] = [];
+      const seen = new Set<string>();
+      const stack = [startKey];
+      while (stack.length) {
+        const k = stack.pop() as string;
+        if (seen.has(k)) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        seen.add(k);
+        const node = nodeByKey.get(k);
+        if (node && node.value !== '') {
+          values.push(node.value);
+        }
+        (childrenByParent.get(k) ?? []).forEach(child => stack.push(child.key));
+      }
+      return Array.from(new Set(values));
+    },
+    [nodeByKey, childrenByParent],
+  );
+
   const emit = useCallback(
     (nextPath: string[]) => {
       const selectedNodes = nextPath
         .map(key => nodeByKey.get(key))
         .filter((n): n is HierarchyNode => Boolean(n));
 
-      // The deepest selected node (drill-down): filter the charts by its value
-      // (from the value column) on the effective target column.
+      // Filter by the deepest selected node AND all of its descendants
+      // (so choosing a parent rolls up every child underneath it).
       const deepest = selectedNodes[selectedNodes.length - 1];
+      const values = deepest ? collectSubtreeValues(deepest.key) : [];
 
       let extraFormData: ExtraFormData = {};
-      if (deepest && effectiveTargetColumn && deepest.value !== '') {
+      if (deepest && effectiveTargetColumn && values.length) {
         extraFormData = {
           filters: [
             {
               col: effectiveTargetColumn,
               op: 'IN' as const,
-              val: [deepest.value],
+              val: values,
             },
           ],
         };
@@ -203,7 +229,13 @@ export default function HierarchyFilterPlugin(
         },
       });
     },
-    [enableEmptyFilter, effectiveTargetColumn, nodeByKey, setDataMask],
+    [
+      collectSubtreeValues,
+      enableEmptyFilter,
+      effectiveTargetColumn,
+      nodeByKey,
+      setDataMask,
+    ],
   );
 
   const onLevelChange = useCallback(

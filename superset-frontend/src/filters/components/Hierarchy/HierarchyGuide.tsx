@@ -157,7 +157,7 @@ export default function HierarchyGuide() {
           {t(
             'Save. On the dashboard: pick a node at a parent level → child ' +
               'levels are generated automatically; charts are filtered by the ' +
-              'deepest node you selected.',
+              'selected node and all of its descendants.',
           )}
         </li>
       </ol>
