@@ -16870,3 +16870,35 @@ msgstr "vd: group_id (nếu biểu đồ đặt tên cột khác)"
 
 msgid "Save. On the dashboard: pick a node at a parent level → child levels are generated automatically; charts are filtered by the selected node and all of its descendants."
 msgstr "Lưu lại. Trên dashboard: chọn một node ở cấp cha → cấp con tự sinh ra; biểu đồ được lọc theo node đã chọn và toàn bộ node con-cháu của nó."
+
+
+#. Guest RLS Exempt Datasets admin page.
+msgid "Guest RLS Exempt Datasets"
+msgstr "Dataset miễn RLS cho guest"
+
+msgid "Exempt dataset"
+msgstr "Dataset miễn trừ"
+
+msgid "exempt dataset"
+msgstr "dataset miễn trừ"
+
+msgid "Add exempt dataset"
+msgstr "Thêm dataset miễn trừ"
+
+msgid "Exempt dataset added."
+msgstr "Đã thêm dataset miễn trừ."
+
+msgid "This dataset is already exempt, or could not be saved."
+msgstr "Dataset này đã được miễn trừ, hoặc không lưu được."
+
+msgid "Removed exempt dataset"
+msgstr "Đã gỡ dataset miễn trừ"
+
+msgid "There was an issue removing the exempt dataset."
+msgstr "Có lỗi khi gỡ dataset miễn trừ."
+
+msgid "No exempt datasets yet"
+msgstr "Chưa có dataset miễn trừ nào"
+
+msgid "Guests must carry an RLS clause for every dataset they query. Add shared/lookup datasets here so they are queryable without one (everything else returns no rows)."
+msgstr "Guest phải kèm điều kiện RLS cho mọi dataset truy vấn. Thêm các dataset dùng chung/tra cứu vào đây để truy vấn được mà không cần RLS (những dataset khác sẽ trả 0 dòng)."

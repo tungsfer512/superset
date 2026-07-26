@@ -145,6 +145,13 @@ const KeycloakRoleMappingList = lazy(
     ),
 );
 
+const GuestRlsExemptDatasetList = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "GuestRlsExemptDatasetList" */ 'src/pages/GuestRlsExemptDatasetList'
+    ),
+);
+
 const UsersList: LazyExoticComponent<any> = lazy(
   () => import(/* webpackChunkName: "UsersList" */ 'src/pages/UsersList'),
 );
@@ -340,6 +347,10 @@ if (isAdmin) {
     {
       path: '/keycloak-role-mapping/',
       Component: KeycloakRoleMappingList,
+    },
+    {
+      path: '/guest-rls-exempt-datasets/',
+      Component: GuestRlsExemptDatasetList,
     },
   );
 }

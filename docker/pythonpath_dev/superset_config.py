@@ -689,3 +689,225 @@ if ENABLE_KEYCLOAK_SSO:
             }
 
     CUSTOM_SECURITY_MANAGER = KeycloakSecurityManager
+
+
+# =====================================================================
+# Embedded dashboards: force the guest token to take precedence over any
+# active Superset session.
+#
+# Flask-Login only invokes the guest-token request loader when NO active
+# session is found. On a SAME-DOMAIN embed, a logged-in Superset session
+# cookie would otherwise win over the guest token — so the request runs as
+# that session user (e.g. an admin with no RLS) and ALL rows leak, ignoring
+# the guest token's row-level-security rules.
+#
+# This hook makes a VALID guest token always win: whenever the guest-token
+# header/param is present and parses to a guest user, we pin g.user (and
+# Flask-Login's cached user) to that guest, so embedded requests are always
+# RLS-scoped regardless of any session cookie the browser sends.
+# =====================================================================
+def FLASK_APP_MUTATOR(app):  # noqa: N802
+    from flask import g, request
+
+    @app.before_request
+    def _enforce_guest_token_precedence():  # noqa: WPS430
+        try:
+            header = app.config.get("GUEST_TOKEN_HEADER_NAME", "X-GuestToken")
+            if not (
+                request.headers.get(header) or request.form.get("guest_token")
+            ):
+                return
+            guest_user = app.appbuilder.sm.get_guest_user_from_request(request)
+            if guest_user is not None:
+                g.user = guest_user
+                # Flask-Login caches the resolved user here; overriding it makes
+                # current_user resolve to the guest instead of the session user.
+                g._login_user = guest_user
+        except Exception:  # noqa: BLE001 - never break the request pipeline
+            pass
+
+
+# =====================================================================
+# Fail-closed Row Level Security for embedded GUEST users.
+#
+# Multi-tenant embeds use per-request inline `rls` in the guest token (one
+# tenant clause per token) instead of thousands of static RLS rules. The risk:
+# if a token is ever minted/refreshed WITHOUT rls (a race, a missing tenant
+# param, an error fallback) — or its rls doesn't cover a dataset — Superset
+# would apply NO filter and return ALL rows.
+#
+# This override makes guests fail CLOSED: when a guest queries a dataset for
+# which the token carries NO applicable rls clause, we inject `1 = 0` so the
+# query returns ZERO rows instead of everything. Datasets that are genuinely
+# shared across tenants (lookup/mapping tables, e.g. the hierarchy filter's
+# mapping dataset) must be listed in GUEST_RLS_EXEMPT_DATASETS.
+# =====================================================================
+GUEST_RLS_STRICT = os.getenv("GUEST_RLS_STRICT", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+# Env fallback/seed list; the primary source is the DB table below, editable
+# in the UI (Settings → "Guest RLS Exempt Datasets").
+_GUEST_RLS_ENV_EXEMPT = [
+    int(x)
+    for x in os.getenv("GUEST_RLS_EXEMPT_DATASETS", "").replace(" ", "").split(",")
+    if x.strip().isdigit()
+]
+
+import time as _grx_time  # noqa: E402
+
+# The mapped model + admin view are created lazily inside register_views (after
+# SqlaTable is imported), so defining them here at config-load time can't crash
+# mapper configuration. The model class is stashed in this holder once created.
+_GuestRlsExemptModel = None
+
+# Small TTL cache so query building (which calls get_guest_rls_filters per
+# dataset) doesn't hit the DB on every call.
+_grx_cache = {"exp": 0.0, "ids": set(_GUEST_RLS_ENV_EXEMPT)}
+
+
+def _get_exempt_dataset_ids():
+    now = _grx_time.time()
+    if now < _grx_cache["exp"]:
+        return _grx_cache["ids"]
+    ids = set(_GUEST_RLS_ENV_EXEMPT)
+    try:
+        if _GuestRlsExemptModel is not None:
+            from superset import db
+
+            ids |= {
+                row[0]
+                for row in db.session.query(
+                    _GuestRlsExemptModel.dataset_id
+                ).all()
+            }
+    except Exception:  # noqa: BLE001 - table may not exist yet / no context
+        pass
+    _grx_cache["exp"] = now + 30
+    _grx_cache["ids"] = ids
+    return ids
+
+
+def _build_guest_rls_exempt_model():
+    """Define the mapped model once (deferred until SqlaTable is available)."""
+    global _GuestRlsExemptModel
+    if _GuestRlsExemptModel is not None:
+        return _GuestRlsExemptModel
+    import sqlalchemy as sa
+    from flask_appbuilder import Model
+    from sqlalchemy.orm import relationship
+
+    from superset.connectors.sqla.models import SqlaTable  # ensures registered
+
+    class GuestRlsExemptDataset(Model):
+        __tablename__ = "guest_rls_exempt_dataset"
+        __table_args__ = {"extend_existing": True}
+
+        id = sa.Column(sa.Integer, primary_key=True)
+        dataset_id = sa.Column(
+            sa.Integer,
+            sa.ForeignKey("tables.id", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        )
+        dataset = relationship(SqlaTable)
+
+        def __repr__(self) -> str:
+            return (
+                self.dataset.table_name if self.dataset else str(self.dataset_id)
+            )
+
+    _GuestRlsExemptModel = GuestRlsExemptDataset
+    return GuestRlsExemptDataset
+
+
+class _GuestRlsHardeningMixin:
+    def get_guest_rls_filters(self, dataset):  # type: ignore[override]
+        rules = super().get_guest_rls_filters(dataset)
+        try:
+            if GUEST_RLS_STRICT and not rules and self.is_guest_user():
+                if getattr(dataset, "id", None) not in _get_exempt_dataset_ids():
+                    # No tenant clause for this dataset -> deny (no rows).
+                    return [{"clause": "1 = 0"}]
+        except Exception:  # noqa: BLE001 - never break query building
+            pass
+        return rules
+
+    def register_views(self):
+        super().register_views()
+        # Create the table + register a modern React admin page (REST API + SPA
+        # + Security menu link), consistent with other Superset list pages.
+        try:
+            from flask_appbuilder import expose
+            from flask_appbuilder.models.sqla.interface import SQLAInterface
+            from flask_appbuilder.security.decorators import (
+                has_access,
+                permission_name,
+            )
+
+            from superset import db
+            from superset.constants import (
+                MODEL_API_RW_METHOD_PERMISSION_MAP,
+                RouteMethod,
+            )
+            from superset.views.base import BaseSupersetView
+            from superset.views.base_api import BaseSupersetModelRestApi
+
+            model = _build_guest_rls_exempt_model()
+            model.__table__.create(bind=db.engine, checkfirst=True)
+
+            class GuestRlsExemptDatasetRestApi(BaseSupersetModelRestApi):
+                datamodel = SQLAInterface(model)
+                resource_name = "guest_rls_exempt_dataset"
+                allow_browser_login = True
+                class_permission_name = "GuestRlsExemptDataset"
+                method_permission_name = MODEL_API_RW_METHOD_PERMISSION_MAP
+                include_route_methods = (
+                    RouteMethod.REST_MODEL_VIEW_CRUD_SET | {RouteMethod.RELATED}
+                )
+                list_columns = ["id", "dataset.id", "dataset.table_name"]
+                show_columns = list_columns
+                add_columns = ["dataset"]
+                edit_columns = add_columns
+                order_columns = ["id"]
+                search_columns = ["dataset"]
+                base_order = ("id", "desc")
+                allowed_rel_fields = {"dataset"}
+
+            class GuestRlsExemptDatasetPageView(BaseSupersetView):
+                route_base = "/"
+                class_permission_name = "GuestRlsExemptDataset"
+
+                @expose("/guest-rls-exempt-datasets/")
+                @has_access
+                @permission_name("read")
+                def list(self):
+                    return super().render_app_template()
+
+            self.appbuilder.add_api(GuestRlsExemptDatasetRestApi)
+            self.appbuilder.add_view(
+                GuestRlsExemptDatasetPageView,
+                "Guest RLS Exempt Datasets",
+                label="Guest RLS Exempt Datasets",
+                category="Security",
+                category_label="Security",
+                icon="fa-shield",
+            )
+        except Exception as ex:  # noqa: BLE001
+            logging.getLogger(__name__).warning(
+                "Guest RLS exempt admin view not ready: %s", ex
+            )
+
+
+try:
+    _guest_rls_base_sm = CUSTOM_SECURITY_MANAGER  # set above if Keycloak is on
+except NameError:
+    from superset.security import SupersetSecurityManager as _guest_rls_base_sm
+
+
+class _HardenedSecurityManager(_GuestRlsHardeningMixin, _guest_rls_base_sm):
+    pass
+
+
+CUSTOM_SECURITY_MANAGER = _HardenedSecurityManager
