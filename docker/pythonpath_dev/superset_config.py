@@ -304,6 +304,17 @@ PUBLIC_ROLE_LIKE = "Gamma"
 GUEST_ROLE_NAME = "Gamma"
 GUEST_TOKEN_JWT_PUBLIC_KEY = ""
 
+# Guest token (embedded dashboards) lifetime, in seconds.
+# Default upstream is 300 (5 min) -> embeds get 401 after a few minutes.
+# Set GUEST_TOKEN_JWT_EXP_SECONDS in .env (e.g. 86400 = 1 day, 604800 = 7 days).
+# NOTE: there is no true "never expires" -- a JWT always carries an exp claim.
+# To emulate "permanent", set a very large value (e.g. 31536000 = 1 year).
+# Longer-lived tokens are riskier: a leaked token stays valid until it expires,
+# and revocation is not possible before exp. Prefer SDK auto-refresh (fetchGuestToken).
+GUEST_TOKEN_JWT_EXP_SECONDS = int(
+    os.getenv("GUEST_TOKEN_JWT_EXP_SECONDS", "86400")
+)
+
 SQLLAB_ASYNC_TIME_LIMIT_SEC = 60 * 60 * 6  # 6 hours
 SQLALCHEMY_POOL_SIZE = 15
 SQLALCHEMY_MAX_OVERFLOW = 20
