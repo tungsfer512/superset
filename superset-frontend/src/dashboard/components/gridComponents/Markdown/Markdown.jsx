@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import cx from 'classnames';
 
-import { css, styled, t } from '@superset-ui/core';
+import { css, styled, t, translateContent } from '@superset-ui/core';
 import { SafeMarkdown, MarkdownEditor } from '@superset-ui/core/components';
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
 
@@ -81,9 +81,12 @@ const getMarkdownPlaceholder = () => `# ✨${t('Header')} 1
 
 <br />
 
-${t('Click here to learn more about [markdown formatting](%(markdownDocsLink)s)', {
-  markdownDocsLink: MARKDOWN_DOCS_LINK,
-})}`;
+${t(
+  'Click here to learn more about [markdown formatting](%(markdownDocsLink)s)',
+  {
+    markdownDocsLink: MARKDOWN_DOCS_LINK,
+  },
+)}`;
 
 const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
 
@@ -312,7 +315,11 @@ class Markdown extends PureComponent {
         source={
           hasError
             ? MARKDOWN_ERROR_MESSAGE
-            : this.state.markdownSource || getMarkdownPlaceholder()
+            : this.props.editMode
+              ? this.state.markdownSource || getMarkdownPlaceholder()
+              : translateContent(
+                  this.state.markdownSource || getMarkdownPlaceholder(),
+                )
         }
         htmlSanitization={this.props.htmlSanitization}
         htmlSchemaOverrides={this.props.htmlSchemaOverrides}

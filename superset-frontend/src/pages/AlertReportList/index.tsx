@@ -26,6 +26,7 @@ import {
   makeApi,
   styled,
   getExtensionsRegistry,
+  translateContent,
 } from '@superset-ui/core';
 import { extendedDayjs } from '@superset-ui/core/utils/dates';
 import {
@@ -287,6 +288,11 @@ function AlertList({
       },
       {
         accessor: 'name',
+        Cell: ({
+          row: {
+            original: { name },
+          },
+        }: any) => <span>{translateContent(name)}</span>,
         Header: t('Name'),
         size: 'xxl',
         id: 'name',

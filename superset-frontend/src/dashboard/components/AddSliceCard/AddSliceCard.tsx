@@ -29,7 +29,13 @@ import {
   FC,
 } from 'react';
 
-import { t, isFeatureEnabled, FeatureFlag, css } from '@superset-ui/core';
+import {
+  t,
+  translateContent,
+  isFeatureEnabled,
+  FeatureFlag,
+  css,
+} from '@superset-ui/core';
 import { Tooltip, ImageLoader } from '@superset-ui/core/components';
 import { GenericLink, usePluginContext } from 'src/components';
 import { assetUrl } from 'src/utils/assetUrl';
@@ -264,7 +270,9 @@ const AddSliceCard: FC<{
                 align-items: center;
               `}
             >
-              <TruncatedTextWithTooltip>{sliceName}</TruncatedTextWithTooltip>
+              <TruncatedTextWithTooltip>
+                {translateContent(sliceName)}
+              </TruncatedTextWithTooltip>
               {isSelected && !showThumbnails ? (
                 <SliceAddedBadgePlaceholder
                   placeholderRef={setSliceAddedBadge}

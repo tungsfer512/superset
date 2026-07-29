@@ -117,6 +117,7 @@ export enum ListViewFilterOperator {
   NameOrDescription = 'name_or_description',
   AllText = 'all_text',
   ChartAllText = 'chart_all_text',
+  DatasetAllText = 'dataset_all_text',
   DatasetIsNullOrEmpty = 'dataset_is_null_or_empty',
   Between = 'between',
   DashboardIsFav = 'dashboard_is_favorite',

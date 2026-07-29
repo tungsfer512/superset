@@ -43,11 +43,15 @@ class DashboardTitleOrSlugFilter(BaseFilter):  # pylint: disable=too-few-public-
     def apply(self, query: Query, value: Any) -> Query:
         if not value:
             return query
+        from superset.translations.db_dictionary import translated_name_matches
+
         ilike_value = f"%{value}%"
         return query.filter(
             or_(
                 Dashboard.dashboard_title.ilike(ilike_value),
                 Dashboard.slug.ilike(ilike_value),
+                # also match dashboards by their translated title
+                Dashboard.dashboard_title.in_(translated_name_matches(value)),
             )
         )
 

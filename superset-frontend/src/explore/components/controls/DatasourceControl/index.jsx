@@ -27,6 +27,7 @@ import {
   styled,
   t,
   withTheme,
+  translateContent,
 } from '@superset-ui/core';
 import { getTemporalColumns } from '@superset-ui/chart-controls';
 import { getUrlParam } from 'src/utils/urlUtils';
@@ -427,7 +428,7 @@ class DatasourceControl extends PureComponent {
     const titleText =
       isMissingDatasource && !datasource.name
         ? t('Missing dataset')
-        : getDatasourceTitle(datasource);
+        : translateContent(getDatasourceTitle(datasource));
 
     const tooltip = titleText;
 

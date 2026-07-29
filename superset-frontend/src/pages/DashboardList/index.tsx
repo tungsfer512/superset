@@ -22,6 +22,7 @@ import {
   styled,
   SupersetClient,
   t,
+  translateContent,
 } from '@superset-ui/core';
 import { useSelector } from 'react-redux';
 import { useState, useMemo, useCallback } from 'react';
@@ -335,7 +336,7 @@ function DashboardList(props: DashboardListProps) {
             },
           },
         }: any) => (
-          <Link to={url} title={dashboardTitle}>
+          <Link to={url} title={translateContent(dashboardTitle)}>
             {certifiedBy && (
               <>
                 <CertifiedBadge
@@ -344,7 +345,7 @@ function DashboardList(props: DashboardListProps) {
                 />{' '}
               </>
             )}
-            {dashboardTitle}
+            {translateContent(dashboardTitle)}
           </Link>
         ),
         Header: t('Name'),

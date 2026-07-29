@@ -25,6 +25,7 @@ import {
   isFeatureEnabled,
   FeatureFlag,
   t,
+  translateContent,
   getExtensionsRegistry,
 } from '@superset-ui/core';
 import { Global } from '@emotion/react';
@@ -603,7 +604,7 @@ const Header = () => {
 
   const editableTitleProps = useMemo(
     () => ({
-      title: dashboardTitle,
+      title: editMode ? dashboardTitle : translateContent(dashboardTitle),
       canEdit: userCanEdit && editMode,
       onSave: handleChangeText,
       placeholder: t('Add the name of the dashboard'),

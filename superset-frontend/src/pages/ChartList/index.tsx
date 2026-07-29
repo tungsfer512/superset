@@ -24,6 +24,7 @@ import {
   styled,
   SupersetClient,
   t,
+  translateContent,
 } from '@superset-ui/core';
 import { useState, useMemo, useCallback } from 'react';
 import rison from 'rison';
@@ -361,7 +362,7 @@ function ChartList(props: ChartListProps) {
                   />{' '}
                 </>
               )}
-              {sliceName}
+              {translateContent(sliceName)}
             </Link>
             {description && <InfoTooltip tooltip={description} />}
           </FlexRowContainer>
@@ -398,8 +399,10 @@ function ChartList(props: ChartListProps) {
             : '';
 
           return (
-            <Tooltip title={dsNameTxt} placement="top">
-              <GenericLink to={dsUrl}>{displayName}</GenericLink>
+            <Tooltip title={translateContent(dsNameTxt)} placement="top">
+              <GenericLink to={dsUrl}>
+                {translateContent(displayName)}
+              </GenericLink>
             </Tooltip>
           );
         },

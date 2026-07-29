@@ -23,6 +23,7 @@ import {
   useTheme,
   css,
   t,
+  translateContent,
 } from '@superset-ui/core';
 import { FunctionComponent, useState, useMemo, useCallback, Key } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -317,14 +318,16 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
           if (PREVENT_UNSAFE_DEFAULT_URLS_ON_DATASET) {
             titleLink = (
               <Link data-test="internal-link" to={exploreURL}>
-                {datasetTitle}
+                {translateContent(datasetTitle)}
               </Link>
             );
           } else {
             titleLink = (
               // exploreUrl can be a link to Explore or an external link
               // in the first case use SPA routing, else use HTML anchor
-              <GenericLink to={exploreURL}>{datasetTitle}</GenericLink>
+              <GenericLink to={exploreURL}>
+                {translateContent(datasetTitle)}
+              </GenericLink>
             );
           }
           try {
@@ -517,7 +520,15 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canEdit, canDelete, canExport, openDatasetEditModal, canDuplicate, user, locale],
+    [
+      canEdit,
+      canDelete,
+      canExport,
+      openDatasetEditModal,
+      canDuplicate,
+      user,
+      locale,
+    ],
   );
 
   const filterTypes: ListViewFilters = useMemo(
@@ -527,7 +538,7 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
         key: 'search',
         id: 'table_name',
         input: 'search',
-        operator: FilterOperator.Contains,
+        operator: FilterOperator.DatasetAllText,
       },
       {
         Header: t('Type'),

@@ -20,7 +20,7 @@ import { Fragment, useCallback, memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
-import { styled, t } from '@superset-ui/core';
+import { styled, t, translateContent } from '@superset-ui/core';
 
 import { EditableTitle, EmptyState } from '@superset-ui/core/components';
 import { setEditMode, onRefresh } from 'src/dashboard/actions/dashboardState';
@@ -389,7 +389,11 @@ const Tab = props => {
           ref={dragSourceRef}
         >
           <EditableTitle
-            title={component.meta.text}
+            title={
+              editMode
+                ? component.meta.text
+                : translateContent(component.meta.text)
+            }
             defaultTitle={component.meta.defaultText}
             placeholder={component.meta.placeholder}
             canEdit={editMode && isFocused}

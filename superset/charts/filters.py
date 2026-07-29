@@ -40,6 +40,8 @@ class ChartAllTextFilter(BaseFilter):  # pylint: disable=too-few-public-methods
     def apply(self, query: Query, value: Any) -> Query:
         if not value:
             return query
+        from superset.translations.db_dictionary import translated_name_matches
+
         ilike_value = f"%{value}%"
         return query.filter(
             or_(
@@ -47,6 +49,8 @@ class ChartAllTextFilter(BaseFilter):  # pylint: disable=too-few-public-methods
                 Slice.description.ilike(ilike_value),
                 Slice.viz_type.ilike(ilike_value),
                 SqlaTable.table_name.ilike(ilike_value),
+                # also match charts by their translated name
+                Slice.slice_name.in_(translated_name_matches(value)),
             )
         )
 

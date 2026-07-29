@@ -22,6 +22,25 @@ from superset.connectors.sqla.models import SqlaTable
 from superset.views.base import BaseFilter
 
 
+class DatasetAllTextFilter(BaseFilter):  # pylint: disable=too-few-public-methods
+    name = _("All Text")
+    arg_name = "dataset_all_text"
+
+    def apply(self, query: Query, value: object) -> Query:
+        if not value:
+            return query
+        from superset.translations.db_dictionary import translated_name_matches
+
+        ilike_value = f"%{value}%"
+        return query.filter(
+            or_(
+                SqlaTable.table_name.ilike(ilike_value),
+                # also match datasets by their translated name
+                SqlaTable.table_name.in_(translated_name_matches(str(value))),
+            )
+        )
+
+
 class DatasetIsNullOrEmptyFilter(BaseFilter):  # pylint: disable=too-few-public-methods
     name = _("Null or Empty")
     arg_name = "dataset_is_null_or_empty"

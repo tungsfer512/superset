@@ -19,7 +19,7 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { css, styled, t } from '@superset-ui/core';
+import { css, styled, t, translateContent } from '@superset-ui/core';
 
 import PopoverDropdown from '@superset-ui/core/components/PopoverDropdown';
 import { EditableTitle } from '@superset-ui/core/components';
@@ -248,7 +248,11 @@ class Header extends PureComponent {
                   </HoverMenu>
                 )}
                 <EditableTitle
-                  title={component.meta.text}
+                  title={
+                    editMode
+                      ? component.meta.text
+                      : translateContent(component.meta.text)
+                  }
                   canEdit={editMode}
                   onSaveTitle={this.handleChangeText}
                   showTooltip={false}

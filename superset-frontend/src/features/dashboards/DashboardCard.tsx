@@ -23,6 +23,7 @@ import {
   FeatureFlag,
   t,
   SupersetClient,
+  translateContent,
 } from '@superset-ui/core';
 import { CardStyles } from 'src/views/CRUD/utils';
 import {
@@ -160,7 +161,7 @@ function DashboardCard({
     >
       <ListViewCard
         loading={dashboard.loading || false}
-        title={dashboard.dashboard_title}
+        title={translateContent(dashboard.dashboard_title)}
         certifiedBy={dashboard.certified_by}
         certificationDetails={dashboard.certification_details}
         titleRight={<PublishedLabel isPublished={dashboard.published} />}

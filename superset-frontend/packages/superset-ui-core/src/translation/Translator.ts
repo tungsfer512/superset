@@ -94,6 +94,27 @@ export default class Translator {
     }
   }
 
+  /**
+   * Translate dynamic, user-generated content (chart/dashboard/tab names,
+   * markdown, headings) by exact-string lookup. Unlike translate(), this does
+   * NOT run sprintf formatting -- content may legitimately contain "%"
+   * characters. Returns the input unchanged when no dictionary entry exists.
+   */
+  translateContent(input?: string | null): string {
+    if (!input) {
+      return input ?? '';
+    }
+    try {
+      // Jed exposes gettext() at runtime (raw lookup, no sprintf); the typed
+      // wrapper only declares translate(), so cast to reach it.
+      return (this.i18n as unknown as { gettext(key: string): string }).gettext(
+        input,
+      );
+    } catch (err) {
+      return input;
+    }
+  }
+
   translateWithNumber(key: string, ...args: unknown[]): string {
     try {
       const [plural, num, ...rest] = args;

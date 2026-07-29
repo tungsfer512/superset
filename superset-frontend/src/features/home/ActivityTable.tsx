@@ -18,7 +18,7 @@
  */
 import { useEffect, useState } from 'react';
 import { extendedDayjs } from '@superset-ui/core/utils/dates';
-import { styled, t } from '@superset-ui/core';
+import { styled, t, translateContent } from '@superset-ui/core';
 import { setItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
 import { Link } from 'react-router-dom';
 import { ListViewCard } from '@superset-ui/core/components';
@@ -74,10 +74,12 @@ const UNTITLED = t('[Untitled]');
 const UNKNOWN_TIME = t('Unknown');
 
 const getEntityTitle = (entity: ActivityObject) => {
-  if ('dashboard_title' in entity) return entity.dashboard_title || UNTITLED;
-  if ('slice_name' in entity) return entity.slice_name || UNTITLED;
-  if ('label' in entity) return entity.label || UNTITLED;
-  return entity.item_title || UNTITLED;
+  if ('dashboard_title' in entity)
+    return translateContent(entity.dashboard_title) || UNTITLED;
+  if ('slice_name' in entity)
+    return translateContent(entity.slice_name) || UNTITLED;
+  if ('label' in entity) return translateContent(entity.label) || UNTITLED;
+  return translateContent(entity.item_title) || UNTITLED;
 };
 
 const getEntityIcon = (entity: ActivityObject) => {

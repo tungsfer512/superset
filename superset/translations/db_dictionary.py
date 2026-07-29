@@ -284,6 +284,29 @@ def invalidate_cache() -> None:
     _pack_cache.clear()
 
 
+def translated_name_matches(value: str) -> Any:
+    """Scalar subquery of original names (msgids) whose translation matches
+    ``value`` (case-insensitive substring) in the current UI locale.
+
+    Use as ``Model.name_column.in_(translated_name_matches(value))`` so list
+    searches also match objects by their translated name.
+    """
+    from sqlalchemy import select
+
+    try:
+        from flask_babel import get_locale
+
+        locale = str(get_locale() or "")
+    except Exception:  # noqa: BLE001 - no request/app context
+        locale = ""
+    stmt = select(TranslationDictionary.msgid).where(
+        TranslationDictionary.msgstr.ilike(f"%{value}%")
+    )
+    if locale:
+        stmt = stmt.where(TranslationDictionary.locale == locale)
+    return stmt
+
+
 def get_merged_pack(locale: str) -> dict[str, Any]:
     """File pack with DB entries merged on top (DB wins). Cached briefly."""
     now = time.time()

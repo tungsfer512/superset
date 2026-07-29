@@ -27,7 +27,13 @@ import {
   UnsavedChangesModal,
 } from '@superset-ui/core/components';
 import { AlteredSliceTag } from 'src/components';
-import { css, logging, SupersetClient, t } from '@superset-ui/core';
+import {
+  css,
+  logging,
+  SupersetClient,
+  t,
+  translateContent,
+} from '@superset-ui/core';
 import { chartPropShape } from 'src/dashboard/util/propShapes';
 import { Icons } from '@superset-ui/core/components/Icons';
 import PropertiesModal from 'src/explore/components/PropertiesModal';
@@ -237,7 +243,12 @@ export const ExploreChartHeader = ({
     <>
       <PageHeaderWithActions
         editableTitleProps={{
-          title: sliceName ?? '',
+          title:
+            !slice ||
+            canOverwrite ||
+            (slice?.owners || []).includes(user?.userId)
+              ? (sliceName ?? '') // editors edit the original name
+              : translateContent(sliceName), // viewers see the translation
           canEdit:
             !slice ||
             canOverwrite ||

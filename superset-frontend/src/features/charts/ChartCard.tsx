@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isFeatureEnabled, FeatureFlag, t, css } from '@superset-ui/core';
+import {
+  isFeatureEnabled,
+  FeatureFlag,
+  t,
+  translateContent,
+  css,
+} from '@superset-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import {
   ConfirmStatusChange,
@@ -169,7 +175,7 @@ export default function ChartCard({
     >
       <ListViewCard
         loading={loading}
-        title={chart.slice_name}
+        title={translateContent(chart.slice_name)}
         certifiedBy={chart.certified_by}
         certificationDetails={chart.certification_details}
         cover={
@@ -184,7 +190,9 @@ export default function ChartCard({
         )}
         description={t('Modified %s', chart.changed_on_delta_humanized)}
         coverLeft={<FacePile users={chart.owners || []} />}
-        coverRight={<Label>{chart.datasource_name_text}</Label>}
+        coverRight={
+          <Label>{translateContent(chart.datasource_name_text)}</Label>
+        }
         linkComponent={Link}
         actions={
           <ListViewCard.Actions

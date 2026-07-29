@@ -31,6 +31,7 @@ import {
   styled,
   SupersetTheme,
   t,
+  translateContent,
   useTheme,
 } from '@superset-ui/core';
 import { useUiConfig } from 'src/components/UiConfigContext';
@@ -216,18 +217,22 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
 
     useEffect(() => {
       const headerElement = headerRef.current;
+      // Show the translated name in view mode, the original while editing.
+      const displaySliceName = editMode
+        ? sliceName
+        : translateContent(sliceName);
       if (canExplore) {
-        setHeaderTooltip(getSliceHeaderTooltip(sliceName));
+        setHeaderTooltip(getSliceHeaderTooltip(displaySliceName));
       } else if (
         headerElement &&
         (headerElement.scrollWidth > headerElement.offsetWidth ||
           headerElement.scrollHeight > headerElement.offsetHeight)
       ) {
-        setHeaderTooltip(sliceName ?? null);
+        setHeaderTooltip(displaySliceName ?? null);
       } else {
         setHeaderTooltip(null);
       }
-    }, [sliceName, width, height, canExplore]);
+    }, [sliceName, width, height, canExplore, editMode]);
 
     const exploreUrl = `/explore/?dashboard_page_id=${dashboardPageId}&slice_id=${slice.slice_id}`;
 
@@ -255,10 +260,9 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
             <div>
               <EditableTitle
                 title={
-                  sliceName ||
-                  (editMode
-                    ? '---' // this makes an empty title clickable
-                    : '')
+                  editMode
+                    ? sliceName || '---' // '---' makes an empty title clickable
+                    : translateContent(sliceName) || ''
                 }
                 canEdit={editMode}
                 onSaveTitle={updateSliceName}

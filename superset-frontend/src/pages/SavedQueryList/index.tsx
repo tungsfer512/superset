@@ -23,6 +23,7 @@ import {
   styled,
   SupersetClient,
   t,
+  translateContent,
 } from '@superset-ui/core';
 import { useCallback, useMemo, useState, MouseEvent } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -336,7 +337,9 @@ function SavedQueryList({
             original: { id, label },
           },
         }: any) => (
-          <Link to={makeUrl(`/sqllab?savedQueryId=${id}`)}>{label}</Link>
+          <Link to={makeUrl(`/sqllab?savedQueryId=${id}`)}>
+            {translateContent(label)}
+          </Link>
         ),
         id: 'label',
       },
@@ -499,7 +502,14 @@ function SavedQueryList({
         id: QueryObjectColumns.ChangedBy,
       },
     ],
-    [canDelete, canEdit, canExport, copyQueryLink, handleSavedQueryPreview, locale],
+    [
+      canDelete,
+      canEdit,
+      canExport,
+      copyQueryLink,
+      handleSavedQueryPreview,
+      locale,
+    ],
   );
 
   const filters: ListViewFilters = useMemo(
