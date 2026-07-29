@@ -152,6 +152,13 @@ const GuestRlsExemptDatasetList = lazy(
     ),
 );
 
+const TranslationDictionaryList = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "TranslationDictionaryList" */ 'src/pages/TranslationDictionaryList'
+    ),
+);
+
 const UsersList: LazyExoticComponent<any> = lazy(
   () => import(/* webpackChunkName: "UsersList" */ 'src/pages/UsersList'),
 );
@@ -351,6 +358,10 @@ if (isAdmin) {
     {
       path: '/guest-rls-exempt-datasets/',
       Component: GuestRlsExemptDatasetList,
+    },
+    {
+      path: '/translation-dictionary/',
+      Component: TranslationDictionaryList,
     },
   );
 }

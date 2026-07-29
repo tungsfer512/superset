@@ -30,6 +30,7 @@ from flask import (
     current_app as app,
     flash,
     g,
+    jsonify,
     redirect,
     request,
     Response,
@@ -905,6 +906,19 @@ class Superset(BaseSupersetView):
         # Only allow expected language formats like "en", "pt_BR", etc.
         if not re.match(r"^[a-z]{2,3}(_[A-Z]{2})?$", lang):
             abort(400, "Invalid language code")
+
+        # Merge the compiled messages.json with any runtime overrides/additions
+        # stored in the translation_dictionary table (DB wins). Falls back to the
+        # raw file if the DB layer is unavailable.
+        try:
+            from superset.translations.db_dictionary import get_merged_pack
+
+            pack = get_merged_pack(lang)
+            response = jsonify(pack)
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+            return response
+        except Exception:  # pylint: disable=broad-except
+            logger.warning("Falling back to file language pack for %s", lang)
 
         base_dir = os.path.join(os.path.dirname(__file__), "..", "translations")
         file_path = safe_join(base_dir, lang, "LC_MESSAGES", "messages.json")

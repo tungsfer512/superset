@@ -910,6 +910,138 @@ class _GuestRlsHardeningMixin:
                 "Guest RLS exempt admin view not ready: %s", ex
             )
 
+        # ------------------------------------------------------------------ #
+        # Translation dictionary (DB-backed i18n): admin REST API + SPA page. #
+        # ------------------------------------------------------------------ #
+        try:
+            from flask_appbuilder import expose
+            from flask_appbuilder.api import (
+                expose as api_expose,
+                protect,
+                safe,
+            )
+            from flask_appbuilder.models.sqla.interface import SQLAInterface
+            from flask_appbuilder.security.decorators import (
+                has_access,
+                permission_name,
+            )
+
+            from superset import db
+            from superset.constants import (
+                MODEL_API_RW_METHOD_PERMISSION_MAP,
+                RouteMethod,
+            )
+            from superset.translations.db_dictionary import (
+                TranslationDictionary,
+                export_to_files,
+                import_from_files,
+                invalidate_cache,
+                seed_if_empty,
+            )
+            from superset.views.base import BaseSupersetView
+            from superset.views.base_api import BaseSupersetModelRestApi
+
+            # Ensure the table exists (migration is canonical; this is a safety
+            # net) and seed from files on first boot only.
+            TranslationDictionary.__table__.create(bind=db.engine, checkfirst=True)
+            try:
+                seed_if_empty()
+            except Exception as seed_ex:  # noqa: BLE001
+                logging.getLogger(__name__).warning(
+                    "Translation dictionary seed skipped: %s", seed_ex
+                )
+
+            class TranslationDictionaryRestApi(BaseSupersetModelRestApi):
+                datamodel = SQLAInterface(TranslationDictionary)
+                resource_name = "translation_dictionary"
+                allow_browser_login = True
+                class_permission_name = "TranslationDictionary"
+                method_permission_name = {
+                    **MODEL_API_RW_METHOD_PERMISSION_MAP,
+                    "sync_from_file": "write",
+                    "export_to_file": "write",
+                }
+                include_route_methods = RouteMethod.REST_MODEL_VIEW_CRUD_SET | {
+                    "sync_from_file",
+                    "export_to_file",
+                }
+                list_columns = [
+                    "id",
+                    "locale",
+                    "msgid",
+                    "msgstr",
+                    "source",
+                    "updated_on",
+                ]
+                show_columns = list_columns
+                add_columns = ["locale", "msgcontext", "msgid", "msgstr"]
+                edit_columns = add_columns
+                order_columns = ["locale", "msgid", "source", "updated_on"]
+                search_columns = ["locale", "msgid", "msgstr", "source"]
+                base_order = ("updated_on", "desc")
+
+                def pre_add(self, item):  # noqa: D401
+                    from superset.translations.db_dictionary import msgid_hash
+
+                    item.msgid_hash = msgid_hash(item.msgid or "")
+                    item.source = "db"
+
+                def pre_update(self, item):  # noqa: D401
+                    from superset.translations.db_dictionary import msgid_hash
+
+                    item.msgid_hash = msgid_hash(item.msgid or "")
+
+                def post_add(self, item):
+                    invalidate_cache()
+
+                def post_update(self, item):
+                    invalidate_cache()
+
+                def post_delete(self, item):
+                    invalidate_cache()
+
+                @api_expose("/sync_from_file", methods=["POST"])
+                @protect()
+                @safe
+                @permission_name("write")
+                def sync_from_file(self):
+                    """Merge file translations into the DB (add-missing only)."""
+                    added = import_from_files(only_missing=True)
+                    return self.response(200, added=added)
+
+                @api_expose("/export_to_file", methods=["POST"])
+                @protect()
+                @safe
+                @permission_name("write")
+                def export_to_file(self):
+                    """Write the DB dictionary back out to json/po/mo files."""
+                    written = export_to_files()
+                    return self.response(200, locales=written)
+
+            class TranslationDictionaryPageView(BaseSupersetView):
+                route_base = "/"
+                class_permission_name = "TranslationDictionary"
+
+                @expose("/translation-dictionary/")
+                @has_access
+                @permission_name("read")
+                def list(self):
+                    return super().render_app_template()
+
+            self.appbuilder.add_api(TranslationDictionaryRestApi)
+            self.appbuilder.add_view(
+                TranslationDictionaryPageView,
+                "Translation Dictionary",
+                label="Translation Dictionary",
+                category="Manage",
+                category_label="Manage",
+                icon="fa-language",
+            )
+        except Exception as ex:  # noqa: BLE001
+            logging.getLogger(__name__).warning(
+                "Translation dictionary admin view not ready: %s", ex
+            )
+
 
 try:
     _guest_rls_base_sm = CUSTOM_SECURITY_MANAGER  # set above if Keycloak is on

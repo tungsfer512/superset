@@ -16919,3 +16919,89 @@ msgstr "Chọn hàm tổng hợp"
 
 msgid "SQL will appear here"
 msgstr "SQL sẽ hiển thị ở đây"
+
+
+#. Translation dictionary admin page.
+msgid "Translation Dictionary"
+msgstr "Từ điển đa ngôn ngữ"
+
+msgid "Translation"
+msgstr "Bản dịch"
+
+msgid "translation"
+msgstr "bản dịch"
+
+msgid "Add translation"
+msgstr "Thêm bản dịch"
+
+msgid "Edit translation"
+msgstr "Sửa bản dịch"
+
+msgid "Translation added."
+msgstr "Đã thêm bản dịch."
+
+msgid "Translation updated."
+msgstr "Đã cập nhật bản dịch."
+
+msgid "Deleted translation"
+msgstr "Đã xóa bản dịch"
+
+msgid "There was an issue saving the translation (duplicate key?)."
+msgstr "Có lỗi khi lưu bản dịch (trùng khóa?)."
+
+msgid "There was an issue deleting the translation."
+msgstr "Có lỗi khi xóa bản dịch."
+
+msgid "Language is required"
+msgstr "Bắt buộc chọn ngôn ngữ"
+
+msgid "e.g. vi, en, fr"
+msgstr "vd: vi, en, fr"
+
+msgid "Source text"
+msgstr "Văn bản gốc"
+
+msgid "Source text is required"
+msgstr "Bắt buộc nhập văn bản gốc"
+
+msgid "Original text (chart name, label, markdown...)"
+msgstr "Văn bản gốc (tên chart, nhãn, markdown...)"
+
+msgid "Translation is required"
+msgstr "Bắt buộc nhập bản dịch"
+
+msgid "Translated text"
+msgstr "Văn bản đã dịch"
+
+msgid "From file (po)"
+msgstr "Từ file (po)"
+
+msgid "Manual (db)"
+msgstr "Thủ công (db)"
+
+msgid "Export to files"
+msgstr "Xuất ra file"
+
+msgid "Sync from files"
+msgstr "Đồng bộ từ file"
+
+msgid "Synced from files: %s entries added."
+msgstr "Đã đồng bộ từ file: thêm %s mục."
+
+msgid "There was an issue syncing from files."
+msgstr "Có lỗi khi đồng bộ từ file."
+
+msgid "Exported to files: %s."
+msgstr "Đã xuất ra file: %s."
+
+msgid "There was an issue exporting to files."
+msgstr "Có lỗi khi xuất ra file."
+
+msgid "No translations yet"
+msgstr "Chưa có bản dịch nào"
+
+msgid "Add entries manually, or use \"Sync from files\" to import translations from the bundled po/mo files."
+msgstr "Thêm thủ công, hoặc dùng \"Đồng bộ từ file\" để nạp bản dịch từ các file po/mo có sẵn."
+
+msgid "Select a language"
+msgstr "Chọn ngôn ngữ"
