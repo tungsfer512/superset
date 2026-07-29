@@ -17,7 +17,13 @@
  * under the License.
  */
 import { useSelector } from 'react-redux';
-import { css, SupersetTheme, useTheme, useTruncation } from '@superset-ui/core';
+import {
+  css,
+  SupersetTheme,
+  translateContent,
+  useTheme,
+  useTruncation,
+} from '@superset-ui/core';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { useFilterConfigModal } from 'src/dashboard/components/nativeFilters/FilterBar/FilterConfigurationLink/useFilterConfigModal';
 import { RootState } from 'src/dashboard/types';
@@ -60,8 +66,12 @@ export const NameRow = ({
             margin-right: ${theme.sizeUnit}px;
           `}
         />
-        <TooltipWithTruncation title={elementsTruncated ? filter.name : null}>
-          <FilterName ref={filterNameRef}>{filter.name}</FilterName>
+        <TooltipWithTruncation
+          title={elementsTruncated ? translateContent(filter.name) : null}
+        >
+          <FilterName ref={filterNameRef}>
+            {translateContent(filter.name)}
+          </FilterName>
         </TooltipWithTruncation>
       </InternalRow>
       {canEdit && (

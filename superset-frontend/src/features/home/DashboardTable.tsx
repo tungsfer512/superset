@@ -17,7 +17,7 @@
  * under the License.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { SupersetClient, t } from '@superset-ui/core';
+import { SupersetClient, t, translateContent } from '@superset-ui/core';
 import { useFavoriteStatus, useListViewResource } from 'src/views/CRUD/hooks';
 import { Dashboard, DashboardTableProps, TableTab } from 'src/views/CRUD/types';
 import handleResourceExport from 'src/utils/export';
@@ -227,7 +227,7 @@ function DashboardTable({
           description={
             <>
               {t('Are you sure you want to delete')}{' '}
-              <b>{dashboardToDelete.dashboard_title}</b>?
+              <b>{translateContent(dashboardToDelete.dashboard_title)}</b>?
             </>
           }
           onConfirm={() => {

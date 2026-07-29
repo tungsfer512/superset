@@ -18,7 +18,13 @@
  */
 import { useState, ReactNode, useLayoutEffect, RefObject } from 'react';
 
-import { css, styled, Metric, SupersetTheme } from '@superset-ui/core';
+import {
+  css,
+  styled,
+  Metric,
+  SupersetTheme,
+  translateContent,
+} from '@superset-ui/core';
 import {
   SafeMarkdown,
   Typography,
@@ -59,7 +65,9 @@ export function MetricOption({
   shouldShowTooltip = true,
   url = '',
 }: MetricOptionProps) {
-  const verbose = metric.verbose_name || metric.metric_name || metric.label;
+  const verbose = translateContent(
+    metric.verbose_name || metric.metric_name || metric.label,
+  );
 
   const label = (
     <span

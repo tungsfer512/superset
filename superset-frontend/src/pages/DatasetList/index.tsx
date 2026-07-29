@@ -773,7 +773,7 @@ const DatasetList: FunctionComponent<DatasetListProps> = ({
             <>
               <p>
                 {t('The dataset')}
-                <b> {datasetCurrentlyDeleting.table_name} </b>
+                <b> {translateContent(datasetCurrentlyDeleting.table_name)} </b>
                 {t(
                   'is linked to %s charts that appear on %s dashboards. Are you sure you want to continue? Deleting the dataset will break those objects.',
                   datasetCurrentlyDeleting.charts.count,

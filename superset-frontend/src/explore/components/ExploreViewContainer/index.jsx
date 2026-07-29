@@ -30,6 +30,7 @@ import {
   useChangeEffect,
   useComponentDidMount,
   usePrevious,
+  translateContent,
 } from '@superset-ui/core';
 import { debounce, isEqual, isObjectLike, omit, pick } from 'lodash';
 import { Resizable } from 're-resizable';
@@ -273,7 +274,7 @@ function ExploreViewContainer(props) {
 
   useEffect(() => {
     if (props.sliceName) {
-      document.title = props.sliceName;
+      document.title = translateContent(props.sliceName);
     }
     return () => {
       document.title = 'Superset';

@@ -17,7 +17,12 @@
  * under the License.
  */
 import { useState, ReactNode, useLayoutEffect, RefObject } from 'react';
-import { css, styled, SupersetTheme } from '@superset-ui/core';
+import {
+  css,
+  styled,
+  SupersetTheme,
+  translateContent,
+} from '@superset-ui/core';
 import {
   SafeMarkdown,
   Tooltip,
@@ -89,7 +94,7 @@ export function ColumnOption({
           `}
           ref={labelRef}
         >
-          {getColumnLabelText(column)}
+          {translateContent(getColumnLabelText(column))}
         </span>
       </Tooltip>
       {hasExpression && <SQLPopover sqlExpression={expression} />}

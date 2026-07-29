@@ -438,7 +438,7 @@ function DashboardList(props: DashboardListProps) {
                   description={
                     <>
                       {t('Are you sure you want to delete')}{' '}
-                      <b>{original.dashboard_title}</b>?
+                      <b>{translateContent(original.dashboard_title)}</b>?
                     </>
                   }
                   onConfirm={handleDelete}
@@ -778,7 +778,10 @@ function DashboardList(props: DashboardListProps) {
                   description={
                     <>
                       {t('Are you sure you want to delete')}{' '}
-                      <b>{dashboardToDelete.dashboard_title}</b>?
+                      <b>
+                        {translateContent(dashboardToDelete.dashboard_title)}
+                      </b>
+                      ?
                     </>
                   }
                   onConfirm={() => {

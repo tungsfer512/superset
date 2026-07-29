@@ -24,6 +24,7 @@ import {
   t,
   useCSSTextTruncation,
   useTheme,
+  translateContent,
 } from '@superset-ui/core';
 
 import { Icons } from '@superset-ui/core/components/Icons';
@@ -153,7 +154,7 @@ const DatasourcePanelItem = ({
       if (labelIsTruncated) {
         tooltipNode = (
           <div>
-            <b>{t('Name')}:</b> {folder.name}
+            <b>{t('Name')}:</b> {translateContent(folder.name)}
           </div>
         );
       }
@@ -198,7 +199,9 @@ const DatasourcePanelItem = ({
         <SectionHeaderButton onClick={() => onToggleCollapse(folder.id)}>
           <Tooltip title={getTooltipNode(folder)}>
             <SectionHeaderTextContainer>
-              <SectionHeader ref={labelRef}>{folder.name}</SectionHeader>
+              <SectionHeader ref={labelRef}>
+                {translateContent(folder.name)}
+              </SectionHeader>
               {collapsedFolderIds.has(folder.id) ? (
                 <Icons.DownOutlined iconSize="s" iconColor={theme.colorText} />
               ) : (

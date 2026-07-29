@@ -18,7 +18,7 @@
  */
 
 import { useCallback } from 'react';
-import { css, useTheme } from '@superset-ui/core';
+import { css, translateContent, useTheme } from '@superset-ui/core';
 import { CrossFilterIndicator } from 'src/dashboard/components/nativeFilters/selectors';
 import { useDispatch } from 'react-redux';
 import { setDirectPathToChild } from 'src/dashboard/actions/dashboardState';
@@ -74,7 +74,7 @@ const CrossFilter = (props: {
       `}
     >
       <CrossFilterTitle
-        title={filter.name}
+        title={translateContent(filter.name)}
         orientation={orientation || FilterBarOrientation.Horizontal}
         onHighlightFilterSource={() => handleHighlightFilterSource(filter.path)}
       />

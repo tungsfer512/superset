@@ -129,7 +129,8 @@ export default function ChartCard({
           title={t('Please confirm')}
           description={
             <>
-              {t('Are you sure you want to delete')} <b>{chart.slice_name}</b>?
+              {t('Are you sure you want to delete')}{' '}
+              <b>{translateContent(chart.slice_name)}</b>?
             </>
           }
           onConfirm={() =>

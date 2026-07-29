@@ -22,7 +22,12 @@ import {
   InPortal,
   OutPortal,
 } from 'react-reverse-portal';
-import { styled, SupersetTheme, truncationCSS } from '@superset-ui/core';
+import {
+  styled,
+  SupersetTheme,
+  translateContent,
+  truncationCSS,
+} from '@superset-ui/core';
 import {
   FormItem as StyledFormItem,
   Form,
@@ -324,7 +329,7 @@ const FilterControl = ({
           id={`filter-name-${filter.id}`}
           data-test="filter-control-name"
         >
-          {name}
+          {translateContent(name)}
         </FilterControlTitle>
         {isRequired && <RequiredFieldIndicator />}
         {filter.description?.trim() && (

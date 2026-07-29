@@ -17,7 +17,7 @@
  * under the License.
  */
 import { useMemo } from 'react';
-import { css, t, useTheme } from '@superset-ui/core';
+import { css, t, translateContent, useTheme } from '@superset-ui/core';
 import { MenuItem } from '@superset-ui/core/components/Menu';
 import { Icons } from '@superset-ui/core/components/Icons';
 import { Link } from 'react-router-dom';
@@ -86,7 +86,7 @@ export const useDashboardsMenuItems = ({
                   flex: 1;
                 `}
               >
-                {dashboard.dashboard_title}
+                {translateContent(dashboard.dashboard_title)}
               </div>
               <Icons.Full
                 iconSize="l"

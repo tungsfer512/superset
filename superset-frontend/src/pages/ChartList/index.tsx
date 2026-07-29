@@ -496,7 +496,7 @@ function ChartList(props: ChartListProps) {
                   description={
                     <>
                       {t('Are you sure you want to delete')}{' '}
-                      <b>{original.slice_name}</b>?
+                      <b>{translateContent(original.slice_name)}</b>?
                     </>
                   }
                   onConfirm={handleDelete}
