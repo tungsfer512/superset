@@ -41,6 +41,7 @@ import TableSelector from 'src/components/TableSelector';
 import CheckboxControl from 'src/explore/components/controls/CheckboxControl';
 import TextControl from 'src/explore/components/controls/TextControl';
 import TextAreaControl from 'src/explore/components/controls/TextAreaControl';
+import MetricExpressionBuilder from 'src/components/Datasource/MetricExpressionBuilder';
 import SpatialControl from 'src/explore/components/controls/SpatialControl';
 import withToasts from 'src/components/MessageToasts/withToasts';
 import CurrencyControl from 'src/explore/components/controls/CurrencyControl';
@@ -1611,16 +1612,10 @@ class DatasourceEditor extends PureComponent {
             <TextControl canEdit value={v} onChange={onChange} />
           ),
           expression: (v, onChange) => (
-            <TextAreaControl
-              canEdit
-              initialValue={v}
+            <MetricExpressionBuilder
+              value={v}
               onChange={onChange}
-              extraClasses={['datasource-sql-expression']}
-              language="sql"
-              offerEditInModal={false}
-              minLines={5}
-              textAreaStyles={{ minWidth: '200px', maxWidth: '450px' }}
-              resize="both"
+              columns={datasource.columns}
             />
           ),
           description: (v, onChange, label) => (

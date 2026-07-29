@@ -4567,7 +4567,7 @@ msgid "Edit Database"
 msgstr "Chỉnh sửa cơ sở dữ liệu"
 
 msgid "Edit Dataset "
-msgstr "Chỉnh sửa tập dữ liệu"
+msgstr "Chỉnh sửa tập dữ liệu "
 
 msgid "Edit Log"
 msgstr "Chỉnh sửa nhật ký"
@@ -16902,3 +16902,20 @@ msgstr "Chưa có dataset miễn trừ nào"
 
 msgid "Guests must carry an RLS clause for every dataset they query. Add shared/lookup datasets here so they are queryable without one (everything else returns no rows)."
 msgstr "Guest phải kèm điều kiện RLS cho mọi dataset truy vấn. Thêm các dataset dùng chung/tra cứu vào đây để truy vấn được mà không cần RLS (những dataset khác sẽ trả 0 dòng)."
+
+
+#. Metric expression builder (dataset editor).
+msgid "Count distinct"
+msgstr "Đếm giá trị khác nhau"
+
+msgid "Count all rows"
+msgstr "Đếm tất cả dòng"
+
+msgid "Aggregate function"
+msgstr "Hàm tổng hợp"
+
+msgid "Select aggregate function"
+msgstr "Chọn hàm tổng hợp"
+
+msgid "SQL will appear here"
+msgstr "SQL sẽ hiển thị ở đây"
