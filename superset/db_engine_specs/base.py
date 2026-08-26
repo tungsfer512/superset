@@ -22,6 +22,7 @@ import logging
 import re
 import warnings
 from datetime import datetime
+from functools import lru_cache
 from inspect import signature
 from re import Match, Pattern
 from typing import (
@@ -80,6 +81,11 @@ from superset.superset_typing import (
 )
 from superset.utils import core as utils, json
 from superset.utils.core import ColumnSpec, GenericDataType, QuerySource
+from superset.utils.display_timezone import (
+    format_utc_offset,
+    get_utc_offset_minutes,
+    is_tz_aware_type,
+)
 from superset.utils.hashing import md5_sha_from_str
 from superset.utils.json import redact_sensitive, reveal_sensitive
 from superset.utils.network import is_hostname_valid, is_port_open
@@ -142,6 +148,16 @@ builtin_time_grains: dict[str | None, str] = {
     TimeGrainConstants.WEEK_ENDING_SATURDAY: _("Week ending Saturday"),
     TimeGrainConstants.WEEK_ENDING_SUNDAY: _("Week ending Sunday"),
 }
+
+
+@lru_cache(maxsize=None)
+def _warn_time_zone_unsupported(engine: str) -> None:
+    """Warn once per engine that ``DISPLAY_TIME_ZONE`` cannot be honored."""
+    logger.warning(
+        "DISPLAY_TIME_ZONE is set but database engine %s has no time zone "
+        "conversion expression; temporal columns are left unconverted.",
+        engine,
+    )
 
 
 class TimestampExpression(ColumnClause):  # pylint: disable=abstract-method, too-many-ancestors
@@ -219,6 +235,26 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     _date_trunc_functions: dict[str, str] = {}
     _time_grain_expressions: dict[str | None, str] = {}
+
+    # SQL templates used by the ``DISPLAY_TIME_ZONE`` setting to convert a UTC
+    # timestamp expression into wall-clock time in a target time zone. ``{col}``
+    # marks the source expression; ``{tz}`` is substituted with the IANA time
+    # zone name, ``{offset}`` with a fixed ``+HH:MM`` offset and
+    # ``{offset_minutes}`` with a signed whole-minute offset.
+    #
+    # ``utc_to_tz_expression`` is used for naive columns holding UTC values;
+    # ``tz_aware_to_tz_expression`` for columns that already carry a time zone
+    # (``TIMESTAMP WITH TIME ZONE`` and friends), where re-interpreting the
+    # value as UTC would double-convert it. When only the former is defined it
+    # is used for both. ``None`` means the engine has no supported conversion,
+    # and ``DISPLAY_TIME_ZONE`` is ignored for it.
+    utc_to_tz_expression: str | None = None
+    tz_aware_to_tz_expression: str | None = None
+
+    # Whether ``epoch_to_dttm``/``epoch_ms_to_dttm`` produce a time-zone-aware
+    # instant rather than a naive UTC timestamp; selects which of the two
+    # templates above applies to epoch-encoded columns.
+    epoch_to_dttm_is_tz_aware: bool = False
     _default_column_type_mappings: tuple[ColumnTypeMapping, ...] = (
         (
             re.compile(r"^string", re.IGNORECASE),
@@ -823,43 +859,114 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         return database.get_sqla_engine(catalog=catalog, schema=schema, source=source)
 
     @classmethod
+    def is_tz_aware_column_type(cls, type_: str | None, sqla_type: Any = None) -> bool:
+        """
+        Whether a column of this type holds an instant rather than a naive wall clock.
+
+        Engines whose type names do not spell this out (BigQuery's ``TIMESTAMP``,
+        for instance) should override this.
+        """
+        return is_tz_aware_type(type_, sqla_type)
+
+    @classmethod
+    def get_utc_to_tz_expression(
+        cls,
+        time_zone: str,
+        tz_aware: bool = False,
+    ) -> str | None:
+        """
+        Return a SQL template converting a timestamp to wall clock in ``time_zone``.
+
+        The returned template still contains ``{col}``, to be substituted by
+        :class:`TimestampExpression` with the properly quoted column.
+
+        :param time_zone: IANA time zone name, e.g. ``Asia/Ho_Chi_Minh``
+        :param tz_aware: whether the source expression already carries a time zone
+        :return: the template, or ``None`` if this engine supports no conversion
+        """
+        template = cls.utc_to_tz_expression
+        if tz_aware and cls.tz_aware_to_tz_expression:
+            template = cls.tz_aware_to_tz_expression
+        if not template:
+            _warn_time_zone_unsupported(cls.engine)
+            return None
+
+        return (
+            template.replace("{tz}", time_zone)
+            .replace("{offset}", format_utc_offset(time_zone))
+            .replace("{offset_minutes}", str(get_utc_offset_minutes(time_zone)))
+        )
+
+    @classmethod
+    def _get_time_grain_expression(cls, time_grain: str, type_: str) -> str:
+        """
+        Resolve the ``{col}``-templated SQL that truncates to ``time_grain``.
+
+        :param time_grain: time grain, e.g. P1Y for 1 year
+        :param type_: the column's type name, used to pick a truncate function
+        :raises NotImplementedError: if this engine has no spec for the grain
+        """
+        time_expr = cls.get_time_grain_expressions().get(time_grain)
+        if not time_expr:
+            raise NotImplementedError(
+                f"No grain spec for {time_grain} for database {cls.engine}"
+            )
+        if type_ and (date_trunc_function := cls._date_trunc_functions.get(type_)):
+            if "{func}" in time_expr:
+                time_expr = time_expr.replace("{func}", date_trunc_function)
+            if "{type}" in time_expr:
+                time_expr = time_expr.replace("{type}", type_)
+        return time_expr
+
+    @classmethod
     def get_timestamp_expr(
         cls,
         col: ColumnClause,
         pdf: str | None,
         time_grain: str | None,
+        time_zone: str | None = None,
     ) -> TimestampExpression:
         """
         Construct a TimestampExpression to be used in a SQLAlchemy query.
 
+        The expression is composed inside out: the raw column is first decoded
+        from epoch (if needed), then shifted into ``time_zone`` (if set), and
+        only then truncated to ``time_grain`` -- so that a "day" is a day in the
+        target time zone rather than in UTC.
+
         :param col: Target column for the TimestampExpression
         :param pdf: date format (seconds or milliseconds)
         :param time_grain: time grain, e.g. P1Y for 1 year
+        :param time_zone: IANA time zone to convert UTC values to, if any
         :return: TimestampExpression object
         """
-        if time_grain:
-            type_ = str(getattr(col, "type", ""))
-            time_expr = cls.get_time_grain_expressions().get(time_grain)
-            if not time_expr:
-                raise NotImplementedError(
-                    f"No grain spec for {time_grain} for database {cls.engine}"
-                )
-            if type_ and "{func}" in time_expr:
-                date_trunc_function = cls._date_trunc_functions.get(type_)
-                if date_trunc_function:
-                    time_expr = time_expr.replace("{func}", date_trunc_function)
-            if type_ and "{type}" in time_expr:
-                date_trunc_function = cls._date_trunc_functions.get(type_)
-                if date_trunc_function:
-                    time_expr = time_expr.replace("{type}", type_)
-        else:
-            time_expr = "{col}"
-
         # if epoch, translate to DATE using db specific conf
         if pdf == "epoch_s":
-            time_expr = time_expr.replace("{col}", cls.epoch_to_dttm())
+            base_expr = cls.epoch_to_dttm()
         elif pdf == "epoch_ms":
-            time_expr = time_expr.replace("{col}", cls.epoch_ms_to_dttm())
+            base_expr = cls.epoch_ms_to_dttm()
+        else:
+            base_expr = "{col}"
+
+        if time_zone:
+            tz_aware = (
+                # the epoch has already been decoded, so the column's own type
+                # (an integer) says nothing about the expression's
+                cls.epoch_to_dttm_is_tz_aware
+                if pdf in ("epoch_s", "epoch_ms")
+                else cls.is_tz_aware_column_type(
+                    str(getattr(col, "type", "")), col.type
+                )
+            )
+            if tz_expr := cls.get_utc_to_tz_expression(time_zone, tz_aware=tz_aware):
+                base_expr = tz_expr.replace("{col}", base_expr)
+
+        if time_grain:
+            time_expr = cls._get_time_grain_expression(
+                time_grain, str(getattr(col, "type", ""))
+            ).replace("{col}", base_expr)
+        else:
+            time_expr = base_expr
 
         return TimestampExpression(time_expr, col, type_=col.type)
 

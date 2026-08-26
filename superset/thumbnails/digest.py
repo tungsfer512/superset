@@ -26,6 +26,7 @@ from superset import security_manager
 from superset.tasks.exceptions import ExecutorNotFoundError
 from superset.tasks.types import ExecutorType
 from superset.tasks.utils import get_current_user, get_executor
+from superset.utils import display_timezone
 from superset.utils.core import override_user
 from superset.utils.hashing import md5_sha_from_str
 
@@ -90,6 +91,36 @@ def _adjust_string_with_rls(
     return unique_string
 
 
+def _adjust_string_with_time_zone(unique_string: str, executor: str) -> str:
+    """
+    Add the display time zone to the unique string.
+
+    Temporal data is converted to it in SQL, so two viewers in different zones
+    see different numbers and must not share a cached thumbnail. Resolved as the
+    executor, since that is who the screenshot is taken as.
+
+    The per-request tier is deliberately left out: the screenshot worker drives
+    a headless browser that sends no such header, so keying on it would store an
+    image that does not match its own key.
+    """
+    user = (
+        security_manager.find_user(executor)
+        or security_manager.get_current_guest_user_if_guest()
+    )
+    with override_user(user):
+        display_timezone.clear_user_time_zone_cache()
+        time_zone = (
+            display_timezone.get_user_time_zone()
+            or display_timezone.get_configured_time_zone()
+        )
+    display_timezone.clear_user_time_zone_cache()
+
+    if time_zone:
+        unique_string = f"{unique_string}\n{time_zone}"
+
+    return unique_string
+
+
 def get_dashboard_digest(dashboard: Dashboard) -> str | None:
     try:
         executor_type, executor = get_executor(
@@ -112,6 +143,7 @@ def get_dashboard_digest(dashboard: Dashboard) -> str | None:
     unique_string = _adjust_string_with_rls(
         unique_string, dashboard.datasources, executor
     )
+    unique_string = _adjust_string_with_time_zone(unique_string, executor)
 
     return md5_sha_from_str(unique_string)
 
@@ -132,5 +164,6 @@ def get_chart_digest(chart: Slice) -> str | None:
     unique_string = f"{chart.params or ''}.{executor}"
     unique_string = _adjust_string_for_executor(unique_string, executor_type, executor)
     unique_string = _adjust_string_with_rls(unique_string, [chart.datasource], executor)
+    unique_string = _adjust_string_with_time_zone(unique_string, executor)
 
     return md5_sha_from_str(unique_string)

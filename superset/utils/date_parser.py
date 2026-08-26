@@ -48,10 +48,27 @@ from superset.commands.chart.exceptions import (
     TimeRangeParseFailError,
 )
 from superset.constants import InstantTimeComparison, LRU_CACHE_MAX_SIZE, NO_TIME_RANGE
+from superset.utils.display_timezone import (
+    get_time_zone as get_display_time_zone,
+    now as display_time_zone_now,
+)
 
 ParserElement.enable_packrat()
 
 logger = logging.getLogger(__name__)
+
+
+def reference_now() -> datetime:
+    """Reference point for relative expressions such as ``now`` or ``today``.
+
+    When ``DISPLAY_TIME_ZONE`` is set, this is the wall clock in that zone, so
+    that relative ranges line up with the temporal columns, which are converted
+    to the same zone in SQL. Otherwise it falls back to the module-level
+    ``datetime.now()``, preserving upstream behaviour.
+    """
+    if time_zone := get_display_time_zone():
+        return display_time_zone_now(time_zone)
+    return datetime.now()
 
 
 def parse_human_datetime(human_readable: str) -> datetime:
@@ -59,12 +76,16 @@ def parse_human_datetime(human_readable: str) -> datetime:
     x_periods = r"^\s*([0-9]+)\s+(second|minute|hour|day|week|month|quarter|year)s?\s*$"
     if re.search(x_periods, human_readable, re.IGNORECASE):
         raise TimeRangeAmbiguousError(human_readable)
+    # relative expressions ("now", "today", "last week") are resolved in the
+    # display time zone, so that they line up with the temporal columns, which
+    # are converted to that same zone in SQL
+    reference = reference_now()
     try:
-        default = datetime(year=datetime.now().year, month=1, day=1)
+        default = datetime(year=reference.year, month=1, day=1)
         dttm = parse(human_readable, default=default)
     except (ValueError, OverflowError) as ex:
         cal = parsedatetime.Calendar()
-        parsed_dttm, parsed_flags = cal.parseDT(human_readable)
+        parsed_dttm, parsed_flags = cal.parseDT(human_readable, sourceTime=reference)
         # 0 == not parsed at all
         if parsed_flags == 0:
             logger.debug(ex)
@@ -105,7 +126,7 @@ def get_past_or_future(
 ) -> datetime:
     cal = parsedatetime.Calendar()
     source_dttm = dttm_from_timetuple(
-        source_time.timetuple() if source_time else datetime.now().timetuple()
+        source_time.timetuple() if source_time else reference_now().timetuple()
     )
     return dttm_from_timetuple(cal.parse(human_readable or "", source_dttm)[0])
 
@@ -121,7 +142,7 @@ def parse_human_timedelta(
     True
     """
     source_dttm = dttm_from_timetuple(
-        source_time.timetuple() if source_time else datetime.now().timetuple()
+        source_time.timetuple() if source_time else reference_now().timetuple()
     )
     return get_past_or_future(human_readable, source_time) - source_dttm
 

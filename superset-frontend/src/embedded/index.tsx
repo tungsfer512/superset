@@ -44,7 +44,7 @@ import {
   getThemeController,
 } from './EmbeddedContextProviders';
 import { embeddedApi } from './api';
-import { getDataMaskChangeTrigger } from './utils';
+import { getDataMaskChangeTrigger, getDisplayTimeZoneHeaders } from './utils';
 
 setupPlugins();
 
@@ -210,6 +210,7 @@ function setupGuestClient(guestToken: string) {
     appRoot: applicationRoot(),
     guestToken,
     guestTokenHeaderName: bootstrapData.config?.GUEST_TOKEN_HEADER_NAME,
+    headers: getDisplayTimeZoneHeaders(bootstrapData.config),
     unauthorizedHandler: guestUnauthorizedHandler,
   });
 }

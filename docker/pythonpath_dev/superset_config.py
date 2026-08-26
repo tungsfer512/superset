@@ -236,6 +236,12 @@ HTML_SANITIZATION = False
 BABEL_DEFAULT_LOCALE = os.getenv("BABEL_DEFAULT_LOCALE", "vi")
 BABEL_DEFAULT_TIMEZONE = os.getenv("BABEL_DEFAULT_TIMEZONE", "Asia/Ho_Chi_Minh")
 
+# Data at rest is UTC; charts group, filter and label it in this timezone.
+# Conversion happens in SQL, so time grains, time-range filters and axis labels
+# all agree. Set to an empty string to fall back to raw UTC.
+# See docs/docs/configuration/timezones.mdx
+DISPLAY_TIME_ZONE = os.getenv("DISPLAY_TIME_ZONE", "Asia/Ho_Chi_Minh") or None
+
 LANGUAGES = {
     "vi": {"flag": "vn", "name": "Tiếng Việt"},
     "en": {"flag": "us", "name": "English"},

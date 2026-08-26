@@ -42,6 +42,9 @@ export type User = {
   userId?: number; // optional because guest user doesn't have a user id
   username: string;
   loginCount?: number;
+  // IANA name of the timezone this user's temporal data is rendered in; empty
+  // when the instance default applies
+  displayTimeZone?: string;
 };
 
 export type UserRoles = Record<string, [string, string][]>;

@@ -42,3 +42,7 @@ class UserAttribute(Model, AuditMixinNullable):
     welcome_dashboard_id = Column(Integer, ForeignKey("dashboards.id"))
     welcome_dashboard = relationship("Dashboard")
     avatar_url = Column(String(100))
+    # IANA time zone name temporal data is displayed and filtered in for this
+    # user, overriding the `DISPLAY_TIME_ZONE` default. See
+    # `superset/utils/display_timezone.py`.
+    display_time_zone = Column(String(64))

@@ -33,6 +33,7 @@ from werkzeug.wrappers.response import Response
 from superset import appbuilder, dataframe, db, result_set, viz
 from superset.common.db_query_status import QueryStatus
 from superset.daos.datasource import DatasourceDAO
+from superset.daos.user import UserDAO
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 from superset.exceptions import (
     CacheLoadError,
@@ -119,6 +120,9 @@ def bootstrap_user_data(user: User, include_perms: bool = False) -> dict[str, An
             "createdOn": user.created_on.isoformat(),
             "email": user.email,
             "loginCount": user.login_count,
+            # the zone temporal data is rendered in for this user; empty when
+            # they have no preference and the instance default applies
+            "displayTimeZone": UserDAO.get_display_time_zone(user) or "",
         }
 
     if include_perms:

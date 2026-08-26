@@ -55,6 +55,11 @@ class ClickHouseBaseEngineSpec(BaseEngineSpec):
 
     time_groupby_inline = True
 
+    # ClickHouse `DateTime`/`DateTime64` values are instants, so the same
+    # expression works whether or not the column declares a time zone.
+    utc_to_tz_expression = "toTimeZone(toDateTime({col}), '{tz}')"
+    tz_aware_to_tz_expression = utc_to_tz_expression
+
     _time_grain_expressions = {
         None: "{col}",
         "PT1M": "toStartOfMinute(toDateTime({col}))",

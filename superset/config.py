@@ -1760,6 +1760,32 @@ DOCUMENTATION_ICON = None  # Recommended size: 16x16
 DEFAULT_RELATIVE_START_TIME = "today"
 DEFAULT_RELATIVE_END_TIME = "today"
 
+# Time zone temporal data should be displayed and filtered in. Superset assumes
+# data at rest is stored in UTC; when this is set to an IANA time zone name
+# (e.g. "Asia/Ho_Chi_Minh"), temporal columns are converted to wall-clock time
+# in that zone *in SQL*, so time grains, time-range filters and chart labels all
+# agree. Relative ranges ("today", "now", "Last week") are resolved in the same
+# zone. `None` keeps the upstream behaviour of passing values through untouched.
+#
+# Requires DB engine support; see `utc_to_tz_expression` in
+# `superset/db_engine_specs/`. Unsupported engines log a warning and are left
+# unconverted. Override or opt out per database with
+# `{"display_time_zone": "UTC"}` in the database's Extra, and per column with
+# `{"skip_time_zone_conversion": true}` in the column's Extra.
+#
+# NOTE: SQL Lab runs raw SQL and is deliberately not converted.
+DISPLAY_TIME_ZONE: str | None = None
+
+# Request header carrying the viewer's time zone, overriding the default above
+# for that request only. Embedded dashboards use it: the host application passes
+# `?timezone=Asia/Ho_Chi_Minh` as a URL parameter (like `lang`) and the embedded
+# page then sends this header on every API call it makes, since a cross-origin
+# iframe cannot rely on cookies and its guest user has no stored preference.
+# Values are validated against the IANA database, and take part in the query
+# cache key. Like a user preference, this can only choose which zone to render
+# in -- it cannot enable conversion for a database that has opted out.
+DISPLAY_TIME_ZONE_HEADER_NAME = "X-Superset-Display-Timezone"
+
 # Configure which SQL validator to use for each engine
 SQL_VALIDATORS_BY_ENGINE = {
     "presto": "PrestoDBSQLValidator",

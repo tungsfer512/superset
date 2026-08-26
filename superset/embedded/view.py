@@ -14,8 +14,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from typing import Callable
 import re
+from typing import Callable
 
 from flask import abort, current_app, request
 from flask_appbuilder import expose
@@ -25,7 +25,7 @@ from flask_wtf.csrf import same_origin
 from superset import event_logger, is_feature_enabled
 from superset.daos.dashboard import EmbeddedDashboardDAO
 from superset.superset_typing import FlaskResponse
-from superset.utils import json
+from superset.utils import display_timezone, json
 from superset.views.base import BaseSupersetView, common_bootstrap_payload
 
 
@@ -77,9 +77,19 @@ class EmbeddedView(BaseSupersetView):
             dashboard_version="v2",
         )
 
+        # Allow a display time zone override via ?timezone= for embedded
+        # dashboards, for the same reason as ?lang= below: a cross-origin iframe
+        # cannot rely on cookies, and its guest viewer has no stored preference.
+        # The value is validated here and echoed back to the page, which sends
+        # it as a header on the API calls it makes -- those requests carry no
+        # URL parameters of their own.
         bootstrap_data = {
             "config": {
-                "GUEST_TOKEN_HEADER_NAME": current_app.config["GUEST_TOKEN_HEADER_NAME"]
+                "GUEST_TOKEN_HEADER_NAME": current_app.config[
+                    "GUEST_TOKEN_HEADER_NAME"
+                ],
+                "DISPLAY_TIME_ZONE_HEADER_NAME": display_timezone.get_header_name(),
+                "DISPLAY_TIME_ZONE": display_timezone.get_request_time_zone() or "",
             },
             "common": common_bootstrap_payload(),
             "embedded": {

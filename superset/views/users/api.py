@@ -28,6 +28,11 @@ from werkzeug.security import generate_password_hash
 from superset import is_feature_enabled
 from superset.daos.user import UserDAO
 from superset.extensions import db, event_logger
+from superset.utils.display_timezone import (
+    available_time_zones,
+    clear_user_time_zone_cache,
+    format_utc_offset,
+)
 from superset.utils.slack import get_user_avatar, SlackClientError
 from superset.views.base_api import BaseSupersetApi, requires_json, statsd_metrics
 from superset.views.users.schemas import CurrentUserPutSchema, UserResponseSchema
@@ -45,6 +50,13 @@ class CurrentUserRestApi(BaseSupersetApi):
     openapi_spec_component_schemas = (UserResponseSchema, CurrentUserPutSchema)
 
     current_user_put_schema = CurrentUserPutSchema()
+
+    @staticmethod
+    def _dump_current_user() -> Dict[str, Any]:
+        """Serialize the current user, including their `user_attribute` fields."""
+        payload = user_response_schema.dump(g.user)
+        payload["display_time_zone"] = UserDAO.get_display_time_zone(g.user) or ""
+        return payload
 
     def pre_update(self, item: User, data: Dict[str, Any]) -> None:
         item.changed_on = datetime.now()
@@ -81,7 +93,48 @@ class CurrentUserRestApi(BaseSupersetApi):
             401:
               $ref: '#/components/responses/401'
         """
-        return self.response(200, result=user_response_schema.dump(g.user))
+        return self.response(200, result=self._dump_current_user())
+
+    @expose("/timezones/", methods=("GET",))
+    @protect()
+    @permission_name("read")
+    @safe
+    def get_time_zones(self) -> Response:
+        """Get the time zones accepted for the display time zone preference.
+        ---
+        get:
+          summary: Get the selectable display time zones
+          description: >-
+            Lists the IANA time zone names this instance accepts for a user's
+            display time zone, each with its current UTC offset. The list comes
+            from the server so that every option is one the API will accept:
+            browsers expose a different set of canonical names.
+          responses:
+            200:
+              description: The selectable time zones, ordered by UTC offset
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            offset:
+                              type: string
+            401:
+              $ref: '#/components/responses/401'
+        """
+        zones = [
+            {"name": name, "offset": format_utc_offset(name)}
+            for name in available_time_zones()
+        ]
+        zones.sort(key=lambda zone: (zone["offset"], zone["name"]))
+        return self.response(200, result=zones)
 
     @expose("/roles/", methods=("GET",))
     @protect()
@@ -154,12 +207,19 @@ class CurrentUserRestApi(BaseSupersetApi):
             if not item:
                 return self.response_400(message="At least one field must be provided.")
 
+            # not a column on `ab_user`; it lives on the `user_attribute` row
+            if "display_time_zone" in item:
+                UserDAO.set_display_time_zone(
+                    g.user, item.pop("display_time_zone") or None
+                )
+                clear_user_time_zone_cache()
+
             for key, value in item.items():
                 setattr(g.user, key, value)
 
             self.pre_update(g.user, item)
             db.session.commit()  # pylint: disable=consider-using-transaction
-            return self.response(200, result=user_response_schema.dump(g.user))
+            return self.response(200, result=self._dump_current_user())
         except ValidationError as error:
             return self.response_400(message=error.messages)
 

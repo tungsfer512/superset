@@ -92,6 +92,10 @@ class StarRocksEngineSpec(MySQLEngineSpec):
     engine = "starrocks"
     engine_name = "StarRocks"
 
+    # unlike MySQL, StarRocks ships its own time zone database, so named zones
+    # can be used and DST is handled correctly
+    utc_to_tz_expression = "convert_tz({col}, 'UTC', '{tz}')"
+
     default_driver = "starrocks"
     sqlalchemy_uri_placeholder = (
         "starrocks://user:password@host:port/catalog.db[?key=value&key=value...]"

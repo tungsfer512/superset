@@ -21,6 +21,29 @@ import { DataMaskStateWithId } from '@superset-ui/core';
 import { isEmpty, isEqual } from 'lodash';
 import { NATIVE_FILTER_PREFIX } from 'src/dashboard/components/nativeFilters/FiltersConfigModal/utils';
 
+/**
+ * The header carrying the viewer's time zone on every API call this page makes.
+ *
+ * The zone arrives as a `?timezone=` URL parameter on the embedded page, the
+ * same way `lang` does, and is validated server side before being echoed back
+ * in the bootstrap config. The API calls made from here carry no URL parameters
+ * of their own, so it travels on as a header and the backend converts temporal
+ * columns to that zone in SQL. An absent or rejected value yields no header,
+ * leaving the instance default in place.
+ */
+export const getDisplayTimeZoneHeaders = (
+  config: {
+    DISPLAY_TIME_ZONE?: string;
+    DISPLAY_TIME_ZONE_HEADER_NAME?: string;
+  } = {},
+): Record<string, string> => {
+  const {
+    DISPLAY_TIME_ZONE: timezone,
+    DISPLAY_TIME_ZONE_HEADER_NAME: headerName,
+  } = config;
+  return timezone && headerName ? { [headerName]: timezone } : {};
+};
+
 export const getDataMaskChangeTrigger = (
   dataMask: DataMaskStateWithId,
   previousDataMask: DataMaskStateWithId,

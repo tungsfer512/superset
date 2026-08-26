@@ -7,6 +7,144 @@ version: 1
 
 # Timezones
 
+## Displaying UTC data in a fixed timezone
+
+If your data is stored in UTC and you want charts to group, filter and label it
+in a single fixed timezone, set `DISPLAY_TIME_ZONE` to an
+[IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones):
+
+```python
+# superset_config.py
+DISPLAY_TIME_ZONE = "Asia/Ho_Chi_Minh"
+```
+
+Superset then converts temporal columns to wall-clock time in that zone **in
+SQL**, before the time grain is applied — so a "day" is a day in that zone, not
+in UTC. Time-range filters are compared against the same converted expression,
+and relative ranges (`today`, `now`, `Last week`) are resolved in that zone
+too, so the filter, the grouping and the axis labels all agree. Values reach
+the browser as naive local wall clock, which is how the frontend already
+renders them, so no client-side setting is involved.
+
+### Requirements and caveats
+
+- **The data must actually be UTC.** Columns that already hold local time are
+  shifted a second time. Opt those out (see below).
+- **Engine support.** Named-zone conversion (DST-correct) is used for
+  PostgreSQL, Redshift, ClickHouse, Trino, Hive/Spark, BigQuery, Snowflake and
+  StarRocks. A fixed offset is used for MySQL, Microsoft SQL Server, Presto and
+  SQLite, so zones observing DST are shifted by their current offset year-round.
+  Engines with no template log a warning and are left unconverted.
+- **Indexes.** Filters are applied to the converted expression, so an index on
+  the raw column no longer applies. Add an expression index, e.g. for
+  PostgreSQL: `CREATE INDEX ... ON t ((ts AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))`.
+- **SQL Lab is not converted** — it runs the SQL you type, unchanged.
+- **Legacy "Hours offset"**: a dataset with a non-zero hours offset shifts the
+  result in Python on top of this conversion. Clear it before enabling this.
+- **Date-only columns** (`DATE`) and columns Superset parses from strings via
+  `python_date_format` are never converted; there is no time-of-day to carry
+  the offset.
+
+### Per-user timezone
+
+Each user can pick their own timezone from **Settings → Info → Edit user →
+Display timezone**. Leaving it on *Instance default* falls back to the value
+resolved below. The choice is stored on `user_attribute.display_time_zone` and
+is also available over the API:
+
+```bash
+curl -X PUT /api/v1/me/ -d '{"display_time_zone": "Asia/Ho_Chi_Minh"}'
+curl -X PUT /api/v1/me/ -d '{"display_time_zone": ""}'   # back to the default
+```
+
+The resolved timezone is part of the query cache key, so two users in different
+timezones never see each other's cached results — at the cost of one cached
+copy per timezone actually in use.
+
+A user preference only chooses *which* zone to render in. It cannot switch
+conversion **on**: if `DISPLAY_TIME_ZONE` is unset, or the target database has
+opted out, nothing is converted regardless of what the user picked. That data
+may not be UTC at all, and a preference must not be able to corrupt it.
+
+Where there is no user — Celery tasks, anonymous browsing, embedded dashboards
+authenticated by a guest token — the configured default applies. Concretely:
+
+- **Alerts & reports** render in the report executor's timezone, the same user
+  whose RLS rules apply.
+- **Thumbnails** render in the thumbnail executor's timezone. When
+  `THUMBNAIL_EXECUTORS` is `CURRENT_USER` the executor is already part of the
+  thumbnail digest, so per-user images stay separate; with a fixed executor
+  everyone shares one image, rendered in that account's timezone.
+- **Cache warm-up** warms the default-timezone copy. Users with a custom
+  timezone simply start from a cold cache.
+
+### Overrides
+
+Per database, in the database's **Extra**:
+
+```json
+{ "display_time_zone": "UTC" }
+```
+
+Use `null` instead of a name to opt the database out entirely.
+
+Per column, in the column's **Extra** — useful for a calculated column that
+already converts the timezone itself:
+
+```json
+{ "skip_time_zone_conversion": true }
+```
+
+### Embedded dashboards
+
+An embedded dashboard runs in a cross-origin iframe, where cookies are
+unreliable and the viewer is an ephemeral guest user with no stored preference.
+The host application therefore states the zone explicitly, as a URL parameter
+alongside `lang`:
+
+```js
+embedDashboard({
+  id: '...',
+  supersetDomain: 'https://superset.example.com',
+  mountPoint: document.getElementById('dashboard'),
+  fetchGuestToken: () => fetchGuestTokenFromBackend(),
+  dashboardUiConfig: {
+    urlParams: { lang: 'vi', timezone: 'Asia/Ho_Chi_Minh' },
+  },
+});
+```
+
+Superset validates the value, and the embedded page forwards it as the
+`X-Superset-Display-Timezone` header on every API call it makes — the chart data
+requests carry no URL parameters of their own. The header name is configurable
+via `DISPLAY_TIME_ZONE_HEADER_NAME`, and any client may send it directly:
+
+```
+X-Superset-Display-Timezone: Asia/Ho_Chi_Minh
+```
+
+The underlying data is untouched: it stays in UTC and is converted per query.
+An unknown name is ignored rather than rejected, so a typo falls back to the
+instance default instead of breaking the dashboard. If you serve the API
+cross-origin, make sure the header is in `CORS_OPTIONS["allow_headers"]`.
+
+### Resolution order
+
+1. the zone asserted by the request (`?timezone=` or the header above);
+2. the current user's own choice (`user_attribute.display_time_zone`);
+3. the target database's `Extra`, which may also opt the database out;
+4. the `DISPLAY_TIME_ZONE` setting.
+
+Tiers 3 and 4 decide *whether* to convert at all. Neither a request nor a user
+preference can enable conversion for a database that opted out, whose data may
+not be UTC — they only choose which zone to render in. The resolved zone is part
+of the query cache key, so two viewers in different zones never share results.
+
+Setting `DISPLAY_TIME_ZONE = "UTC"` is the useful way to enable the feature
+while leaving the choice entirely to each user or embedding host.
+
+## Background
+
 There are four distinct timezone components which relate to Apache Superset,
 
 1. The timezone that the underlying data is encoded in.

@@ -153,6 +153,16 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
     """
     arraysize = 5000
 
+    # Both templates are type preserving, so that `{func}`/`{type}` in the time
+    # grain expressions below still match the converted expression: a DATETIME
+    # column stays a DATETIME, a TIMESTAMP stays a TIMESTAMP whose instant
+    # carries the target zone's wall clock.
+    utc_to_tz_expression = "DATETIME(CAST({col} AS TIMESTAMP), '{tz}')"
+    tz_aware_to_tz_expression = "TIMESTAMP(DATETIME({col}, '{tz}'), 'UTC')"
+
+    # `TIMESTAMP_SECONDS`/`TIMESTAMP_MILLIS` return a TIMESTAMP, i.e. an instant
+    epoch_to_dttm_is_tz_aware = True
+
     _date_trunc_functions = {
         "DATE": "DATE_TRUNC",
         "DATETIME": "DATETIME_TRUNC",
@@ -406,6 +416,14 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
                     }
                 )
         return payload
+
+    @classmethod
+    def is_tz_aware_column_type(cls, type_: str | None, sqla_type: Any = None) -> bool:
+        # BigQuery's TIMESTAMP is an instant; DATETIME is the naive one. Neither
+        # type name spells the distinction out the way the generic check expects.
+        if type_ and type_.strip().upper().startswith("TIMESTAMP"):
+            return True
+        return super().is_tz_aware_column_type(type_, sqla_type)
 
     @classmethod
     def epoch_to_dttm(cls) -> str:

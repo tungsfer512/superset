@@ -63,6 +63,11 @@ class RedshiftEngineSpec(BasicParametersMixin, PostgresBaseEngineSpec):
     max_column_name_length = 127
     default_driver = "psycopg2"
 
+    # Redshift supports `AT TIME ZONE` but `CONVERT_TIMEZONE` is the documented
+    # way to go from UTC to a named zone, and returns a plain TIMESTAMP.
+    utc_to_tz_expression = "CONVERT_TIMEZONE('UTC', '{tz}', {col})"
+    tz_aware_to_tz_expression = "CONVERT_TIMEZONE('{tz}', {col})"
+
     sqlalchemy_uri_placeholder = (
         "redshift+psycopg2://user:password@host:port/dbname[?key=value&key=value...]"
     )

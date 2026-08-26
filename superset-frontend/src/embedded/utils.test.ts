@@ -18,7 +18,43 @@
  */
 import { DataMaskStateWithId } from '@superset-ui/core';
 import { cloneDeep } from 'lodash';
-import { getDataMaskChangeTrigger } from './utils';
+import { getDataMaskChangeTrigger, getDisplayTimeZoneHeaders } from './utils';
+
+describe('getDisplayTimeZoneHeaders', () => {
+  const HEADER = 'X-Superset-Display-Timezone';
+
+  it('forwards the time zone the server validated', () => {
+    expect(
+      getDisplayTimeZoneHeaders({
+        DISPLAY_TIME_ZONE: 'Asia/Ho_Chi_Minh',
+        DISPLAY_TIME_ZONE_HEADER_NAME: HEADER,
+      }),
+    ).toEqual({ [HEADER]: 'Asia/Ho_Chi_Minh' });
+  });
+
+  it('honors a custom header name', () => {
+    expect(
+      getDisplayTimeZoneHeaders({
+        DISPLAY_TIME_ZONE: 'Europe/Paris',
+        DISPLAY_TIME_ZONE_HEADER_NAME: 'X-Tenant-TZ',
+      }),
+    ).toEqual({ 'X-Tenant-TZ': 'Europe/Paris' });
+  });
+
+  it('sends no header when the page was given no time zone', () => {
+    expect(
+      getDisplayTimeZoneHeaders({
+        DISPLAY_TIME_ZONE: '',
+        DISPLAY_TIME_ZONE_HEADER_NAME: HEADER,
+      }),
+    ).toEqual({});
+  });
+
+  it('sends no header when the config is absent', () => {
+    expect(getDisplayTimeZoneHeaders()).toEqual({});
+    expect(getDisplayTimeZoneHeaders({})).toEqual({});
+  });
+});
 
 const dataMask: DataMaskStateWithId = {
   '1': {

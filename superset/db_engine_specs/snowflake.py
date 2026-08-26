@@ -99,6 +99,11 @@ class SnowflakeEngineSpec(PostgresBaseEngineSpec):
         "$.auth_params.privatekey_pass",
     }
 
+    # the three-argument form reads a TIMESTAMP_NTZ as being in `source_tz`; the
+    # two-argument form moves an already-zoned TIMESTAMP_TZ/LTZ instead.
+    utc_to_tz_expression = "CONVERT_TIMEZONE('UTC', '{tz}', {col})"
+    tz_aware_to_tz_expression = "CONVERT_TIMEZONE('{tz}', {col})"
+
     _time_grain_expressions = {
         None: "{col}",
         TimeGrain.SECOND: "DATE_TRUNC('SECOND', {col})",

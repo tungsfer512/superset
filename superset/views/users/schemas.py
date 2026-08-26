@@ -18,13 +18,26 @@ from flask_appbuilder.security.sqla.apis.user.schema import User
 from flask_appbuilder.security.sqla.apis.user.validator import (
     PasswordComplexityValidator,
 )
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, ValidationError
 from marshmallow.fields import Boolean, Integer, String
 from marshmallow.validate import Length
+
+from superset.utils.display_timezone import is_known_time_zone
 
 first_name_description = "The current user's first name"
 last_name_description = "The current user's last name"
 password_description = "The current user's password for authentication"  # noqa: S105
+display_time_zone_description = (
+    "IANA time zone name temporal data is displayed and filtered in for this "
+    "user, e.g. `Asia/Ho_Chi_Minh`. An empty string clears the preference, "
+    "falling back to the instance default."
+)
+
+
+def validate_display_time_zone(value: str) -> None:
+    """Accept a known IANA time zone name, or an empty string to clear it."""
+    if value and not is_known_time_zone(value):
+        raise ValidationError(f"Unknown time zone: {value}")
 
 
 class UserResponseSchema(Schema):
@@ -36,6 +49,10 @@ class UserResponseSchema(Schema):
     is_active = Boolean()
     is_anonymous = Boolean()
     login_count = Integer()
+    display_time_zone = String(
+        metadata={"description": display_time_zone_description},
+        dump_only=True,
+    )
 
 
 class CurrentUserPutSchema(Schema):
@@ -55,4 +72,10 @@ class CurrentUserPutSchema(Schema):
         required=False,
         validate=[PasswordComplexityValidator()],
         metadata={"description": password_description},
+    )
+    display_time_zone = fields.String(
+        required=False,
+        allow_none=True,
+        validate=[validate_display_time_zone],
+        metadata={"description": display_time_zone_description},
     )

@@ -131,6 +131,12 @@ class MySQLEngineSpec(BasicParametersMixin, BaseEngineSpec):
         DECIMAL: lambda val: Decimal(val) if isinstance(val, str) else val
     }
 
+    # `CONVERT_TZ` only accepts named zones when the server's time zone tables
+    # have been loaded (`mysql_tzinfo_to_sql`), so a fixed offset is used
+    # instead. Zones observing DST are therefore shifted by their current
+    # offset year-round.
+    utc_to_tz_expression = "CONVERT_TZ({col}, '+00:00', '{offset}')"
+
     _time_grain_expressions = {
         None: "{col}",
         TimeGrain.SECOND: "DATE_ADD(DATE({col}), "

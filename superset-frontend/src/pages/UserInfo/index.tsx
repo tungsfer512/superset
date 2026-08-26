@@ -103,6 +103,7 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
           ...json.result,
           firstName: json.result.first_name,
           lastName: json.result.last_name,
+          displayTimeZone: json.result.display_time_zone ?? '',
         };
         setUserDetails(transformedUser);
       })
@@ -175,9 +176,7 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
                 {user.isActive ? t('Yes') : t('No')}
               </Descriptions.Item>
               <Descriptions.Item label={t('Role')}>
-                {user.roles
-                  ? Object.keys(user.roles).join(', ')
-                  : t('None')}
+                {user.roles ? Object.keys(user.roles).join(', ') : t('None')}
               </Descriptions.Item>
               <Descriptions.Item label={t('Login count')}>
                 {user.loginCount}
@@ -185,9 +184,7 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
             </Descriptions>
           </Collapse.Panel>
           <Collapse.Panel
-            header={
-              <DescriptionTitle>{t('Personal info')}</DescriptionTitle>
-            }
+            header={<DescriptionTitle>{t('Personal info')}</DescriptionTitle>}
             key="personalInfo"
           >
             <Descriptions
@@ -202,7 +199,12 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
               <Descriptions.Item label={t('Last Name')}>
                 {userDetails.lastName}
               </Descriptions.Item>
-              <Descriptions.Item label={t('Email')}>{user.email}</Descriptions.Item>
+              <Descriptions.Item label={t('Email')}>
+                {user.email}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('Display timezone')}>
+                {userDetails.displayTimeZone || t('Instance default')}
+              </Descriptions.Item>
             </Descriptions>
           </Collapse.Panel>
         </Collapse>

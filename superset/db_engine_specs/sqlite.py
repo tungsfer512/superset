@@ -43,6 +43,10 @@ class SqliteEngineSpec(BaseEngineSpec):
 
     disable_ssh_tunneling = True
 
+    # SQLite has no time zone database, so a fixed offset is used. Zones
+    # observing DST are therefore shifted by their current offset year-round.
+    utc_to_tz_expression = "DATETIME({col}, '{offset_minutes} minutes')"
+
     _time_grain_expressions = {
         None: "{col}",
         TimeGrain.SECOND: "DATETIME(STRFTIME('%Y-%m-%dT%H:%M:%S', {col}))",

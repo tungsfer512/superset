@@ -101,6 +101,9 @@ class HiveEngineSpec(PrestoEngineSpec):
     # function names?
     _show_functions_column = "tab_name"
 
+    utc_to_tz_expression = "from_utc_timestamp({col}, '{tz}')"
+    tz_aware_to_tz_expression = utc_to_tz_expression
+
     # pylint: disable=line-too-long
     _time_grain_expressions = {
         None: "{col}",

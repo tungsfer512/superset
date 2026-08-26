@@ -79,7 +79,7 @@ from superset.superset_typing import (
     OrderBy,
     QueryObjectDict,
 )
-from superset.utils import core as utils, json
+from superset.utils import core as utils, display_timezone, json
 from superset.utils.core import (
     GenericDataType,
     get_column_name,
@@ -734,6 +734,15 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
     @property
     def db_extra(self) -> Optional[dict[str, Any]]:
         raise NotImplementedError()
+
+    @property
+    def display_time_zone(self) -> Optional[str]:
+        """
+        Time zone this datasource's UTC temporal data should be rendered in.
+
+        See ``DISPLAY_TIME_ZONE`` in ``superset/config.py``.
+        """
+        return display_timezone.get_time_zone(getattr(self, "database", None))
 
     def query(self, query_obj: QueryObjectDict) -> QueryResult:
         raise NotImplementedError()
@@ -1503,7 +1512,12 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
 
         if tf:
             if tf in {"epoch_ms", "epoch_s"}:
-                seconds_since_epoch = int(dttm.timestamp())
+                # The rest of the pipeline works in display-time-zone wall
+                # clock, but the stored value is a UTC epoch, so the bound has
+                # to be read back as UTC before being encoded.
+                seconds_since_epoch = display_timezone.to_epoch_seconds(
+                    dttm, getattr(col, "display_time_zone", None)
+                )
                 if tf == "epoch_s":
                     return str(seconds_since_epoch)
                 return str(seconds_since_epoch * 1000)
@@ -1628,7 +1642,14 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
             expression = template_processor.process_template(column["column_name"])
             col = sa.literal_column(expression, type_=type_)
 
-        time_expr = self.db_engine_spec.get_timestamp_expr(col, None, time_grain)
+        time_zone = (
+            self.display_time_zone
+            if display_timezone.is_convertible_column(column.get("type"))
+            else None
+        )
+        time_expr = self.db_engine_spec.get_timestamp_expr(
+            col, None, time_grain, time_zone
+        )
         return self.make_sqla_column_compatible(time_expr, label)
 
     def convert_tbl_column_to_sqla_col(
@@ -1647,6 +1668,18 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
             col = literal_column(expression, type_=type_)
         else:
             col = sa.column(tbl_column.column_name, type_=type_)
+        # Epoch-encoded columns are left alone: the integer has to be decoded
+        # into a timestamp before a time zone means anything, and the matching
+        # bound is encoded back to a UTC epoch in `dttm_sql_literal`.
+        if not tbl_column.python_date_format and (
+            time_zone := getattr(tbl_column, "display_time_zone", None)
+        ):
+            tz_expr = db_engine_spec.get_utc_to_tz_expression(
+                time_zone,
+                tz_aware=db_engine_spec.is_tz_aware_column_type(tbl_column.type, type_),
+            )
+            if tz_expr:
+                col = TimestampExpression(tz_expr, col, type_=type_)
         col = self.make_sqla_column_compatible(col, label)
         return col
 

@@ -166,6 +166,14 @@ class PrestoBaseEngineSpec(BaseEngineSpec, metaclass=ABCMeta):
     supports_dynamic_schema = True
     supports_catalog = supports_dynamic_catalog = supports_cross_catalog_queries = True
 
+    # `with_timezone` is not available across all Presto versions, so a fixed
+    # offset is used here; Trino overrides this with a DST-correct expression.
+    utc_to_tz_expression = "({col} + INTERVAL '{offset_minutes}' MINUTE)"
+    tz_aware_to_tz_expression = (
+        "(CAST({col} AT TIME ZONE 'UTC' AS TIMESTAMP) "
+        "+ INTERVAL '{offset_minutes}' MINUTE)"
+    )
+
     column_type_mappings = (
         (
             re.compile(r"^boolean.*", re.IGNORECASE),

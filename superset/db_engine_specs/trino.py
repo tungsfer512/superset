@@ -76,6 +76,14 @@ class TrinoEngineSpec(PrestoBaseEngineSpec):
     engine_name = "Trino"
     allows_alias_to_source_column = False
 
+    # `with_timezone` pins the naive value to UTC, `AT TIME ZONE` moves it, and
+    # the cast drops the zone again so downstream grains keep working on a plain
+    # TIMESTAMP.
+    utc_to_tz_expression = (
+        "CAST(with_timezone({col}, 'UTC') AT TIME ZONE '{tz}' AS TIMESTAMP)"
+    )
+    tz_aware_to_tz_expression = "CAST({col} AT TIME ZONE '{tz}' AS TIMESTAMP)"
+
     # OAuth 2.0
     supports_oauth2 = True
     oauth2_exception = TrinoAuthError

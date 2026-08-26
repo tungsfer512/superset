@@ -40,3 +40,29 @@ class UserDAO(BaseDAO[User]):
             attrs = UserAttribute(avatar_url=url, user_id=user.id)
             user.extra_attributes = [attrs]
             db.session.add(attrs)
+
+    @staticmethod
+    def get_display_time_zone(user: User) -> str | None:
+        """The user's own display time zone preference, if they set one.
+
+        This is the stored value, not the resolved one: ``None`` means "use the
+        instance default". See ``superset/utils/display_timezone.py``.
+
+        Guest users (embedded dashboards) have no attribute row -- and are not
+        even ORM objects -- so they always report ``None``.
+        """
+        attributes = getattr(user, "extra_attributes", None)
+        if not attributes:
+            return None
+        return attributes[0].display_time_zone or None
+
+    @staticmethod
+    def set_display_time_zone(user: User, time_zone: str | None) -> None:
+        """Store the user's display time zone; ``None`` clears the preference."""
+        time_zone = time_zone or None
+        if user.extra_attributes:
+            user.extra_attributes[0].display_time_zone = time_zone
+        else:
+            attrs = UserAttribute(display_time_zone=time_zone, user_id=user.id)
+            user.extra_attributes = [attrs]
+            db.session.add(attrs)

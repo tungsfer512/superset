@@ -24,12 +24,12 @@ from collections.abc import Hashable
 from datetime import datetime
 from typing import Any, Optional, TYPE_CHECKING
 
+import humanize
 import sqlalchemy as sqla
 from flask import current_app as app
 from flask_appbuilder import Model
 from flask_appbuilder.models.decorators import renders
 from flask_babel import get_locale, gettext as __
-import humanize
 from jinja2.exceptions import TemplateError
 from markupsafe import Markup
 from sqlalchemy import (
@@ -330,6 +330,10 @@ class Query(
         return ""
 
     def get_extra_cache_keys(self, query_obj: dict[str, Any]) -> list[Hashable]:
+        # the display time zone is baked into the generated SQL, so changing it
+        # has to produce different cached results
+        if time_zone := self.display_time_zone:
+            return [f"tz:{time_zone}"]
         return []
 
     @property

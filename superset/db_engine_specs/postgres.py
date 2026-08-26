@@ -100,6 +100,13 @@ class PostgresBaseEngineSpec(BaseEngineSpec):
     engine = ""
     engine_name = "PostgreSQL"
 
+    # `timestamp AT TIME ZONE 'UTC'` reads the naive value as UTC and yields a
+    # `timestamptz`; the second `AT TIME ZONE` renders it as naive wall clock in
+    # the target zone. A column that is already `timestamptz` needs only the
+    # second step.
+    utc_to_tz_expression = "({col} AT TIME ZONE 'UTC' AT TIME ZONE '{tz}')"
+    tz_aware_to_tz_expression = "({col} AT TIME ZONE '{tz}')"
+
     _time_grain_expressions = {
         None: "{col}",
         TimeGrain.SECOND: "DATE_TRUNC('second', {col})",

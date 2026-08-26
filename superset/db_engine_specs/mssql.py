@@ -56,6 +56,14 @@ class MssqlEngineSpec(BaseEngineSpec):
     allows_cte_in_subquery = False
     supports_multivalues_insert = True
 
+    # SQL Server's `AT TIME ZONE` takes Windows zone names, not IANA ones, so a
+    # fixed offset is used. Zones observing DST are therefore shifted by their
+    # current offset year-round.
+    utc_to_tz_expression = "DATEADD(MINUTE, {offset_minutes}, {col})"
+    tz_aware_to_tz_expression = (
+        "DATEADD(MINUTE, {offset_minutes}, CAST({col} AT TIME ZONE 'UTC' AS DATETIME2))"
+    )
+
     _time_grain_expressions = {
         None: "{col}",
         TimeGrain.SECOND: "DATEADD(SECOND, \

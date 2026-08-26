@@ -111,7 +111,7 @@ from superset.superset_typing import (
     QueryObjectDict,
     ResultSetColumnType,
 )
-from superset.utils import core as utils, json
+from superset.utils import core as utils, display_timezone, json
 from superset.utils.backports import StrEnum
 
 config = current_app.config  # Backward compatibility for tests
@@ -876,6 +876,24 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
         return self.database.get_extra()
 
     @property
+    def display_time_zone(self) -> str | None:
+        """
+        Time zone this column's UTC values should be converted to, if any.
+
+        ``None`` when ``DISPLAY_TIME_ZONE`` is unset, when the database or the
+        column opts out, or when the column's type cannot meaningfully be
+        shifted (a date with no time-of-day, a string parsed via
+        ``python_date_format``).
+        """
+        if not self.is_temporal:
+            return None
+        if not display_timezone.is_convertible_column(
+            self.type, self.python_date_format, self.get_extra_dict()
+        ):
+            return None
+        return display_timezone.get_time_zone(self.database)
+
+    @property
     def type_generic(self) -> utils.GenericDataType | None:
         if self.is_dttm:
             return utils.GenericDataType.TEMPORAL
@@ -915,6 +933,16 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
             col = literal_column(expression, type_=type_)
         else:
             col = column(self.column_name, type_=type_)
+        # Epoch-encoded columns are left alone: the integer has to be decoded
+        # into a timestamp before a time zone means anything, which only
+        # `get_timestamp_expression` does.
+        if not self.python_date_format and (time_zone := self.display_time_zone):
+            tz_expr = db_engine_spec.get_utc_to_tz_expression(
+                time_zone,
+                tz_aware=db_engine_spec.is_tz_aware_column_type(self.type, type_),
+            )
+            if tz_expr:
+                col = TimestampExpression(tz_expr, col, type_=type_)
         col = self.database.make_sqla_column_compatible(col, label)
         return col
 
@@ -944,7 +972,8 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
             self.type, db_extra=self.db_extra
         )
         type_ = column_spec.sqla_type if column_spec else DateTime
-        if not self.expression and not time_grain and not is_epoch:
+        time_zone = self.display_time_zone
+        if not self.expression and not time_grain and not is_epoch and not time_zone:
             sqla_col = column(self.column_name, type_=type_)
             return self.database.make_sqla_column_compatible(sqla_col, label)
         if expression := self.expression:
@@ -962,7 +991,9 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
             col = literal_column(expression, type_=type_)
         else:
             col = column(self.column_name, type_=type_)
-        time_expr = self.db_engine_spec.get_timestamp_expr(col, pdf, time_grain)
+        time_expr = self.db_engine_spec.get_timestamp_expr(
+            col, pdf, time_grain, time_zone
+        )
         return self.database.make_sqla_column_compatible(time_expr, label)
 
     @property
@@ -1513,6 +1544,7 @@ class SqlaTable(
         has_timegrain = col.get("columnType") == "BASE_AXIS" and time_grain
         is_dttm = False
         pdf = None
+        time_zone = self.display_time_zone
         is_column_reference = col.get("isColumnReference", False)
 
         # First, check if this is a column reference that exists in metadata
@@ -1523,6 +1555,9 @@ class SqlaTable(
             )
             is_dttm = col_in_metadata.is_temporal
             pdf = col_in_metadata.python_date_format
+            # `get_sqla_col` has already applied the display time zone, unless
+            # the column is epoch-encoded and still needs decoding below
+            time_zone = time_zone if pdf else None
         else:
             # Column doesn't exist in metadata or is not a reference - treat as ad-hoc
             # expression Note: If isColumnReference=true but column not found, we still
@@ -1574,6 +1609,7 @@ class SqlaTable(
                 col=sqla_column,
                 pdf=pdf,
                 time_grain=time_grain,
+                time_zone=time_zone,
             )
         return self.make_sqla_column_compatible(sqla_column, label)
 
@@ -1927,6 +1963,12 @@ class SqlaTable(
         from superset.utils.rls import collect_rls_predicates_for_sql
 
         extra_cache_keys = super().get_extra_cache_keys(query_obj)
+
+        # the display time zone is baked into the generated SQL, so changing it
+        # has to produce different cached results
+        if time_zone := self.display_time_zone:
+            extra_cache_keys.append(f"tz:{time_zone}")
+
         if self.has_extra_cache_key_calls(query_obj):
             sqla_query = self.get_sqla_query(**query_obj)
             extra_cache_keys += sqla_query.extra_cache_keys
