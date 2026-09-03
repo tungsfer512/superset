@@ -925,6 +925,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         pdf: str | None,
         time_grain: str | None,
         time_zone: str | None = None,
+        native_type: str | None = None,
     ) -> TimestampExpression:
         """
         Construct a TimestampExpression to be used in a SQLAlchemy query.
@@ -938,6 +939,10 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param pdf: date format (seconds or milliseconds)
         :param time_grain: time grain, e.g. P1Y for 1 year
         :param time_zone: IANA time zone to convert UTC values to, if any
+        :param native_type: the column's type as the database declares it.
+            Needed to tell a zone-aware column from a naive one: ``TIMESTAMP
+            WITH TIME ZONE`` and ``TIMESTAMP`` both map to the same SQLAlchemy
+            type, so ``col.type`` cannot answer that on its own.
         :return: TimestampExpression object
         """
         # if epoch, translate to DATE using db specific conf
@@ -955,7 +960,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 cls.epoch_to_dttm_is_tz_aware
                 if pdf in ("epoch_s", "epoch_ms")
                 else cls.is_tz_aware_column_type(
-                    str(getattr(col, "type", "")), col.type
+                    native_type or str(getattr(col, "type", "")), col.type
                 )
             )
             if tz_expr := cls.get_utc_to_tz_expression(time_zone, tz_aware=tz_aware):

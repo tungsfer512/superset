@@ -1648,7 +1648,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
             else None
         )
         time_expr = self.db_engine_spec.get_timestamp_expr(
-            col, None, time_grain, time_zone
+            col, None, time_grain, time_zone, native_type=column.get("type")
         )
         return self.make_sqla_column_compatible(time_expr, label)
 

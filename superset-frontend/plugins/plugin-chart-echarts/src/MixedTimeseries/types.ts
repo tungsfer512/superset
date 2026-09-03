@@ -58,6 +58,8 @@ export type EchartsMixedTimeseriesFormData = QueryFormData & {
   truncateYAxisSecondary: boolean;
   timeGrainSqla?: TimeGranularity;
   tooltipTimeFormat?: string;
+  /** Declarative tooltip customization; see `utils/customTooltip.ts`. */
+  tooltipCustomConfig?: string;
   zoomable: boolean;
   richTooltip: boolean;
   showQueryIdentifiers?: boolean;

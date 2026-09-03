@@ -105,6 +105,15 @@ import {
 } from '../constants';
 import { getDefaultTooltip } from '../utils/tooltip';
 import {
+  decorateTooltipValue,
+  formatCustomTooltipTitle,
+  getTooltipSeriesLabel,
+  getTooltipValueFormatter,
+  limitTooltipRows,
+  orderTooltipKeys,
+  parseCustomTooltipConfig,
+} from '../utils/customTooltip';
+import {
   getPercentFormatter,
   getTooltipTimeFormatter,
   getXAxisFormatter,
@@ -176,6 +185,7 @@ export default function transformProps(
     stack,
     tooltipTimeFormat,
     tooltipSortByMetric,
+    tooltipCustomConfig,
     showTooltipTotal,
     showTooltipPercentage,
     truncateXAxis,
@@ -526,6 +536,8 @@ export default function transformProps(
     xAxisDataType === GenericDataType.Temporal
       ? getTooltipTimeFormatter(tooltipTimeFormat)
       : String;
+  // parsed once, not per hover
+  const customTooltip = parseCustomTooltipConfig(tooltipCustomConfig);
   const xAxisFormatter =
     xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
@@ -690,51 +702,58 @@ export default function transformProps(
           allowTotal && !forcePercentFormatter && showTooltipPercentage;
         const keys = Object.keys(forecastValues);
         let focusedRow;
-        sortedKeys
-          .filter(key => keys.includes(key))
-          .forEach(key => {
-            const value = forecastValues[key];
-            if (value.observation === 0 && stack) {
-              return;
-            }
-            const row = formatForecastTooltipSeries({
-              ...value,
-              seriesName: key,
-              formatter,
-            });
-
-            const annotationRow = annotationLayers.some(
-              item => item.name === key,
-            );
-
-            if (
-              showPercentage &&
-              value.observation !== undefined &&
-              !annotationRow
-            ) {
-              row.push(
-                percentFormatter.format(value.observation / (total || 1)),
-              );
-            }
-            rows.push(row);
-            if (key === focusedSeries) {
-              focusedRow = rows.length - 1;
-            }
+        orderTooltipKeys(
+          sortedKeys.filter(key => keys.includes(key)),
+          customTooltip,
+        ).forEach(key => {
+          const value = forecastValues[key];
+          if (value.observation === 0 && stack) {
+            return;
+          }
+          const row = formatForecastTooltipSeries({
+            ...value,
+            seriesName: getTooltipSeriesLabel(key, customTooltip),
+            formatter: getTooltipValueFormatter(formatter, key, customTooltip),
           });
+          row[1] = decorateTooltipValue(row[1], key, customTooltip);
+
+          const annotationRow = annotationLayers.some(
+            item => item.name === key,
+          );
+
+          if (
+            showPercentage &&
+            value.observation !== undefined &&
+            !annotationRow
+          ) {
+            row.push(percentFormatter.format(value.observation / (total || 1)));
+          }
+          rows.push(row);
+          if (key === focusedSeries) {
+            focusedRow = rows.length - 1;
+          }
+        });
         if (stack) {
           rows.reverse();
           if (focusedRow !== undefined) {
             focusedRow = rows.length - focusedRow - 1;
           }
         }
+        // cap the series rows before appending the total, so that a `maxRows`
+        // small enough to trim everything still leaves the total visible
+        const limited = limitTooltipRows(rows, focusedRow, customTooltip);
         if (allowTotal && showTooltipTotal) {
           const totalRow = ['Total', formatter.format(total)];
           if (showPercentage) {
             totalRow.push(percentFormatter.format(1));
           }
-          rows.push(totalRow);
+          limited.rows.push(totalRow);
         }
-        return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
+        return tooltipHtml(
+          limited.rows,
+          formatCustomTooltipTitle(tooltipFormatter(xValue), customTooltip),
+          limited.focusedRow,
+        );
       },
     },
     legend: {

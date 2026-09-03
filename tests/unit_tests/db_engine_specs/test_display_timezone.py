@@ -49,6 +49,40 @@ def test_postgres_tz_aware_column_is_not_double_converted() -> None:
     assert _compile(expr) == "(ts AT TIME ZONE 'Asia/Ho_Chi_Minh')"
 
 
+def test_tz_awareness_comes_from_the_declared_type() -> None:
+    """`get_column_spec` maps timestamptz and timestamp to the same SQLA type.
+
+    `TIMESTAMP WITH TIME ZONE` and `TIMESTAMP` both come back as
+    `types.TIMESTAMP()` with `timezone=False`, so the SQLAlchemy type cannot
+    tell them apart and the database's own type name has to be passed in.
+    Without it a zone-aware column is converted twice.
+    """
+    from superset.db_engine_specs.postgres import PostgresEngineSpec
+
+    # what `get_column_spec` actually hands back for a timestamptz column
+    col = column("ts", type_=types.TIMESTAMP())
+    assert PostgresEngineSpec.get_column_spec("TIMESTAMP WITH TIME ZONE")
+    assert (
+        getattr(
+            PostgresEngineSpec.get_column_spec("TIMESTAMP WITH TIME ZONE").sqla_type,
+            "timezone",
+            False,
+        )
+        is False
+    )
+
+    expr = PostgresEngineSpec.get_timestamp_expr(
+        col, None, None, TZ, native_type="TIMESTAMP WITH TIME ZONE"
+    )
+    assert _compile(expr) == "(ts AT TIME ZONE 'Asia/Ho_Chi_Minh')"
+
+    # ...while a naive column of the same SQLA type still gets both steps
+    expr = PostgresEngineSpec.get_timestamp_expr(
+        col, None, None, TZ, native_type="TIMESTAMP"
+    )
+    assert _compile(expr) == "(ts AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')"
+
+
 def test_grain_is_applied_after_the_conversion() -> None:
     """A "day" must be a day in the target zone, not in UTC."""
     from superset.db_engine_specs.postgres import PostgresEngineSpec
@@ -70,13 +104,14 @@ def test_epoch_is_decoded_before_the_conversion() -> None:
 
 
 def test_offset_based_engines_substitute_the_offset() -> None:
+    """Engines with no time zone database of their own shift by a fixed offset.
+
+    DST is therefore not tracked on these: a zone that observes it is shifted
+    by the offset in force when the query was built.
+    """
     from superset.db_engine_specs.mssql import MssqlEngineSpec
-    from superset.db_engine_specs.mysql import MySQLEngineSpec
     from superset.db_engine_specs.sqlite import SqliteEngineSpec
 
-    assert MySQLEngineSpec.get_utc_to_tz_expression(TZ) == (
-        "CONVERT_TZ({col}, '+00:00', '+07:00')"
-    )
     assert MssqlEngineSpec.get_utc_to_tz_expression(TZ) == (
         "DATEADD(MINUTE, 420, {col})"
     )
@@ -85,9 +120,30 @@ def test_offset_based_engines_substitute_the_offset() -> None:
     )
 
 
+def test_mysql_prefers_named_zones_and_falls_back_to_an_offset() -> None:
+    """`CONVERT_TZ` needs the server's time zone tables to resolve a name.
+
+    Where they are loaded -- the official images and the managed offerings ship
+    them -- the named branch is DST correct. Where they are not, `CONVERT_TZ`
+    returns NULL rather than failing, which would blank every timestamp, so the
+    offset branch catches it.
+    """
+    from superset.db_engine_specs.mysql import MySQLEngineSpec
+    from superset.db_engine_specs.starrocks import StarRocksEngineSpec
+
+    expected = (
+        "COALESCE("
+        "CONVERT_TZ({col}, 'UTC', 'Asia/Ho_Chi_Minh'), "
+        "CONVERT_TZ({col}, '+00:00', '+07:00')"
+        ")"
+    )
+    assert MySQLEngineSpec.get_utc_to_tz_expression(TZ) == expected
+    # StarRocks implements the same function and inherits the template
+    assert StarRocksEngineSpec.get_utc_to_tz_expression(TZ) == expected
+
+
 def test_named_zone_engines_substitute_the_name() -> None:
     from superset.db_engine_specs.clickhouse import ClickHouseEngineSpec
-    from superset.db_engine_specs.starrocks import StarRocksEngineSpec
     from superset.db_engine_specs.trino import TrinoEngineSpec
 
     assert TrinoEngineSpec.get_utc_to_tz_expression(TZ) == (
@@ -95,9 +151,6 @@ def test_named_zone_engines_substitute_the_name() -> None:
     )
     assert ClickHouseEngineSpec.get_utc_to_tz_expression(TZ) == (
         "toTimeZone(toDateTime({col}), 'Asia/Ho_Chi_Minh')"
-    )
-    assert StarRocksEngineSpec.get_utc_to_tz_expression(TZ) == (
-        "convert_tz({col}, 'UTC', 'Asia/Ho_Chi_Minh')"
     )
 
 

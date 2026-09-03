@@ -41,9 +41,13 @@ never share cached results.
 from __future__ import annotations
 
 import logging
+import os
 import re
+import zoneinfo
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
+from importlib import resources
+from pathlib import Path
 from typing import Any, TYPE_CHECKING
 from zoneinfo import available_timezones, ZoneInfo, ZoneInfoNotFoundError
 
@@ -93,13 +97,97 @@ class InvalidTimeZoneError(ValueError):
 
 
 @lru_cache(maxsize=1)
+def _zone_aliases() -> dict[str, str]:
+    """Map every deprecated IANA name to the canonical zone it links to.
+
+    Python's tzdata ships the IANA ``backward`` links -- ``Greenwich``,
+    ``Asia/Saigon``, ``US/Eastern`` and ~150 more -- but databases generally
+    ship only the canonical names. PostgreSQL, for one, rejects all of them:
+    ``time zone "Greenwich" not recognized``. Since the zone name travels into
+    the generated SQL verbatim, an alias would break the chart outright.
+
+    The mapping is read from ``tzdata.zi``, the zone database's own source, so
+    it stays correct as tzdata is updated instead of drifting from a list
+    maintained here. Returns an empty map if that file cannot be found, which
+    leaves names untouched -- the previous behaviour.
+    """
+    text: str | None = None
+    for root in list(zoneinfo.TZPATH):
+        path = os.path.join(root, "tzdata.zi")
+        if os.path.isfile(path):
+            text = Path(path).read_text(encoding="utf-8")
+            break
+    if text is None:
+        try:
+            text = (
+                resources.files("tzdata.zoneinfo")
+                .joinpath("tzdata.zi")
+                .read_text(encoding="utf-8")
+            )
+        except (ModuleNotFoundError, FileNotFoundError, OSError):
+            logger.warning(
+                "tzdata.zi not found; deprecated time zone names will be passed "
+                "to the database unchanged and may be rejected."
+            )
+            return {}
+
+    aliases: dict[str, str] = {}
+    for line in text.splitlines():
+        parts = line.split()
+        # `L <target> <alias>`, the zic source form of a Link line
+        if len(parts) > 2 and parts[0] in ("L", "Link"):
+            aliases[parts[2]] = parts[1]
+    return aliases
+
+
+@lru_cache(maxsize=1)
+def canonical_time_zones() -> frozenset[str]:
+    """The zones this instance offers, excluding deprecated aliases.
+
+    Also excludes the region-less legacy zones (``EST``, ``CET``,
+    ``PST8PDT``...): they are canonical in tzdata but absent from PostgreSQL's
+    ``pg_timezone_names``, and they describe a UTC offset rather than a place,
+    which is not what a display time zone should mean.
+    """
+    aliases = _zone_aliases()
+    return frozenset(
+        name
+        for name in available_timezones()
+        # `UTC` is a link to `Etc/UTC` in tzdata, but it is the plainest name
+        # for the most useful choice and every engine recognizes it
+        if name == "UTC" or (name not in aliases and "/" in name)
+    )
+
+
+def canonicalize_time_zone(time_zone: str) -> str:
+    """Resolve a deprecated alias to the canonical name databases accept.
+
+    A name this instance already offers is returned untouched, so what the user
+    picked is what reaches the SQL. That matters for ``UTC``, which tzdata links
+    to ``Etc/UTC``: the plain name is the one every engine recognizes.
+    """
+    if time_zone in canonical_time_zones():
+        return time_zone
+    seen: set[str] = set()
+    aliases = _zone_aliases()
+    while time_zone in aliases and time_zone not in seen:
+        seen.add(time_zone)
+        time_zone = aliases[time_zone]
+    return time_zone
+
+
+@lru_cache(maxsize=1)
 def available_time_zones() -> frozenset[str]:
-    """Every IANA name this instance accepts (cached: the lookup scans tzdata).
+    """Every IANA name this instance accepts as input (cached: it scans tzdata).
+
+    Wider than :func:`canonical_time_zones`: a name already stored from an
+    earlier version, or sent by an embedding host, still validates and is then
+    canonicalized rather than rejected.
 
     Note this is not the same set a browser reports from
     ``Intl.supportedValuesOf('timeZone')``: the two disagree on which name in an
     alias pair is canonical (``Asia/Ho_Chi_Minh`` here, ``Asia/Saigon`` there).
-    Pickers must therefore be populated from this list, not from the browser's.
+    Pickers must therefore be populated from the server, not from the browser.
     """
     return frozenset(available_timezones())
 
@@ -110,7 +198,12 @@ def is_known_time_zone(time_zone: str) -> bool:
 
 
 def validate_time_zone(time_zone: Any, source: str = CONFIG_KEY) -> str | None:
-    """Return ``time_zone`` if it is a usable IANA name, else ``None``."""
+    """Return a usable, canonical IANA name for ``time_zone``, else ``None``.
+
+    Deprecated aliases are resolved rather than rejected, so a name stored
+    before this instance knew better keeps working instead of breaking the
+    charts that use it.
+    """
     if not time_zone:
         return None
     if not isinstance(time_zone, str):
@@ -119,7 +212,16 @@ def validate_time_zone(time_zone: Any, source: str = CONFIG_KEY) -> str | None:
     if not is_known_time_zone(time_zone):
         logger.warning("Ignoring unknown %s: %r", source, time_zone)
         return None
-    return time_zone
+
+    canonical = canonicalize_time_zone(time_zone)
+    if canonical != time_zone:
+        logger.info(
+            "Resolving deprecated %s %r to %r, which databases recognize",
+            source,
+            time_zone,
+            canonical,
+        )
+    return canonical
 
 
 def get_configured_time_zone(database: Database | None = None) -> str | None:

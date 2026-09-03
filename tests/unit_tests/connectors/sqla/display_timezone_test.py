@@ -42,6 +42,9 @@ def dataset() -> SqlaTable:
         database=database,
         columns=[
             TableColumn(column_name="ts", type="TIMESTAMP", is_dttm=True),
+            TableColumn(
+                column_name="ts_tz", type="TIMESTAMP WITH TIME ZONE", is_dttm=True
+            ),
             TableColumn(column_name="day", type="DATE", is_dttm=True),
             TableColumn(column_name="name", type="VARCHAR"),
         ],
@@ -135,3 +138,21 @@ def test_disabled_by_default(dataset: SqlaTable) -> None:
         )
     assert "AT TIME ZONE" not in sql
     assert "DATE_TRUNC('day', ts)" in sql
+
+
+def test_tz_aware_column_is_converted_once(dataset: SqlaTable) -> None:
+    """A timestamptz column already carries its zone: reading it as UTC first
+    would shift it twice. This goes through the same path a real dataset does,
+    where the SQLAlchemy type has lost the distinction.
+    """
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+        sql = _sql(
+            dataset,
+            granularity="ts_tz",
+            extras={"time_grain_sqla": "P1D"},
+            columns=["ts_tz"],
+            groupby=["ts_tz"],
+            is_timeseries=True,
+        )
+    assert "DATE_TRUNC('day', (ts_tz AT TIME ZONE 'Asia/Ho_Chi_Minh'))" in sql
+    assert "AT TIME ZONE 'UTC'" not in sql

@@ -1,0 +1,73 @@
+---
+title: Custom tooltip
+hide_title: true
+sidebar_position: 4
+version: 1
+---
+
+# Custom tooltip
+
+Time-series charts expose a **Custom tooltip** control under
+**Customize → Tooltip**. It takes a JSON object describing the tooltip you want,
+and the chart builds its formatter from that.
+
+It is deliberately a description rather than code: a JavaScript `formatter`
+would run in every viewer's browser, embedded guests included, so anyone able
+to edit a chart could execute script on the pages it is embedded in. Everything
+below is data, and the rendered result is HTML-sanitized like any other tooltip.
+
+## Example
+
+```json
+{
+  "title": "Ngày {time}",
+  "maxRows": 10,
+  "series": {
+    "SUM(revenue)": {
+      "label": "Doanh thu",
+      "suffix": " ₫",
+      "format": ",.0f",
+      "order": 1
+    },
+    "COUNT(*)": { "label": "Số đơn", "order": 2 },
+    "internal_id": { "hidden": true }
+  }
+}
+```
+
+## Fields
+
+| Field | Type | Effect |
+|---|---|---|
+| `title` | string | Heading template. `{time}` (or `{x}`) stands for the heading the chart would otherwise show, so it still honors **Tooltip time format**. |
+| `maxRows` | number | Lists at most this many series; the remainder is summarized as a count. The **Total** row is never trimmed. |
+| `series` | object | Keyed by series name — the label shown in the legend. |
+
+Per series:
+
+| Field | Type | Effect |
+|---|---|---|
+| `label` | string | Replaces the series name in that row. |
+| `prefix` | string | Prepended to the formatted value. |
+| `suffix` | string | Appended to the formatted value. |
+| `format` | string | A [d3 format](https://d3js.org/d3-format) string for that row only, overriding **Number format**. |
+| `hidden` | boolean | Drops the row. |
+| `order` | number | Lower comes first. Series without `order` keep the order the chart already chose, after the ordered ones. |
+
+## Behavior notes
+
+- **Invalid input is ignored.** Unparseable JSON, a value of the wrong type, or
+  an unknown key is dropped and the default tooltip is used, so a typo cannot
+  break a dashboard. Check the browser console for what was skipped.
+- **Series names must match exactly.** They are the legend labels, which for a
+  grouped chart include the dimension values (`Asia, SUM(revenue)`).
+- `prefix` and `suffix` wrap the *formatted* string, so forecast rows
+  (`20, ŷ = 30 (10, 40)`) keep their shape.
+- Changing the control re-renders the chart without re-running the query.
+
+## Supported charts
+
+The control appears on the charts whose tooltip it can drive: Line, Bar, Area,
+Scatter, Smooth Line, Step and Mixed Chart. Other chart families (Pie, Big
+Number, Funnel, Heatmap, …) build their tooltips separately and are not wired
+to it.

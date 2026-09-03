@@ -131,11 +131,20 @@ class MySQLEngineSpec(BasicParametersMixin, BaseEngineSpec):
         DECIMAL: lambda val: Decimal(val) if isinstance(val, str) else val
     }
 
-    # `CONVERT_TZ` only accepts named zones when the server's time zone tables
-    # have been loaded (`mysql_tzinfo_to_sql`), so a fixed offset is used
-    # instead. Zones observing DST are therefore shifted by their current
-    # offset year-round.
-    utc_to_tz_expression = "CONVERT_TZ({col}, '+00:00', '{offset}')"
+    # `CONVERT_TZ` accepts named zones -- and so handles DST correctly -- only
+    # when the server's time zone tables have been loaded. The official MySQL
+    # images and the managed offerings ship them populated, but a minimal
+    # install may not, and there `CONVERT_TZ` returns NULL rather than failing,
+    # which would silently blank every timestamp. Falling back to a fixed offset
+    # in SQL keeps such a server working, at the cost of DST accuracy there.
+    #
+    # StarRocks speaks the same dialect and inherits this.
+    utc_to_tz_expression = (
+        "COALESCE("
+        "CONVERT_TZ({col}, 'UTC', '{tz}'), "
+        "CONVERT_TZ({col}, '+00:00', '{offset}')"
+        ")"
+    )
 
     _time_grain_expressions = {
         None: "{col}",

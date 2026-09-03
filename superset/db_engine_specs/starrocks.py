@@ -92,9 +92,9 @@ class StarRocksEngineSpec(MySQLEngineSpec):
     engine = "starrocks"
     engine_name = "StarRocks"
 
-    # unlike MySQL, StarRocks ships its own time zone database, so named zones
-    # can be used and DST is handled correctly
-    utc_to_tz_expression = "convert_tz({col}, 'UTC', '{tz}')"
+    # `utc_to_tz_expression` is inherited from MySQL: StarRocks implements the
+    # same `CONVERT_TZ`, and ships its own time zone database, so the named
+    # branch resolves and the offset fallback stays unused.
 
     default_driver = "starrocks"
     sqlalchemy_uri_placeholder = (

@@ -29,7 +29,7 @@ from superset import is_feature_enabled
 from superset.daos.user import UserDAO
 from superset.extensions import db, event_logger
 from superset.utils.display_timezone import (
-    available_time_zones,
+    canonical_time_zones,
     clear_user_time_zone_cache,
     format_utc_offset,
 )
@@ -131,7 +131,7 @@ class CurrentUserRestApi(BaseSupersetApi):
         """
         zones = [
             {"name": name, "offset": format_utc_offset(name)}
-            for name in available_time_zones()
+            for name in canonical_time_zones()
         ]
         zones.sort(key=lambda zone: (zone["offset"], zone["name"]))
         return self.response(200, result=zones)

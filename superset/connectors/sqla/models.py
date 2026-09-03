@@ -992,7 +992,7 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
         else:
             col = column(self.column_name, type_=type_)
         time_expr = self.db_engine_spec.get_timestamp_expr(
-            col, pdf, time_grain, time_zone
+            col, pdf, time_grain, time_zone, native_type=self.type
         )
         return self.database.make_sqla_column_compatible(time_expr, label)
 
@@ -1545,6 +1545,7 @@ class SqlaTable(
         is_dttm = False
         pdf = None
         time_zone = self.display_time_zone
+        native_type: str | None = None
         is_column_reference = col.get("isColumnReference", False)
 
         # First, check if this is a column reference that exists in metadata
@@ -1555,6 +1556,7 @@ class SqlaTable(
             )
             is_dttm = col_in_metadata.is_temporal
             pdf = col_in_metadata.python_date_format
+            native_type = col_in_metadata.type
             # `get_sqla_col` has already applied the display time zone, unless
             # the column is epoch-encoded and still needs decoding below
             time_zone = time_zone if pdf else None
@@ -1610,6 +1612,7 @@ class SqlaTable(
                 pdf=pdf,
                 time_grain=time_grain,
                 time_zone=time_zone,
+                native_type=native_type,
             )
         return self.make_sqla_column_compatible(sqla_column, label)
 

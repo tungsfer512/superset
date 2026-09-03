@@ -77,6 +77,8 @@ export type EchartsTimeseriesFormData = QueryFormData & {
   stackDimension: string;
   timeCompare?: string[];
   tooltipTimeFormat?: string;
+  /** Declarative tooltip customization; see `utils/customTooltip.ts`. */
+  tooltipCustomConfig?: string;
   showTooltipTotal?: boolean;
   showTooltipPercentage?: boolean;
   truncateXAxis: boolean;

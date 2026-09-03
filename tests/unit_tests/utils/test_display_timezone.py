@@ -156,3 +156,45 @@ def test_relative_range_is_midnight_in_the_display_zone() -> None:
     today = display_timezone.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
     assert until == today
     assert since == today - timedelta(days=1)
+
+
+def test_deprecated_aliases_are_canonicalized() -> None:
+    """Databases ship canonical zone names only.
+
+    Python's tzdata carries the IANA `backward` links, but PostgreSQL rejects
+    them outright -- `time zone "Greenwich" not recognized` -- and the name goes
+    into the generated SQL verbatim, so an alias breaks the chart.
+    """
+    assert display_timezone.validate_time_zone("Greenwich") == "Etc/GMT"
+    assert display_timezone.validate_time_zone("Asia/Saigon") == "Asia/Ho_Chi_Minh"
+    assert display_timezone.validate_time_zone("Europe/Kiev") == "Europe/Kyiv"
+    assert display_timezone.validate_time_zone("US/Eastern") == "America/New_York"
+    assert display_timezone.validate_time_zone("Japan") == "Asia/Tokyo"
+
+
+def test_canonical_names_are_left_alone() -> None:
+    for name in ("Asia/Ho_Chi_Minh", "Europe/Paris", "UTC"):
+        assert display_timezone.validate_time_zone(name) == name
+
+
+def test_selectable_zones_are_canonical_and_geographic() -> None:
+    """What the picker offers must be what a database accepts."""
+    selectable = display_timezone.canonical_time_zones()
+
+    assert "UTC" in selectable
+    assert "Asia/Ho_Chi_Minh" in selectable
+    # deprecated aliases are not offered...
+    for alias in ("Greenwich", "Asia/Saigon", "US/Eastern", "Japan", "Zulu"):
+        assert alias not in selectable
+    # ...nor are the region-less legacy zones, which name an offset, not a place
+    for legacy in ("EST", "CET", "MST7MDT", "PST8PDT"):
+        assert legacy not in selectable
+    # every offered name is a real zone
+    assert selectable <= display_timezone.available_time_zones()
+
+
+def test_a_stored_alias_still_resolves() -> None:
+    """A preference saved before this instance knew better must keep working."""
+    assert display_timezone.is_known_time_zone("Greenwich")
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "Greenwich"}):
+        assert display_timezone.get_time_zone() == "Etc/GMT"

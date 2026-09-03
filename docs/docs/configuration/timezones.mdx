@@ -18,6 +18,24 @@ in a single fixed timezone, set `DISPLAY_TIME_ZONE` to an
 DISPLAY_TIME_ZONE = "Asia/Ho_Chi_Minh"
 ```
 
+### Zone names
+
+The name travels into the generated SQL verbatim, so it has to be one the
+target database recognizes. Databases ship the *canonical* IANA zones only,
+while Python's tzdata also carries the deprecated `backward` links — PostgreSQL
+answers `time zone "Greenwich" not recognized` for those.
+
+Superset resolves a deprecated name to its canonical one before building the
+query (`Greenwich` → `Etc/GMT`, `Asia/Saigon` → `Asia/Ho_Chi_Minh`,
+`US/Eastern` → `America/New_York`), so a value stored by an older version, or
+sent by an embedding host, keeps working. The mapping is read from the zone
+database's own `tzdata.zi`, so it follows tzdata updates.
+
+The user-facing picker offers only canonical, region-based zones plus `UTC`. It
+deliberately leaves out the region-less legacy zones (`EST`, `CET`, `PST8PDT`,
+…): those name a UTC offset rather than a place, which is not what a display
+timezone should mean.
+
 Superset then converts temporal columns to wall-clock time in that zone **in
 SQL**, before the time grain is applied — so a "day" is a day in that zone, not
 in UTC. Time-range filters are compared against the same converted expression,
@@ -30,11 +48,10 @@ renders them, so no client-side setting is involved.
 
 - **The data must actually be UTC.** Columns that already hold local time are
   shifted a second time. Opt those out (see below).
-- **Engine support.** Named-zone conversion (DST-correct) is used for
-  PostgreSQL, Redshift, ClickHouse, Trino, Hive/Spark, BigQuery, Snowflake and
-  StarRocks. A fixed offset is used for MySQL, Microsoft SQL Server, Presto and
-  SQLite, so zones observing DST are shifted by their current offset year-round.
-  Engines with no template log a warning and are left unconverted.
+- **Engine support.** See the table below. Most engines convert by zone *name*
+  and so track DST correctly; a few have no time zone database and shift by a
+  fixed offset instead. Engines with no template at all log a warning and are
+  left unconverted.
 - **Indexes.** Filters are applied to the converted expression, so an index on
   the raw column no longer applies. Add an expression index, e.g. for
   PostgreSQL: `CREATE INDEX ... ON t ((ts AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))`.
@@ -77,6 +94,45 @@ authenticated by a guest token — the configured default applies. Concretely:
   everyone shares one image, rendered in that account's timezone.
 - **Cache warm-up** warms the default-timezone copy. Users with a custom
   timezone simply start from a cold cache.
+
+### Engine support
+
+Verified by running Superset's own generated SQL against a live server and
+comparing every result with Python's `zoneinfo` — see
+[`scripts/tz-test/`](https://github.com/apache/superset/tree/master/scripts/tz-test).
+"Zones correct" is the count out of the 436 the picker offers, checked at one
+instant in each hemisphere's summer so that a one-sided DST error still shows.
+
+| Engine | Converts by | Zones correct | Verified against |
+|---|---|---|---|
+| PostgreSQL | name | 436 / 436 | PostgreSQL 16 |
+| MySQL | name, offset fallback | 436 / 436 | MySQL 8 |
+| Trino | name | 436 / 436 | Trino 483 |
+| ClickHouse | name | 434 / 436 | ClickHouse 24.10 |
+| SQLite | offset | 315 / 436 | bundled |
+| StarRocks | name, offset fallback | not measured | inherits MySQL |
+| Redshift | name | not measured | |
+| BigQuery, Snowflake, Hive/Spark, Databricks | name | not measured | |
+| Microsoft SQL Server, Presto | offset | not measured | |
+
+Notes on the two engines that are not perfect:
+
+- **SQLite** has no time zone database, so it can only shift by a fixed offset,
+  computed when the query is built. The 315 zones that do not observe DST are
+  always right; the other 121 are off by the DST amount outside the current
+  season. This mostly affects Superset's own example database.
+- **ClickHouse 24.10** bundles an older tzdata than Superset's, and so does not
+  know `America/Coyhaique` (added in tzdata 2025a). It raises an error rather
+  than returning a wrong answer. Any engine can fall behind this way; run the
+  checker after upgrading either side.
+
+To check an engine that is not listed — including a cloud warehouse — point the
+script at it:
+
+```bash
+docker compose exec superset \
+  python scripts/tz-test/check_engine_timezones.py "<sqlalchemy-uri>" --all
+```
 
 ### Overrides
 
