@@ -109,9 +109,12 @@ import {
   formatCustomTooltipTitle,
   getTooltipSeriesLabel,
   getTooltipValueFormatter,
+  groupTooltipRows,
   limitTooltipRows,
   orderTooltipKeys,
   parseCustomTooltipConfig,
+  resolveGroupIndex,
+  type TooltipEntry,
 } from '../utils/customTooltip';
 import {
   getPercentFormatter,
@@ -538,6 +541,7 @@ export default function transformProps(
       : String;
   // parsed once, not per hover
   const customTooltip = parseCustomTooltipConfig(tooltipCustomConfig);
+  const groupIndex = resolveGroupIndex(customTooltip, groupBy);
   const xAxisFormatter =
     xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
@@ -691,7 +695,7 @@ export default function transformProps(
           ? percentFormatter
           : (getCustomFormatter(customFormatters, metrics) ?? defaultFormatter);
 
-        const rows: string[][] = [];
+        const entries: TooltipEntry[] = [];
         const total = Object.values(filteredForecastValues).reduce(
           (acc, value) =>
             value.observation !== undefined ? acc + value.observation : acc,
@@ -701,7 +705,6 @@ export default function transformProps(
         const showPercentage =
           allowTotal && !forcePercentFormatter && showTooltipPercentage;
         const keys = Object.keys(forecastValues);
-        let focusedRow;
         orderTooltipKeys(
           sortedKeys.filter(key => keys.includes(key)),
           customTooltip,
@@ -712,7 +715,7 @@ export default function transformProps(
           }
           const row = formatForecastTooltipSeries({
             ...value,
-            seriesName: getTooltipSeriesLabel(key, customTooltip),
+            seriesName: getTooltipSeriesLabel(key, customTooltip, groupIndex),
             formatter: getTooltipValueFormatter(formatter, key, customTooltip),
           });
           row[1] = decorateTooltipValue(row[1], key, customTooltip);
@@ -728,17 +731,36 @@ export default function transformProps(
           ) {
             row.push(percentFormatter.format(value.observation / (total || 1)));
           }
-          rows.push(row);
-          if (key === focusedSeries) {
-            focusedRow = rows.length - 1;
-          }
+          entries.push({ key, row, value: value.observation });
         });
         if (stack) {
-          rows.reverse();
-          if (focusedRow !== undefined) {
-            focusedRow = rows.length - focusedRow - 1;
-          }
+          entries.reverse();
         }
+
+        // Grouping interleaves header rows, so the rows and the focused index
+        // are assembled from the entries rather than accumulated in the loop.
+        let rows: string[][];
+        let headerRows: number[] | undefined;
+        let focusedRow: number | undefined;
+        if (customTooltip && groupIndex !== undefined) {
+          const grouped = groupTooltipRows(
+            entries,
+            customTooltip,
+            groupIndex,
+            formatter,
+          );
+          ({ rows, headerRows } = grouped);
+          focusedRow = focusedSeries
+            ? grouped.keyRows.get(focusedSeries)
+            : undefined;
+        } else {
+          rows = entries.map(entry => entry.row);
+          focusedRow = focusedSeries
+            ? entries.findIndex(entry => entry.key === focusedSeries)
+            : -1;
+          focusedRow = focusedRow >= 0 ? focusedRow : undefined;
+        }
+
         // cap the series rows before appending the total, so that a `maxRows`
         // small enough to trim everything still leaves the total visible
         const limited = limitTooltipRows(rows, focusedRow, customTooltip);
@@ -751,8 +773,13 @@ export default function transformProps(
         }
         return tooltipHtml(
           limited.rows,
-          formatCustomTooltipTitle(tooltipFormatter(xValue), customTooltip),
+          formatCustomTooltipTitle(
+            tooltipFormatter(xValue),
+            customTooltip,
+            xAxisLabel,
+          ),
           limited.focusedRow,
+          headerRows,
         );
       },
     },

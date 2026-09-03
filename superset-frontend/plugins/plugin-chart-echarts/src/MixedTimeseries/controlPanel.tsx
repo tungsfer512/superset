@@ -37,6 +37,7 @@ import { EchartsTimeseriesSeriesType } from '../Timeseries/types';
 import {
   legendSection,
   minorTicks,
+  customTooltipSection,
   richTooltipSection,
   truncateXAxis,
   xAxisBounds,
@@ -504,6 +505,7 @@ const config: ControlPanelConfig = {
         ],
       ],
     },
+    customTooltipSection,
   ],
   formDataOverrides: formData => {
     const groupby = getStandardizedControls().controls.columns.filter(

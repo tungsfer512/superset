@@ -32,6 +32,7 @@ import { DEFAULT_FORM_DATA, TIME_SERIES_DESCRIPTION_TEXT } from '../constants';
 import {
   legendSection,
   minorTicks,
+  customTooltipSection,
   richTooltipSection,
   seriesOrderSection,
   showValueSection,
@@ -237,6 +238,7 @@ const config: ControlPanelConfig = {
         ],
       ],
     },
+    customTooltipSection,
   ],
   controlOverrides: {
     row_limit: {

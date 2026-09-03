@@ -33,6 +33,7 @@ import {
   legendSection,
   onlyTotalControl,
   showValueControl,
+  customTooltipSection,
   richTooltipSection,
   seriesOrderSection,
   percentageThresholdControl,
@@ -255,6 +256,7 @@ const config: ControlPanelConfig = {
         ],
       ],
     },
+    customTooltipSection,
   ],
   controlOverrides: {
     row_limit: {

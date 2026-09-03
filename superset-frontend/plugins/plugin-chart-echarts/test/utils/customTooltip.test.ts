@@ -20,6 +20,7 @@ import { getNumberFormatter } from '@superset-ui/core';
 import {
   decorateTooltipValue,
   formatCustomTooltipTitle,
+  formatGroupHeader,
   getTooltipSeriesLabel,
   getTooltipValueFormatter,
   limitTooltipRows,
@@ -247,6 +248,35 @@ describe('formatCustomTooltipTitle', () => {
     ).toBe('Khu vực: Hà Nội');
   });
 
+  it('substitutes the x-axis column name too', () => {
+    // `{city}` for an axis named `city` is the natural guess, so it works
+    // alongside the generic placeholders rather than printing verbatim.
+    expect(
+      formatCustomTooltipTitle(
+        'Madrid',
+        parseCustomTooltipConfig('{"title": "Thành phố {city}"}'),
+        'city',
+      ),
+    ).toBe('Thành phố Madrid');
+    // ...and without the axis name it stays literal rather than guessing
+    expect(
+      formatCustomTooltipTitle(
+        'Madrid',
+        parseCustomTooltipConfig('{"title": "Thành phố {city}"}'),
+      ),
+    ).toBe('Thành phố {city}');
+  });
+
+  it('does not treat a column name as a regular expression', () => {
+    expect(
+      formatCustomTooltipTitle(
+        'X',
+        parseCustomTooltipConfig('{"title": "a {a.b(c)} b"}'),
+        'a.b(c)',
+      ),
+    ).toBe('a X b');
+  });
+
   it('substitutes every occurrence', () => {
     expect(
       formatCustomTooltipTitle(
@@ -290,5 +320,29 @@ describe('limitTooltipRows', () => {
   it('drops a focused row that was trimmed away', () => {
     const config = parseCustomTooltipConfig('{"maxRows": 2}');
     expect(limitTooltipRows(rows, 3, config).focusedRow).toBeUndefined();
+  });
+});
+
+describe('formatGroupHeader', () => {
+  it('substitutes {value}', () => {
+    expect(formatGroupHeader('Năm {value}', '2005')).toBe('Năm 2005');
+    expect(formatGroupHeader('{value}', '2005')).toBe('2005');
+    expect(formatGroupHeader('{value} / {value}', '5')).toBe('5 / 5');
+  });
+
+  it('substitutes the grouping dimension name too', () => {
+    // `{year}` when grouping by `year` is the natural guess
+    expect(formatGroupHeader('Năm {year}', '2005', 'year')).toBe('Năm 2005');
+  });
+
+  it('leaves an unrecognized placeholder as written', () => {
+    expect(formatGroupHeader('Năm {year}', '2005')).toBe('Năm {year}');
+    expect(formatGroupHeader('Năm {month}', '2005', 'year')).toBe(
+      'Năm {month}',
+    );
+  });
+
+  it('does not treat the dimension name as a regular expression', () => {
+    expect(formatGroupHeader('a {a.b(c)} b', 'X', 'a.b(c)')).toBe('a X b');
   });
 });

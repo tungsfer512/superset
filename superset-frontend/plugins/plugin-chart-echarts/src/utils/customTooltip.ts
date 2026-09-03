@@ -54,13 +54,39 @@ export type TooltipSeriesConfig = {
   order?: number;
 };
 
+export type TooltipGroupConfig = {
+  /**
+   * Which part of the series name to group on: a dimension name, or its
+   * position among the chart's dimensions. A series with several dimensions is
+   * named by joining their values with `", "`, in dimension order, so
+   * `status` + `year` yields `"Shipped, 2003"`.
+   */
+  by: string | number;
+  /** Header template; `{value}` stands for the group's value. */
+  label?: string;
+  /** Groups listed here come first, in this order; the rest follow as found. */
+  order?: string[];
+  /** Drop the group's own value from each row's label. Defaults to true. */
+  stripFromLabel?: boolean;
+  /** Add a subtotal to each group header. Defaults to false. */
+  total?: boolean;
+};
+
 export type CustomTooltipConfig = {
   /** Heading template; `{time}` or `{x}` stands for the default heading. */
   title?: string;
   /** Keeps at most this many series rows, summarizing the rest as a count. */
   maxRows?: number;
+  /** Splits the rows into sections, each under its own header. */
+  group?: TooltipGroupConfig;
   series: Record<string, TooltipSeriesConfig>;
 };
+
+/** Series with several dimensions are named by joining the values with this. */
+const SERIES_NAME_SEPARATOR = ', ';
+
+/** Indents a row under its group header. Plain spaces would collapse in HTML. */
+const INDENT = '\u00a0\u00a0';
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;
@@ -89,6 +115,29 @@ function parseSeriesConfig(value: unknown): TooltipSeriesConfig | undefined {
   return Object.values(config).some(entry => entry !== undefined)
     ? config
     : undefined;
+}
+
+function parseGroupConfig(value: unknown): TooltipGroupConfig | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  const by = asString(value.by) ?? asFiniteNumber(value.by);
+  if (by === undefined || by === '') {
+    logging.warn(
+      'Ignoring tooltip group: `by` must be a dimension or an index',
+    );
+    return undefined;
+  }
+  const order = Array.isArray(value.order)
+    ? value.order.filter((entry): entry is string => typeof entry === 'string')
+    : undefined;
+  return {
+    by,
+    label: asString(value.label),
+    order: order?.length ? order : undefined,
+    stripFromLabel: asBoolean(value.stripFromLabel),
+    total: asBoolean(value.total),
+  };
 }
 
 /**
@@ -130,11 +179,13 @@ export function parseCustomTooltipConfig(
     title: asString(parsed.title),
     maxRows:
       maxRows !== undefined && maxRows > 0 ? Math.floor(maxRows) : undefined,
+    group: parseGroupConfig(parsed.group),
     series,
   };
 
   return config.title === undefined &&
     config.maxRows === undefined &&
+    config.group === undefined &&
     Object.keys(series).length === 0
     ? undefined
     : config;
@@ -164,11 +215,82 @@ export function orderTooltipKeys(
     .map(({ key }) => key);
 }
 
+/**
+ * Resolve `group.by` to a position in the series name.
+ *
+ * A name is the dimension values joined in dimension order, so a dimension's
+ * name maps to its index in `dimensions`. Returns undefined when it cannot be
+ * resolved, which turns grouping off rather than grouping on the wrong part.
+ */
+export function resolveGroupIndex(
+  config?: CustomTooltipConfig,
+  /**
+   * The chart's dimensions, in order. A dimension is either a column name or an
+   * ad-hoc column, which contributes its label to the series name; both are
+   * accepted so a `by` naming either one resolves.
+   */
+  dimensions: readonly (string | { label?: string })[] = [],
+  /**
+   * How many parts precede the dimensions in the series name. Mixed Chart puts
+   * the metric first ("SUM(sales), Shipped, 2003"), so its dimensions start one
+   * place further along than on a plain time-series chart.
+   */
+  offset = 0,
+): number | undefined {
+  const by = config?.group?.by;
+  if (by === undefined) {
+    return undefined;
+  }
+  if (typeof by === 'number') {
+    return by >= 0 ? by + offset : undefined;
+  }
+  const names = dimensions.map(dimension =>
+    typeof dimension === 'string' ? dimension : (dimension?.label ?? ''),
+  );
+  const index = names.indexOf(by);
+  if (index === -1) {
+    logging.warn(
+      `Ignoring tooltip group: no dimension named "${by}" on this chart`,
+    );
+    return undefined;
+  }
+  return index + offset;
+}
+
+/** The group a series belongs to, or undefined when it has no such part. */
+export function getTooltipGroupValue(
+  key: string,
+  groupIndex?: number,
+): string | undefined {
+  if (groupIndex === undefined) {
+    return undefined;
+  }
+  const parts = key.split(SERIES_NAME_SEPARATOR);
+  return groupIndex < parts.length ? parts[groupIndex] : undefined;
+}
+
 export function getTooltipSeriesLabel(
   key: string,
   config?: CustomTooltipConfig,
+  groupIndex?: number,
 ): string {
-  return config?.series[key]?.label ?? key;
+  const explicit = config?.series[key]?.label;
+  if (explicit !== undefined) {
+    return explicit;
+  }
+  const groupValue = getTooltipGroupValue(key, groupIndex);
+  if (groupValue === undefined) {
+    return key;
+  }
+  // the header already states the group, so drop it from the row
+  const label =
+    config?.group?.stripFromLabel === false
+      ? key
+      : key
+          .split(SERIES_NAME_SEPARATOR)
+          .filter((_, index) => index !== groupIndex)
+          .join(SERIES_NAME_SEPARATOR) || key;
+  return `${INDENT}${label}`;
 }
 
 /**
@@ -205,12 +327,114 @@ export function decorateTooltipValue(
 export function formatCustomTooltipTitle(
   defaultTitle: string,
   config?: CustomTooltipConfig,
+  /**
+   * The x-axis column. Accepted as a placeholder as well, because writing
+   * `{city}` for an axis named `city` is the natural guess and silently
+   * printing it verbatim is no help.
+   */
+  xAxisName?: string,
 ): string {
   const template = config?.title;
   if (!template) {
     return defaultTitle;
   }
-  return template.replace(TITLE_PLACEHOLDER, defaultTitle);
+  const substituted = template.replace(TITLE_PLACEHOLDER, defaultTitle);
+  return xAxisName
+    ? substituted.split(`{${xAxisName}}`).join(defaultTitle)
+    : substituted;
+}
+
+/**
+ * Fill in a section header template.
+ *
+ * `{value}` is the group's value. The grouping dimension's own name works too
+ * -- `{year}` when grouping by `year` -- because that is the natural guess, and
+ * silently printing it verbatim helps nobody. Substituted by splitting rather
+ * than with a regular expression, so a column named `a.b(c)` is not read as a
+ * pattern.
+ */
+export function formatGroupHeader(
+  template: string,
+  value: string,
+  byName?: string,
+): string {
+  const filled = template.split('{value}').join(value);
+  return typeof byName === 'string' && byName
+    ? filled.split(`{${byName}}`).join(value)
+    : filled;
+}
+
+export type TooltipEntry = {
+  /** The original series name, before any relabelling. */
+  key: string;
+  /** The rendered row: label, value, and optionally a percentage. */
+  row: string[];
+  /** The numeric observation, for group subtotals. */
+  value?: number;
+};
+
+/**
+ * Lay the rows out in sections, one per group, each under its own header.
+ *
+ * Groups appear in `group.order` first and then in the order the chart already
+ * chose. A series with no such part in its name is left ungrouped, above the
+ * sections, rather than forced under a header that would misdescribe it.
+ */
+export function groupTooltipRows(
+  entries: TooltipEntry[],
+  config: CustomTooltipConfig,
+  groupIndex: number,
+  formatter?: ValueFormatter,
+): { rows: string[][]; headerRows: number[]; keyRows: Map<string, number> } {
+  const groups = new Map<string, TooltipEntry[]>();
+  const ungrouped: TooltipEntry[] = [];
+  entries.forEach(entry => {
+    const value = getTooltipGroupValue(entry.key, groupIndex);
+    if (value === undefined) {
+      ungrouped.push(entry);
+      return;
+    }
+    const bucket = groups.get(value);
+    if (bucket) {
+      bucket.push(entry);
+    } else {
+      groups.set(value, [entry]);
+    }
+  });
+
+  const wanted = config.group?.order ?? [];
+  const names = [
+    ...wanted.filter(name => groups.has(name)),
+    ...[...groups.keys()].filter(name => !wanted.includes(name)),
+  ];
+
+  const rows: string[][] = [];
+  const headerRows: number[] = [];
+  const keyRows = new Map<string, number>();
+  const push = (entry: TooltipEntry) => {
+    keyRows.set(entry.key, rows.length);
+    rows.push(entry.row);
+  };
+
+  ungrouped.forEach(push);
+  names.forEach(name => {
+    const bucket = groups.get(name) ?? [];
+    const label = formatGroupHeader(
+      config.group?.label ?? '{value}',
+      name,
+      typeof config.group?.by === 'string' ? config.group.by : undefined,
+    );
+    const header = [label];
+    if (config.group?.total && formatter) {
+      const total = bucket.reduce((sum, entry) => sum + (entry.value ?? 0), 0);
+      header.push(formatter.format(total));
+    }
+    headerRows.push(rows.length);
+    rows.push(header);
+    bucket.forEach(push);
+  });
+
+  return { rows, headerRows, keyRows };
 }
 
 /**
@@ -225,7 +449,9 @@ export function limitTooltipRows(
   config?: CustomTooltipConfig,
 ): { rows: string[][]; focusedRow: number | undefined } {
   const maxRows = config?.maxRows;
-  if (maxRows === undefined || rows.length <= maxRows) {
+  // `group` wins: trimming a grouped list would strand headers over nothing,
+  // and the count row could not say which section it summarized.
+  if (config?.group || maxRows === undefined || rows.length <= maxRows) {
     return { rows, focusedRow };
   }
   const kept = rows.slice(0, maxRows);

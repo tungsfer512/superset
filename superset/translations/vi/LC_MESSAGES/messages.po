@@ -17005,3 +17005,146 @@ msgstr "Thêm thủ công, hoặc dùng \"Đồng bộ từ file\" để nạp b
 
 msgid "Select a language"
 msgstr "Chọn ngôn ngữ"
+
+# Fork additions: custom tooltip, display timezone, guest RLS strict mode
+
+msgid "%s more…"
+msgstr "%s dòng nữa…"
+
+msgid "Add a series"
+msgstr "Thêm chuỗi dữ liệu"
+
+msgid "All of them"
+msgstr "Tất cả"
+
+msgid "Also set in JSON: %(keys)s"
+msgstr "Còn đặt trong JSON: %(keys)s"
+
+msgid "As the chart orders them"
+msgstr "Theo thứ tự biểu đồ chọn"
+
+msgid "Back to the form"
+msgstr "Quay lại biểu mẫu"
+
+msgid "Choose how many X-Axis labels to show"
+msgstr "Chọn số nhãn hiển thị trên trục X"
+
+msgid "Could not read the strict mode setting."
+msgstr "Không đọc được cấu hình chế độ nghiêm ngặt."
+
+msgid "Could not save the strict mode setting."
+msgstr "Không lưu được cấu hình chế độ nghiêm ngặt."
+
+msgid "Currently from GUEST_RLS_STRICT, which defaults to off. Saving stores the choice in the database, which then takes precedence."
+msgstr "Hiện đang lấy từ GUEST_RLS_STRICT, mặc định là tắt. Khi lưu, lựa chọn được ghi vào cơ sở dữ liệu và sẽ được ưu tiên."
+
+msgid "Currently from GUEST_RLS_STRICT, which defaults to on. Saving stores the choice in the database, which then takes precedence."
+msgstr "Hiện đang lấy từ GUEST_RLS_STRICT, mặc định là bật. Khi lưu, lựa chọn được ghi vào cơ sở dữ liệu và sẽ được ưu tiên."
+
+msgid "Custom tooltip"
+msgstr "Tooltip tuỳ chỉnh"
+
+msgid "Dates and times are shown, grouped and filtered in this timezone. Data is stored in UTC and converted when queried."
+msgstr "Ngày giờ được hiển thị, nhóm và lọc theo múi giờ này. Dữ liệu lưu ở UTC và được quy đổi khi truy vấn."
+
+msgid "Display timezone"
+msgstr "Múi giờ hiển thị"
+
+msgid "Edit as JSON"
+msgstr "Sửa bằng JSON"
+
+msgid "First name is required"
+msgstr "Tên là bắt buộc"
+
+msgid "Group rows by"
+msgstr "Nhóm các dòng theo"
+
+msgid "Heading — {x} or {%(axis)s} stands for the hovered value"
+msgstr "Tiêu đề — {x} hoặc {%(axis)s} là giá trị đang trỏ tới"
+
+msgid "Heading — {x} stands for the hovered value"
+msgstr "Tiêu đề — {x} là giá trị đang trỏ tới"
+
+msgid "Instance default"
+msgstr "Mặc định của hệ thống"
+
+msgid "Keep the full series name in rows"
+msgstr "Giữ nguyên tên chuỗi ở từng dòng"
+
+msgid "Label to show"
+msgstr "Nhãn hiển thị"
+
+msgid "Last name is required"
+msgstr "Họ là bắt buộc"
+
+msgid "Leave empty for the default, e.g. Ngày {x}"
+msgstr "Để trống để dùng mặc định, ví dụ Ngày {x}"
+
+msgid "Leave empty for the default, e.g. Thành phố {%(axis)s}"
+msgstr "Để trống để dùng mặc định, ví dụ Thành phố {%(axis)s}"
+
+msgid "Most rows to list"
+msgstr "Số dòng tối đa"
+
+msgid "No grouping"
+msgstr "Không nhóm"
+
+msgid "Not valid JSON; changes are not saved."
+msgstr "JSON không hợp lệ; thay đổi chưa được lưu."
+
+msgid "Override the color of a whole series for this chart only (e.g. each line). Overrides the color scheme."
+msgstr "Đặt màu riêng cho cả một chuỗi, chỉ trong biểu đồ này (ví dụ từng đường). Ghi đè bộ màu."
+
+msgid "Override the color of individual columns/points by their x-axis value for this chart only."
+msgstr "Đặt màu riêng cho từng cột/điểm theo giá trị trục X, chỉ trong biểu đồ này."
+
+msgid "Password is required"
+msgstr "Mật khẩu là bắt buộc"
+
+msgid "Passwords do not match!"
+msgstr "Mật khẩu không khớp!"
+
+msgid "Rename series"
+msgstr "Đổi tên chuỗi dữ liệu"
+
+msgid "Rename, reorder, hide or group the rows of the tooltip. The form builds the configuration; switch to JSON for anything it does not cover."
+msgstr "Đổi tên, sắp thứ tự, ẩn hoặc nhóm các dòng của tooltip. Biểu mẫu tự dựng cấu hình; chuyển sang JSON cho những gì biểu mẫu chưa có."
+
+msgid "Saved in the database, so it survives a restart and overrides GUEST_RLS_STRICT."
+msgstr "Đã lưu trong cơ sở dữ liệu nên không mất khi khởi động lại, và được ưu tiên hơn GUEST_RLS_STRICT."
+
+msgid "Section header — {value} or {%(dimension)s} stands for the section"
+msgstr "Tiêu đề nhóm — {value} hoặc {%(dimension)s} là giá trị của nhóm"
+
+msgid "Section order"
+msgstr "Thứ tự nhóm"
+
+msgid "Strict mode"
+msgstr "Chế độ nghiêm ngặt"
+
+msgid "Strict mode off: guests without a clause see every row."
+msgstr "Đã tắt chế độ nghiêm ngặt: khách không có điều kiện RLS sẽ thấy toàn bộ dữ liệu."
+
+msgid "Strict mode on: guests without a clause get no rows."
+msgstr "Đã bật chế độ nghiêm ngặt: khách không có điều kiện RLS sẽ không thấy dòng nào."
+
+msgid "Subtotal per section"
+msgstr "Tổng phụ theo nhóm"
+
+msgid "The password reset was successful"
+msgstr "Đặt lại mật khẩu thành công"
+
+msgid "The user was updated successfully"
+msgstr "Đã cập nhật người dùng"
+
+msgid "Tooltip contents"
+msgstr "Nội dung tooltip"
+
+msgid "Truncate X Axis. Can be overridden by specifying a min or max bound. Only applicable for numerical X axis."
+msgstr "Cắt trục X. Có thể ghi đè bằng cách đặt giới hạn nhỏ nhất hoặc lớn nhất. Chỉ áp dụng cho trục X dạng số."
+
+msgid "e.g. Năm {%(dimension)s}"
+msgstr "ví dụ Năm {%(dimension)s}"
+
+msgid "off"
+msgstr "tắt"

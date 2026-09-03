@@ -108,11 +108,17 @@ function StrictModeToggle({
     <Tooltip
       title={
         state.source === 'environment'
-          ? t(
-              'Currently from GUEST_RLS_STRICT (default: %s). Saving stores the ' +
-                'choice in the database, which then takes precedence.',
-              state.environment_default ? t('on') : t('off'),
-            )
+          ? // Two whole sentences rather than interpolating a translated "on":
+            // a lone word carries no context for a translator.
+            state.environment_default
+            ? t(
+                'Currently from GUEST_RLS_STRICT, which defaults to on. Saving ' +
+                  'stores the choice in the database, which then takes precedence.',
+              )
+            : t(
+                'Currently from GUEST_RLS_STRICT, which defaults to off. Saving ' +
+                  'stores the choice in the database, which then takes precedence.',
+              )
           : t(
               'Saved in the database, so it survives a restart and overrides ' +
                 'GUEST_RLS_STRICT.',

@@ -58,6 +58,7 @@ import NumberControl from './NumberControl';
 import TimeRangeControl from './TimeRangeControl';
 import ColorBreakpointsControl from './ColorBreakpointsControl';
 import SeriesColorsControl from './SeriesColorsControl';
+import CustomTooltipControl from './CustomTooltipControl';
 
 const extensionsRegistry = getExtensionsRegistry();
 const DateFilterControlExtension = extensionsRegistry.get(
@@ -105,6 +106,7 @@ const controlMap = {
   NumberControl,
   TimeRangeControl,
   SeriesColorsControl,
+  CustomTooltipControl,
   ...sharedControlComponents,
 };
 export default controlMap;

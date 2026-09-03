@@ -29,7 +29,13 @@ export function tooltipHtml(
   data: string[][],
   title?: string,
   focusedRow?: number,
+  /**
+   * Indices of rows that head a section rather than carrying a series. They are
+   * rendered at full weight and opacity so the grouping reads as a hierarchy.
+   */
+  headerRows?: number[],
 ) {
+  const headers = new Set(headerRows);
   const titleRow = title
     ? `<span style="font-weight: 700;${TRUNCATION_STYLE}">${title}</span>`
     : '';
@@ -41,7 +47,9 @@ export function tooltipHtml(
           ${data
             .map((row, i) => {
               const rowStyle =
-                i === focusedRow ? 'font-weight: 700;' : 'opacity: 0.8;';
+                i === focusedRow || headers.has(i)
+                  ? 'font-weight: 700;'
+                  : 'opacity: 0.8;';
               const cells = row.map((cell, j) => {
                 const cellStyle = `
                   text-align: ${j > 0 ? 'right' : 'left'};

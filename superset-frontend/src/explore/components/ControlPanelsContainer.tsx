@@ -75,65 +75,10 @@ import { RunQueryButton } from './RunQueryButton';
 import { Operators } from '../constants';
 import { Clauses } from './controls/FilterControl/types';
 import StashFormDataContainer from './StashFormDataContainer';
-
-/**
- * Datasource sort choices use labels like `year [asc]` from the API. Jed only has msgids
- * `[asc]` / `[desc]` (see Python __("[asc]")), so translate the suffix here.
- */
-function translateChoiceDisplayLabel(lbl: string): string {
-  if (lbl.endsWith(' [asc]')) {
-    return `${lbl.slice(0, -' [asc]'.length)} ${t('[asc]')}`;
-  }
-  if (lbl.endsWith(' [desc]')) {
-    return `${lbl.slice(0, -' [desc]'.length)} ${t('[desc]')}`;
-  }
-  return t(lbl);
-}
-
-/** Re-apply gettext: shared control configs often call t() at module load (before language pack). */
-function translateControlTupleLabels(rows: unknown): unknown {
-  if (!Array.isArray(rows)) return rows;
-  return rows.map(row => {
-    if (Array.isArray(row) && row.length >= 2) {
-      const [value, lbl] = row;
-      if (typeof lbl === 'string') {
-        return [value, translateChoiceDisplayLabel(lbl)];
-      }
-    }
-    return row;
-  });
-}
-
-/** SelectControl `options` as { label, value, description }[] (e.g. partition time_series_option). */
-function translateControlObjectOptions(
-  options: Record<string, unknown>[],
-): Record<string, unknown>[] {
-  return options.map(item => ({
-    ...item,
-    ...(typeof item.label === 'string' && {
-      label: translateChoiceDisplayLabel(item.label),
-    }),
-    ...(typeof item.description === 'string' && {
-      description: t(item.description),
-    }),
-  }));
-}
-
-function translateControlOptions(options: unknown): unknown {
-  if (!Array.isArray(options) || options.length === 0) {
-    return options;
-  }
-  const head = options[0];
-  const isObjectStyle =
-    head !== null &&
-    typeof head === 'object' &&
-    !Array.isArray(head) &&
-    'label' in (head as object);
-  if (isObjectStyle) {
-    return translateControlObjectOptions(options as Record<string, unknown>[]);
-  }
-  return translateControlTupleLabels(options);
-}
+import {
+  translateControlOptions,
+  translateControlTupleLabels,
+} from './controlLabelTranslation';
 
 const { confirm } = Modal;
 
@@ -409,6 +354,34 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
     props.controls,
   ]);
 
+  /**
+   * Every name the dataset itself defines, so a choice showing one is left as
+   * the dataset spells it. Without this a column named `year`, `status` or
+   * `city` picks up the translation of that word and no longer matches what the
+   * user sees anywhere else.
+   */
+  const datasetNames = useMemo(() => {
+    const datasource = props.exploreState.datasource as
+      | {
+          columns?: { column_name?: string; verbose_name?: string }[];
+          metrics?: { metric_name?: string; verbose_name?: string }[];
+        }
+      | undefined;
+    const names = new Set<string>();
+    [...(datasource?.columns ?? []), ...(datasource?.metrics ?? [])].forEach(
+      entry => {
+        const record = entry as Record<string, unknown>;
+        ['column_name', 'metric_name', 'verbose_name'].forEach(key => {
+          const name = record[key];
+          if (typeof name === 'string' && name) {
+            names.add(name);
+          }
+        });
+      },
+    );
+    return names;
+  }, [props.exploreState.datasource]);
+
   useEffect(() => {
     if (
       prevDatasource &&
@@ -503,8 +476,11 @@ export const ControlPanelsContainer = (props: ControlPanelsContainerProps) => {
       validationErrors?: any[];
     };
 
-    const translatedChoices = translateControlTupleLabels(choices);
-    const translatedOptions = translateControlOptions(options);
+    const translatedChoices = translateControlTupleLabels(
+      choices,
+      datasetNames,
+    );
+    const translatedOptions = translateControlOptions(options, datasetNames);
     const translatedPlaceholder =
       placeholder === undefined || placeholder === null
         ? placeholder

@@ -7,14 +7,43 @@ version: 1
 
 # Custom tooltip
 
-Time-series charts expose a **Custom tooltip** control under
-**Customize → Tooltip**. It takes a JSON object describing the tooltip you want,
-and the chart builds its formatter from that.
+Time-series charts expose a **Custom tooltip** section in the **Customize**
+tab. Fill in the form — heading, grouping, per-series labels and formats — and
+it writes the configuration for you; **Edit as JSON** opens the same value as
+raw text for anything the form does not cover, and the form takes it back as
+long as the JSON still parses.
+
+The rest of this page documents that JSON, which is what the chart reads and
+what a dashboard export carries.
 
 It is deliberately a description rather than code: a JavaScript `formatter`
 would run in every viewer's browser, embedded guests included, so anyone able
 to edit a chart could execute script on the pages it is embedded in. Everything
 below is data, and the rendered result is HTML-sanitized like any other tooltip.
+
+## The form
+
+| Field | Writes |
+|---|---|
+| Heading | `title` |
+| Group rows by | `group.by`, offering the chart's dimensions |
+| Section header | `group.label` |
+| Section order | `group.order`, offering the values found in the data |
+| Subtotal per section | `group.total` |
+| Keep the full series name in rows | `group.stripFromLabel: false` |
+| Most rows to list | `maxRows`, hidden while grouping since the chart ignores it |
+| Rename series | `series[name].label` — a row per series: pick it from the dropdown, type the label, `+` adds another |
+
+The dropdowns are populated from the last query the chart ran, so run it once
+before configuring. Every field also accepts a value you type in, for a series
+or group that is not in the current result.
+
+Renaming is the only per-series option on the form, since it is the common one.
+`prefix`, `suffix`, `format`, `hidden` and `order` are set in the JSON editor
+and **stay applied** when the form is used afterwards: editing a label merges
+into that series' options rather than replacing them. A series carrying any of
+them shows a note under its row saying so, so the form does not read as the
+whole story.
 
 ## Example
 
@@ -39,7 +68,7 @@ below is data, and the rendered result is HTML-sanitized like any other tooltip.
 
 | Field | Type | Effect |
 |---|---|---|
-| `title` | string | Heading template. `{time}` (or `{x}`) stands for the heading the chart would otherwise show, so it still honors **Tooltip time format**. |
+| `title` | string | Heading template. `{x}`, `{time}`, or the x-axis column's own name in braces (`{city}` for an axis named `city`) stands for the heading the chart would otherwise show, so it still honors **Tooltip time format**. An unrecognized placeholder is left as written. |
 | `maxRows` | number | Lists at most this many series; the remainder is summarized as a count. The **Total** row is never trimmed. |
 | `series` | object | Keyed by series name — the label shown in the legend. |
 
@@ -53,6 +82,38 @@ Per series:
 | `format` | string | A [d3 format](https://d3js.org/d3-format) string for that row only, overriding **Number format**. |
 | `hidden` | boolean | Drops the row. |
 | `order` | number | Lower comes first. Series without `order` keep the order the chart already chose, after the ordered ones. |
+
+## Grouping rows into sections
+
+`group` breaks the list into a section per value of one dimension, each under
+its own header — useful when a chart is broken down by two dimensions and the
+flat list ("Shipped, 2003", "Shipped, 2004", …) is hard to read.
+
+```json
+{
+  "group": {
+    "by": "year",
+    "label": "Năm {value}",
+    "order": ["2005", "2004", "2003"],
+    "total": true
+  }
+}
+```
+
+| Field | Type | Effect |
+|---|---|---|
+| `by` | string \| number | The dimension to group on: its name, or its position among the chart's dimensions. |
+| `label` | string | Header template. `{value}`, or the grouping dimension's own name in braces (`{year}` when grouping by `year`), stands for the section's value. Defaults to the value alone; an unrecognized placeholder is left as written. |
+| `order` | string[] | These groups come first, in this order; the rest follow in the order the chart chose. |
+| `stripFromLabel` | boolean | Drop the group's value from each row's label, so a row reads "Shipped" rather than "Shipped, 2003". Defaults to `true`. |
+| `total` | boolean | Put a subtotal on each group header. Defaults to `false`. |
+
+A series whose name has no such part stays ungrouped, listed above the sections,
+rather than being forced under a header that would misdescribe it. Naming an
+unknown dimension turns grouping off and leaves the flat list.
+
+`maxRows` is ignored while grouping: trimming would strand a header over
+nothing, and the "N more…" row could not say which section it stood for.
 
 ## Behavior notes
 

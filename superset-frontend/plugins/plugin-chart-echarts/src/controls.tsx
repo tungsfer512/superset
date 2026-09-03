@@ -19,6 +19,7 @@
 import { t, VizType } from '@superset-ui/core';
 import {
   ControlPanelsContainerProps,
+  ControlPanelSectionConfig,
   ControlSetItem,
   ControlSetRow,
   ControlSubSectionHeader,
@@ -253,45 +254,26 @@ const tooltipPercentageControl: ControlSetItem = {
 const tooltipCustomConfigControl: ControlSetItem = {
   name: 'tooltipCustomConfig',
   config: {
-    type: 'TextAreaControl',
-    language: 'json',
-    label: t('Custom tooltip'),
+    type: 'CustomTooltipControl',
+    label: t('Tooltip contents'),
     renderTrigger: true,
-    height: 150,
     default: '',
     description: t(
-      'Rename, reorder, hide or annotate tooltip rows with a JSON object. ' +
-        'Per series: label, prefix, suffix, format (a d3 format string), ' +
-        'hidden, order. Also `title` for the heading, where {time} stands for ' +
-        'the default one, and `maxRows` to cap how many series are listed. ' +
-        'Invalid JSON is ignored and the default tooltip is used.',
-    ),
-    aboveEditorSection: (
-      <div>
-        <p>{t('Example:')}</p>
-        <pre>
-          {JSON.stringify(
-            {
-              title: 'Ngày {time}',
-              maxRows: 10,
-              series: {
-                'SUM(revenue)': {
-                  label: 'Doanh thu',
-                  suffix: ' ₫',
-                  format: ',.0f',
-                  order: 1,
-                },
-                'COUNT(*)': { label: 'Số đơn', order: 2 },
-                internal_id: { hidden: true },
-              },
-            },
-            null,
-            2,
-          )}
-        </pre>
-      </div>
+      'Rename, reorder, hide or group the rows of the tooltip. The form builds ' +
+        'the configuration; switch to JSON for anything it does not cover.',
     ),
   },
+};
+
+/**
+ * Its own section rather than another row under Tooltip: the editor is a whole
+ * form, and it stays collapsed until someone actually wants to customize.
+ */
+export const customTooltipSection: ControlPanelSectionConfig = {
+  label: t('Custom tooltip'),
+  tabOverride: 'customize',
+  expanded: false,
+  controlSetRows: [[tooltipCustomConfigControl]],
 };
 
 export const richTooltipSection: ControlSetRow[] = [
@@ -301,7 +283,6 @@ export const richTooltipSection: ControlSetRow[] = [
   [tooltipPercentageControl],
   [tooltipSortByMetricControl],
   [tooltipTimeFormatControl],
-  [tooltipCustomConfigControl],
 ];
 
 const sortSeriesType: ControlSetItem = {

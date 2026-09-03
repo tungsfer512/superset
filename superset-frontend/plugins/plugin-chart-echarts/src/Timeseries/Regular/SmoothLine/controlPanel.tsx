@@ -34,6 +34,7 @@ import {
 import {
   legendSection,
   minorTicks,
+  customTooltipSection,
   richTooltipSection,
   seriesOrderSection,
   showValueSectionWithoutStack,
@@ -187,6 +188,7 @@ const config: ControlPanelConfig = {
         ],
       ],
     },
+    customTooltipSection,
   ],
   controlOverrides: {
     row_limit: {

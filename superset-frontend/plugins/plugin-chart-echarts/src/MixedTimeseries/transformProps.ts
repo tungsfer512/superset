@@ -97,9 +97,12 @@ import {
   formatCustomTooltipTitle,
   getTooltipSeriesLabel,
   getTooltipValueFormatter,
+  groupTooltipRows,
   limitTooltipRows,
   orderTooltipKeys,
   parseCustomTooltipConfig,
+  resolveGroupIndex,
+  type TooltipEntry,
 } from '../utils/customTooltip';
 import {
   getTooltipTimeFormatter,
@@ -561,6 +564,13 @@ export default function transformProps(
       : String;
   // parsed once, not per hover
   const customTooltip = parseCustomTooltipConfig(tooltipCustomConfig);
+  // Query A's dimensions name the groups; this chart prefixes the series name
+  // with the metric whenever it has any dimensions, hence the offset.
+  const groupIndex = resolveGroupIndex(
+    customTooltip,
+    ensureIsArray(groupby),
+    ensureIsArray(groupby).length > 0 ? 1 : 0,
+  );
   const xAxisFormatter =
     xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
@@ -681,12 +691,11 @@ export default function transformProps(
           tooltipSortByMetric,
         );
 
-        const rows: string[][] = [];
+        const entries: TooltipEntry[] = [];
         const forecastValues =
           extractForecastValuesFromTooltipParams(forecastValue);
 
         const keys = Object.keys(forecastValues);
-        let focusedRow;
         orderTooltipKeys(
           sortedKeys.filter(key => keys.includes(key)),
           customTooltip,
@@ -718,7 +727,7 @@ export default function transformProps(
           );
           const row = formatForecastTooltipSeries({
             ...value,
-            seriesName: getTooltipSeriesLabel(key, customTooltip),
+            seriesName: getTooltipSeriesLabel(key, customTooltip, groupIndex),
             formatter: getTooltipValueFormatter(
               primarySeries.has(key)
                 ? tooltipFormatter
@@ -728,16 +737,41 @@ export default function transformProps(
             ),
           });
           row[1] = decorateTooltipValue(row[1], key, customTooltip);
-          rows.push(row);
-          if (key === focusedSeries) {
-            focusedRow = rows.length - 1;
-          }
+          entries.push({ key, row, value: value.observation });
         });
+
+        let rows: string[][];
+        let headerRows: number[] | undefined;
+        let focusedRow: number | undefined;
+        if (customTooltip && groupIndex !== undefined) {
+          const grouped = groupTooltipRows(
+            entries,
+            customTooltip,
+            groupIndex,
+            formatter,
+          );
+          ({ rows, headerRows } = grouped);
+          focusedRow = focusedSeries
+            ? grouped.keyRows.get(focusedSeries)
+            : undefined;
+        } else {
+          rows = entries.map(entry => entry.row);
+          const index = focusedSeries
+            ? entries.findIndex(entry => entry.key === focusedSeries)
+            : -1;
+          focusedRow = index >= 0 ? index : undefined;
+        }
+
         const limited = limitTooltipRows(rows, focusedRow, customTooltip);
         return tooltipHtml(
           limited.rows,
-          formatCustomTooltipTitle(tooltipFormatter(xValue), customTooltip),
+          formatCustomTooltipTitle(
+            tooltipFormatter(xValue),
+            customTooltip,
+            xAxisLabel,
+          ),
           limited.focusedRow,
+          headerRows,
         );
       },
     },

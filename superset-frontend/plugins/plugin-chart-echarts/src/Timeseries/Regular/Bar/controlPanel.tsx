@@ -32,6 +32,7 @@ import {
 import {
   legendSection,
   minorTicks,
+  customTooltipSection,
   richTooltipSection,
   seriesOrderSection,
   showValueSection,
@@ -375,6 +376,7 @@ const config: ControlPanelConfig = {
         ...createAxisControl('y'),
       ],
     },
+    customTooltipSection,
   ],
   formDataOverrides: formData => ({
     ...formData,
