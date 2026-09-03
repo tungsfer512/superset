@@ -758,12 +758,44 @@ def FLASK_APP_MUTATOR(app):  # noqa: N802
 # query returns ZERO rows instead of everything. Datasets that are genuinely
 # shared across tenants (lookup/mapping tables, e.g. the hierarchy filter's
 # mapping dataset) must be listed in GUEST_RLS_EXEMPT_DATASETS.
+#
+# ---------------------------------------------------------------------
+# Where strict mode is decided, most specific first:
+#
+#   1. the guest token's `rls_strict` claim, per embed;
+#   2. the `strict_mode` row in `guest_rls_setting`, saved from the toggle on
+#      Settings -> "Guest RLS Exempt Datasets";
+#   3. the GUEST_RLS_STRICT env var, which only seeds (2).
+#
+# Once an admin saves the toggle, the stored value wins and the env var is no
+# longer read, so a restart keeps the choice.
+#
+# An embedding host controls its own viewers by posting the flag when it mints
+# the token -- `GuestTokenCreateSchema` is permissive, so an extra field is
+# accepted:
+#
+#   POST /api/v1/security/guest_token/
+#   {"user": {...}, "resources": [...], "rls": [...], "rls_strict": false}
+#
+# The flag deliberately lives in the token and NOT in a URL parameter or a
+# header. Strict mode fails closed, so a client-supplied off switch would let
+# any viewer read the rows their token carries no clause for. The token is
+# signed with this instance's secret by the host's own backend, so the host
+# decides while the viewer cannot forge it.
 # =====================================================================
-GUEST_RLS_STRICT = os.getenv("GUEST_RLS_STRICT", "true").lower() in (
-    "true",
-    "1",
-    "yes",
-)
+def _grx_truthy(value):
+    return str(value).strip().lower() in ("true", "1", "yes", "on")
+
+
+# Seed only. The effective value is resolved by _get_strict_mode() below:
+# once an admin saves the toggle, the row in `guest_rls_setting` wins and this
+# env var is no longer consulted, so a restart does not silently revert the
+# choice. A guest token may override it per embed.
+GUEST_RLS_STRICT_DEFAULT = _grx_truthy(os.getenv("GUEST_RLS_STRICT", "true"))
+# Kept under the old name for anything that reads the config directly.
+GUEST_RLS_STRICT = GUEST_RLS_STRICT_DEFAULT
+
+_GUEST_RLS_STRICT_KEY = "strict_mode"
 # Env fallback/seed list; the primary source is the DB table below, editable
 # in the UI (Settings → "Guest RLS Exempt Datasets").
 _GUEST_RLS_ENV_EXEMPT = [
@@ -773,15 +805,92 @@ _GUEST_RLS_ENV_EXEMPT = [
 ]
 
 import time as _grx_time  # noqa: E402
+from datetime import datetime as _grx_datetime  # noqa: E402
 
 # The mapped model + admin view are created lazily inside register_views (after
 # SqlaTable is imported), so defining them here at config-load time can't crash
 # mapper configuration. The model class is stashed in this holder once created.
 _GuestRlsExemptModel = None
+_GuestRlsSettingModel = None
 
 # Small TTL cache so query building (which calls get_guest_rls_filters per
 # dataset) doesn't hit the DB on every call.
 _grx_cache = {"exp": 0.0, "ids": set(_GUEST_RLS_ENV_EXEMPT)}
+_grx_strict_cache = {"exp": 0.0, "value": GUEST_RLS_STRICT_DEFAULT}
+
+
+def _read_strict_mode_row():
+    """The saved strict-mode choice, or None when an admin never set one."""
+    if _GuestRlsSettingModel is None:
+        return None
+    from superset import db
+
+    row = (
+        db.session.query(_GuestRlsSettingModel.value)
+        .filter(_GuestRlsSettingModel.key == _GUEST_RLS_STRICT_KEY)
+        .first()
+    )
+    return None if row is None or row[0] is None else _grx_truthy(row[0])
+
+
+def _get_strict_mode():
+    """Effective strict mode for the instance: the saved value, else the env.
+
+    Cached briefly, like the exempt list, because query building consults it
+    once per dataset.
+    """
+    now = _grx_time.time()
+    if now < _grx_strict_cache["exp"]:
+        return _grx_strict_cache["value"]
+    value = GUEST_RLS_STRICT_DEFAULT
+    try:
+        saved = _read_strict_mode_row()
+        if saved is not None:
+            value = saved
+    except Exception as ex:  # noqa: BLE001 - table may not exist yet / no context
+        logging.getLogger(__name__).debug("guest_rls_setting not readable: %s", ex)
+    _grx_strict_cache["exp"] = now + 30
+    _grx_strict_cache["value"] = value
+    return value
+
+
+def _set_strict_mode(value):
+    """Persist the instance-wide strict mode and drop the cache."""
+    from superset import db
+
+    model = _GuestRlsSettingModel
+    row = (
+        db.session.query(model).filter(model.key == _GUEST_RLS_STRICT_KEY).first()
+    )
+    if row is None:
+        row = model(key=_GUEST_RLS_STRICT_KEY)
+        db.session.add(row)
+    row.value = "true" if value else "false"
+    row.changed_on = _grx_datetime.now()
+    db.session.commit()
+    _grx_strict_cache["exp"] = 0.0
+    return bool(value)
+
+
+def _guest_token_strict_mode():
+    """Strict mode asserted by the guest token, or None if it says nothing.
+
+    The embedding host sets this when it mints the token, so it is signed with
+    the instance's secret and cannot be forged by the viewer. That is why the
+    flag is NOT read from a URL parameter or a header: strict mode fails closed,
+    so a client-supplied off switch would let any viewer read the rows their
+    token has no clause for.
+    """
+    try:
+        from flask import g
+
+        token = getattr(g.user, "guest_token", None)
+    except Exception:  # noqa: BLE001 - no request/app context
+        return None
+    if not isinstance(token, dict) or "rls_strict" not in token:
+        return None
+    value = token["rls_strict"]
+    return None if value is None else _grx_truthy(value)
 
 
 def _get_exempt_dataset_ids():
@@ -839,11 +948,80 @@ def _build_guest_rls_exempt_model():
     return GuestRlsExemptDataset
 
 
+def _build_guest_rls_setting_model():
+    """Key/value store for the instance-wide guest RLS settings."""
+    global _GuestRlsSettingModel
+    if _GuestRlsSettingModel is not None:
+        return _GuestRlsSettingModel
+    import sqlalchemy as sa
+    from flask_appbuilder import Model
+
+    class GuestRlsSetting(Model):
+        __tablename__ = "guest_rls_setting"
+        __table_args__ = {"extend_existing": True}
+
+        key = sa.Column(sa.String(64), primary_key=True)
+        value = sa.Column(sa.String(255))
+        changed_on = sa.Column(sa.DateTime)
+
+    _GuestRlsSettingModel = GuestRlsSetting
+    return GuestRlsSetting
+
+
 class _GuestRlsHardeningMixin:
+    def create_guest_access_token(self, user, resources, rls):  # type: ignore[override]
+        """Carry an `rls_strict` override from the mint request into the token.
+
+        `GuestTokenCreateSchema` is permissive, so the host may post
+        `{"user": ..., "resources": ..., "rls": [...], "rls_strict": false}`.
+        Upstream drops unknown fields, so the claim is added here.
+
+        Putting it in the token rather than a URL parameter is deliberate: the
+        token is signed with this instance's secret by the host's own backend,
+        so a viewer cannot flip a protection that fails closed.
+        """
+        token = super().create_guest_access_token(user, resources, rls)
+        try:
+            from flask import request
+
+            payload = request.get_json(silent=True) or {}
+        except Exception:  # noqa: BLE001 - minted outside a request
+            return token
+        if "rls_strict" not in payload:
+            return token
+
+        requested = payload["rls_strict"]
+        try:
+            import jwt
+            from flask import current_app
+
+            secret = current_app.config["GUEST_TOKEN_JWT_SECRET"]
+            algo = current_app.config["GUEST_TOKEN_JWT_ALGO"]
+            claims = jwt.decode(
+                token,
+                secret,
+                algorithms=[algo],
+                # already verified by the encode above; skip re-checking the
+                # audience so this stays independent of that config
+                options={"verify_aud": False},
+            )
+            claims["rls_strict"] = None if requested is None else _grx_truthy(requested)
+            return jwt.encode(claims, secret, algorithm=algo)
+        except Exception as ex:  # noqa: BLE001
+            logging.getLogger(__name__).warning(
+                "Could not attach rls_strict to the guest token: %s", ex
+            )
+            return token
+
     def get_guest_rls_filters(self, dataset):  # type: ignore[override]
         rules = super().get_guest_rls_filters(dataset)
         try:
-            if GUEST_RLS_STRICT and not rules and self.is_guest_user():
+            # The embedding host decides per token; otherwise the instance's own
+            # setting applies (saved value, else the env default).
+            strict = _guest_token_strict_mode()
+            if strict is None:
+                strict = _get_strict_mode()
+            if strict and not rules and self.is_guest_user():
                 if getattr(dataset, "id", None) not in _get_exempt_dataset_ids():
                     # No tenant clause for this dataset -> deny (no rows).
                     return [{"clause": "1 = 0"}]
@@ -856,11 +1034,14 @@ class _GuestRlsHardeningMixin:
         # Create the table + register a modern React admin page (REST API + SPA
         # + Security menu link), consistent with other Superset list pages.
         try:
+            from flask import request
             from flask_appbuilder import expose
+            from flask_appbuilder.api import safe
             from flask_appbuilder.models.sqla.interface import SQLAInterface
             from flask_appbuilder.security.decorators import (
                 has_access,
                 permission_name,
+                protect,
             )
 
             from superset import db
@@ -869,10 +1050,15 @@ class _GuestRlsHardeningMixin:
                 RouteMethod,
             )
             from superset.views.base import BaseSupersetView
-            from superset.views.base_api import BaseSupersetModelRestApi
+            from superset.views.base_api import (
+                BaseSupersetApi,
+                BaseSupersetModelRestApi,
+            )
 
             model = _build_guest_rls_exempt_model()
             model.__table__.create(bind=db.engine, checkfirst=True)
+            setting_model = _build_guest_rls_setting_model()
+            setting_model.__table__.create(bind=db.engine, checkfirst=True)
 
             class GuestRlsExemptDatasetRestApi(BaseSupersetModelRestApi):
                 datamodel = SQLAInterface(model)
@@ -892,6 +1078,56 @@ class _GuestRlsHardeningMixin:
                 base_order = ("id", "desc")
                 allowed_rel_fields = {"dataset"}
 
+            # Kept on its own resource rather than as an extra route on the
+            # model API above, where `/strict_mode/` would compete with FAB's
+            # untyped `/<pk>` GET route.
+            class GuestRlsStrictModeRestApi(BaseSupersetApi):
+                resource_name = "guest_rls_strict_mode"
+                allow_browser_login = True
+                class_permission_name = "GuestRlsExemptDataset"
+                openapi_spec_tag = "Guest RLS"
+
+                @expose("/", methods=("GET",))
+                @protect()
+                @permission_name("read")
+                @safe
+                def get(self):
+                    """Report the instance-wide strict mode and where it comes from."""
+                    saved = None
+                    try:
+                        saved = _read_strict_mode_row()
+                    except Exception as ex:  # noqa: BLE001
+                        logging.getLogger(__name__).debug(
+                            "guest_rls_setting not readable: %s", ex
+                        )
+                    source = "database" if saved is not None else "environment"
+                    return self.response(
+                        200,
+                        result={
+                            "value": _get_strict_mode(),
+                            "source": source,
+                            "environment_default": GUEST_RLS_STRICT_DEFAULT,
+                        },
+                    )
+
+                @expose("/", methods=("PUT",))
+                @protect()
+                @permission_name("write")
+                @safe
+                def put(self):
+                    """Save the instance-wide strict mode.
+
+                    Once saved, the stored value wins over GUEST_RLS_STRICT, so
+                    a restart keeps the admin's choice.
+                    """
+                    payload = request.json or {}
+                    if "value" not in payload:
+                        return self.response_400(message="`value` is required.")
+                    value = _set_strict_mode(_grx_truthy(payload["value"]))
+                    return self.response(
+                        200, result={"value": value, "source": "database"}
+                    )
+
             class GuestRlsExemptDatasetPageView(BaseSupersetView):
                 route_base = "/"
                 class_permission_name = "GuestRlsExemptDataset"
@@ -903,6 +1139,7 @@ class _GuestRlsHardeningMixin:
                     return super().render_app_template()
 
             self.appbuilder.add_api(GuestRlsExemptDatasetRestApi)
+            self.appbuilder.add_api(GuestRlsStrictModeRestApi)
             self.appbuilder.add_view(
                 GuestRlsExemptDatasetPageView,
                 "Guest RLS Exempt Datasets",

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import rison from 'rison';
 import { t, SupersetClient } from '@superset-ui/core';
 import { useListViewResource } from 'src/views/CRUD/hooks';
@@ -27,6 +27,8 @@ import {
   FormItem,
   AsyncSelect,
   Icons,
+  Switch,
+  Tooltip,
 } from '@superset-ui/core/components';
 import { ModalTitleWithIcon } from 'src/components/ModalTitleWithIcon';
 import {
@@ -37,6 +39,98 @@ import {
 } from 'src/components';
 
 const RESOURCE = 'guest_rls_exempt_dataset';
+const STRICT_MODE_ENDPOINT = '/api/v1/guest_rls_strict_mode/';
+
+type StrictMode = {
+  value: boolean;
+  source: 'database' | 'environment';
+  environment_default: boolean;
+};
+
+/**
+ * The instance-wide strict-mode switch.
+ *
+ * Saving writes the choice to the database, and from then on it wins over the
+ * GUEST_RLS_STRICT environment variable, so a restart does not revert it.
+ * An embedding host can still override it for its own viewers by minting the
+ * guest token with an `rls_strict` claim.
+ */
+function StrictModeToggle({
+  addDangerToast,
+  addSuccessToast,
+}: {
+  addDangerToast: (msg: string) => void;
+  addSuccessToast: (msg: string) => void;
+}) {
+  const [state, setState] = useState<StrictMode | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let stale = false;
+    SupersetClient.get({ endpoint: STRICT_MODE_ENDPOINT })
+      .then(({ json }) => {
+        if (!stale) setState(json.result);
+      })
+      .catch(() => {
+        if (!stale)
+          addDangerToast(t('Could not read the strict mode setting.'));
+      });
+    return () => {
+      stale = true;
+    };
+  }, [addDangerToast]);
+
+  const handleChange = async (value: boolean) => {
+    setSaving(true);
+    try {
+      const { json } = await SupersetClient.put({
+        endpoint: STRICT_MODE_ENDPOINT,
+        jsonPayload: { value },
+      });
+      setState(prev => (prev ? { ...prev, ...json.result } : prev));
+      addSuccessToast(
+        value
+          ? t('Strict mode on: guests without a clause get no rows.')
+          : t('Strict mode off: guests without a clause see every row.'),
+      );
+    } catch {
+      addDangerToast(t('Could not save the strict mode setting.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!state) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      title={
+        state.source === 'environment'
+          ? t(
+              'Currently from GUEST_RLS_STRICT (default: %s). Saving stores the ' +
+                'choice in the database, which then takes precedence.',
+              state.environment_default ? t('on') : t('off'),
+            )
+          : t(
+              'Saved in the database, so it survives a restart and overrides ' +
+                'GUEST_RLS_STRICT.',
+            )
+      }
+    >
+      <span>
+        <Switch
+          checked={state.value}
+          loading={saving}
+          onChange={handleChange}
+          aria-label={t('Strict mode')}
+        />{' '}
+        {t('Strict mode')}
+      </span>
+    </Tooltip>
+  );
+}
 
 type ExemptObject = {
   id: number;
@@ -77,11 +171,19 @@ function ExemptModal({
   addDangerToast,
   addSuccessToast,
 }: ExemptModalProps) {
-  const handleFormSubmit = async (values: { dataset: number }) => {
+  const handleFormSubmit = async (values: {
+    dataset: number | { value: number };
+  }) => {
+    // `AsyncSelect` always sets `labelInValue`, so the form holds the whole
+    // option, `{ label, value, key }`. The related field on the API wants the
+    // primary key on its own -- handing it the option makes SQLAlchemy try to
+    // build a `SqlaTable(label=...)`.
+    const { dataset } = values;
+    const datasetId = typeof dataset === 'object' ? dataset?.value : dataset;
     try {
       await SupersetClient.post({
         endpoint: `/api/v1/${RESOURCE}/`,
-        jsonPayload: { dataset: values.dataset },
+        jsonPayload: { dataset: datasetId },
       });
       addSuccessToast(t('Exempt dataset added.'));
     } catch (err) {
@@ -211,6 +313,10 @@ function GuestRlsExemptDatasetList({ addDangerToast, addSuccessToast }: Props) {
   return (
     <>
       <SubMenu name={t('Guest RLS Exempt Datasets')} buttons={subMenuButtons} />
+      <StrictModeToggle
+        addDangerToast={addDangerToast}
+        addSuccessToast={addSuccessToast}
+      />
       <ExemptModal
         show={showModal}
         onHide={() => setShowModal(false)}
