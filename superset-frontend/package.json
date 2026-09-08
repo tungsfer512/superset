@@ -87,7 +87,7 @@
     "ag-grid-community": "34.0.2",
     "ag-grid-react": "34.0.2",
     "@deck.gl/mesh-layers": "^9.3.0",
-    "@deck.gl/widgets": "^9.3.0",
+    "@deck.gl/widgets": "^9.3.11",
     "@emotion/cache": "^11.4.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
