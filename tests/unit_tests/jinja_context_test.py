@@ -1693,3 +1693,62 @@ def test_undefined_template_variable_not_function(mocker: MockerFixture) -> None
     template = "SELECT {{ undefined_variable.some_method() }}"
     with pytest.raises(UndefinedError):
         processor.process_template(template)
+
+
+@with_feature_flags(ENABLE_TEMPLATE_PROCESSING=True)
+def test_display_time_zone_macro_uses_the_configured_zone(
+    mocker: MockerFixture,
+) -> None:
+    """The macro reports the zone temporal columns are converted to."""
+    database = Database(id=1, database_name="my_database", sqlalchemy_uri="sqlite://")
+    mocker.patch(
+        "superset.utils.display_timezone.get_time_zone",
+        return_value="Asia/Ho_Chi_Minh",
+    )
+
+    processor = get_template_processor(database=database)
+    assert (
+        processor.process_template("{{ display_time_zone() }}") == "Asia/Ho_Chi_Minh"
+    )
+
+
+@with_feature_flags(ENABLE_TEMPLATE_PROCESSING=True)
+def test_display_time_zone_macro_is_an_identity_when_disabled(
+    mocker: MockerFixture,
+) -> None:
+    """With conversion off the documented ``or "UTC"`` idiom shifts nothing.
+
+    A dataset writes ``CONVERT_TZ(bound, '{{ display_time_zone() or "UTC" }}',
+    'UTC')``, which has to keep working when the feature is turned off.
+    """
+    database = Database(id=1, database_name="my_database", sqlalchemy_uri="sqlite://")
+    mocker.patch(
+        "superset.utils.display_timezone.get_time_zone",
+        return_value=None,
+    )
+
+    processor = get_template_processor(database=database)
+    assert processor.process_template('{{ display_time_zone() or "UTC" }}') == "UTC"
+
+
+@with_feature_flags(ENABLE_TEMPLATE_PROCESSING=True)
+def test_display_time_zone_macro_follows_the_user_preference(
+    mocker: MockerFixture,
+) -> None:
+    """A viewer's own zone wins, so a dataset must not hard-code one."""
+    database = Database(id=1, database_name="my_database", sqlalchemy_uri="sqlite://")
+    mocker.patch(
+        "superset.utils.display_timezone.get_configured_time_zone",
+        return_value="Asia/Ho_Chi_Minh",
+    )
+    mocker.patch(
+        "superset.utils.display_timezone.get_request_time_zone",
+        return_value=None,
+    )
+    mocker.patch(
+        "superset.utils.display_timezone.get_user_time_zone",
+        return_value="Asia/Tokyo",
+    )
+
+    processor = get_template_processor(database=database)
+    assert processor.process_template("{{ display_time_zone() }}") == "Asia/Tokyo"

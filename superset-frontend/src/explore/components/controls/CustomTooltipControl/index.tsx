@@ -73,13 +73,37 @@ const InlineField = styled.div`
   `}
 `;
 
+/**
+ * The series and its label sit on two lines rather than side by side.
+ *
+ * The panel is narrow and series names get long -- and worse, two of them often
+ * differ only at the end ("…, Chưa hoàn thành" vs "…, Đã hoàn thành"), so a
+ * squeezed dropdown truncates them to the same prefix and the rows become
+ * indistinguishable. `minmax(0, …)` lets the dropdown shrink at all: a plain
+ * `1fr` floors at the content's width and crushes whatever shares the row.
+ */
 const LabelRow = styled.div`
   ${({ theme }) => css`
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'series remove'
+      'label label';
     align-items: center;
     gap: ${theme.sizeUnit}px;
-    margin-bottom: ${theme.sizeUnit}px;
+    margin-bottom: ${theme.sizeUnit * 3}px;
+
+    > *:nth-child(1) {
+      grid-area: series;
+      min-width: 0;
+    }
+    > *:nth-child(2) {
+      grid-area: remove;
+    }
+    > *:nth-child(3) {
+      grid-area: label;
+      min-width: 0;
+    }
   `}
 `;
 
@@ -312,10 +336,8 @@ export default function CustomTooltipControl({
           value={settings.title ?? ''}
           placeholder={
             xAxisName
-              ? t('Leave empty for the default, e.g. Thành phố {%(axis)s}', {
-                  axis: xAxisName,
-                })
-              : t('Leave empty for the default, e.g. Ngày {x}')
+              ? t('e.g. Thành phố {%(axis)s}', { axis: xAxisName })
+              : t('e.g. Ngày {x}')
           }
           onChange={event => commit({ ...settings, title: event.target.value })}
         />
@@ -449,14 +471,6 @@ export default function CustomTooltipControl({
                     )
                   }
                 />
-                <Input
-                  value={override?.label ?? ''}
-                  disabled={!row.key}
-                  placeholder={t('Label to show')}
-                  onChange={event =>
-                    row.key && setSeries(row.key, { label: event.target.value })
-                  }
-                />
                 <Button
                   buttonSize="xsmall"
                   buttonStyle="link"
@@ -465,6 +479,14 @@ export default function CustomTooltipControl({
                 >
                   <Icons.DeleteOutlined iconSize="s" />
                 </Button>
+                <Input
+                  value={override?.label ?? ''}
+                  disabled={!row.key}
+                  placeholder={t('Label to show')}
+                  onChange={event =>
+                    row.key && setSeries(row.key, { label: event.target.value })
+                  }
+                />
               </LabelRow>
               {otherKeys.length > 0 && (
                 <RowNote>

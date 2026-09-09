@@ -184,6 +184,48 @@ An unknown name is ignored rather than rejected, so a typo falls back to the
 instance default instead of breaking the dashboard. If you serve the API
 cross-origin, make sure the header is in `CORS_OPTIONS["allow_headers"]`.
 
+### Virtual datasets that filter in their own SQL
+
+A virtual dataset normally needs to do nothing: Superset converts its temporal
+columns and applies the time range on the converted expression, exactly as it
+does for a physical table.
+
+That changes when the dataset takes the filter over itself, with
+`get_time_filter(..., remove_filter=True)`. The bounds that macro returns are
+wall clock in the **display** timezone, while the column is stored in UTC, so
+comparing them directly is off by the offset. `remove_filter=True` also means
+Superset adds no outer `WHERE` of its own, so nothing corrects it afterwards —
+the query silently returns the wrong rows.
+
+Use the `display_time_zone()` macro to convert the bounds back. Do not hard-code
+a zone: the macro resolves per request, so a viewer with their own preference,
+or an embedded dashboard asserting a zone, still gets the right rows.
+
+```jinja
+{% set tf = get_time_filter('created_at', remove_filter=True) %}
+
+WITH bounds AS (
+  SELECT
+    -- `or "UTC"` makes this an identity when conversion is disabled
+    CONVERT_TZ({{ tf.from_expr }}, '{{ display_time_zone() or "UTC" }}', 'UTC') AS start_utc,
+    CONVERT_TZ({{ tf.to_expr }},   '{{ display_time_zone() or "UTC" }}', 'UTC') AS end_utc
+)
+SELECT t.*
+FROM events AS t CROSS JOIN bounds AS b
+WHERE t.created_at >= b.start_utc
+  AND t.created_at <  b.end_utc
+```
+
+Converting the two bounds rather than the column keeps the column bare, so
+partition pruning and indexes still apply.
+
+Leave the dataset's own temporal column in UTC. Superset converts it again in
+the outer query, so converting it here too shifts it twice.
+
+The macro returns `None` when conversion is disabled, and the resolved zone is
+already part of the query cache key, so no extra `cache_key_wrapper` call is
+needed.
+
 ### Resolution order
 
 1. the zone asserted by the request (`?timezone=` or the header above);

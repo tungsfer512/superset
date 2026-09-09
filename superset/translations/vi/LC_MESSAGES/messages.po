@@ -17148,3 +17148,9 @@ msgstr "ví dụ Năm {%(dimension)s}"
 
 msgid "off"
 msgstr "tắt"
+
+msgid "e.g. Thành phố {%(axis)s}"
+msgstr "ví dụ Thành phố {%(axis)s}"
+
+msgid "e.g. Ngày {x}"
+msgstr "ví dụ Ngày {x}"

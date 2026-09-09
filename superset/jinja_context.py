@@ -46,7 +46,7 @@ from superset.exceptions import (
 )
 from superset.extensions import feature_flag_manager
 from superset.sql.parse import Table
-from superset.utils import json
+from superset.utils import display_timezone, json
 from superset.utils.core import (
     AdhocFilterClause,
     convert_legacy_filters_into_adhoc,
@@ -444,6 +444,28 @@ class ExtraCache:
                 filters.append({"op": op, "col": column, "val": val})
 
         return filters
+
+    def display_time_zone(self) -> str | None:
+        """The time zone this query renders temporal data in, if any.
+
+        Resolved exactly as it is for the columns Superset converts on its own
+        (request, then user preference, then the database's ``Extra``, then
+        ``DISPLAY_TIME_ZONE``), so a virtual dataset that filters in its own SQL
+        can convert its bounds without hard-coding a zone -- which would ignore
+        the viewer's choice.
+
+        The bounds ``get_time_filter`` returns are wall clock in this zone, so a
+        dataset whose column is stored in UTC converts them back:
+
+            CONVERT_TZ(bound, '{{ display_time_zone() or "UTC" }}', 'UTC')
+
+        ``None`` when conversion is disabled; the ``or "UTC"`` above then makes
+        the expression an identity. The name is validated against the IANA
+        database before it gets here, so it is safe to interpolate.
+
+        :return: an IANA time zone name, or ``None`` when conversion is off
+        """
+        return display_timezone.get_time_zone(self.database)
 
     # pylint: disable=too-many-arguments
     def get_time_filter(
@@ -845,6 +867,9 @@ class JinjaTemplateProcessor(BaseTemplateProcessor):
                 "get_filters": partial(safe_proxy, extra_cache.get_filters),
                 "dataset": partial(safe_proxy, dataset_macro_with_context),
                 "get_time_filter": partial(safe_proxy, extra_cache.get_time_filter),
+                "display_time_zone": partial(
+                    safe_proxy, extra_cache.display_time_zone
+                ),
             }
         )
 
