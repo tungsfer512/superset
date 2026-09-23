@@ -39,6 +39,7 @@ import {
   timeComparePivotOperator,
   timeCompareOperator,
 } from '@superset-ui/chart-controls';
+import { buildTooltipTitleQuery } from '../utils/customTooltip';
 
 export default function buildQuery(formData: QueryFormData) {
   const { groupby } = formData;
@@ -82,6 +83,8 @@ export default function buildQuery(formData: QueryFormData) {
       ? formData.time_compare
       : [];
 
+    const tooltipTitleQuery = buildTooltipTitleQuery(formData, baseQueryObject);
+
     return [
       {
         ...baseQueryObject,
@@ -109,6 +112,8 @@ export default function buildQuery(formData: QueryFormData) {
           prophetOperator(formData, baseQueryObject),
         ],
       },
+      // looked up by transformProps as queriesData[1]
+      ...(tooltipTitleQuery ? [tooltipTitleQuery] : []),
     ];
   });
 }

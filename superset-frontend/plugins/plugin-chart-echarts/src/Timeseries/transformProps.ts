@@ -112,6 +112,7 @@ import {
   groupTooltipRows,
   limitTooltipRows,
   orderTooltipKeys,
+  buildTooltipTitleLookup,
   parseCustomTooltipConfig,
   resolveGroupIndex,
   type TooltipEntry,
@@ -542,6 +543,15 @@ export default function transformProps(
   // parsed once, not per hover
   const customTooltip = parseCustomTooltipConfig(tooltipCustomConfig);
   const groupIndex = resolveGroupIndex(customTooltip, groupBy);
+  // Columns the title names that the chart's result lacks come from an extra
+  // query; this throws when one is not one-to-one with the x axis.
+  const rawXAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
+  const titleLookup = buildTooltipTitleLookup(
+    customTooltip,
+    rawXAxisLabel,
+    queriesData[1]?.data as Record<string, unknown>[] | undefined,
+    [xAxisLabel],
+  );
   const xAxisFormatter =
     xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
@@ -776,7 +786,8 @@ export default function transformProps(
           formatCustomTooltipTitle(
             tooltipFormatter(xValue),
             customTooltip,
-            xAxisLabel,
+            [xAxisLabel, rawXAxisLabel],
+            titleLookup?.(xValue),
           ),
           limited.focusedRow,
           headerRows,

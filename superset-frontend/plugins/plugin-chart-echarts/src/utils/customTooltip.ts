@@ -30,14 +30,26 @@
  * degrade to the default tooltip, never break the chart.
  */
 import {
+  ensureIsArray,
   getNumberFormatter,
+  getXAxisColumn,
+  getXAxisLabel,
+  isXAxisSet,
   logging,
+  QueryFormData,
+  QueryObject,
   t,
   ValueFormatter,
 } from '@superset-ui/core';
 
 /** Placeholders in `title` that stand for the tooltip's default heading. */
 const TITLE_PLACEHOLDER = /\{(?:time|x)\}/g;
+
+/** Every `{name}` in a template; the name is captured. */
+const ANY_PLACEHOLDER = /\{([^{}]+)\}/g;
+
+/** Names that `formatCustomTooltipTitle` fills without looking anything up. */
+const RESERVED_TITLE_NAMES = ['time', 'x'];
 
 export type TooltipSeriesConfig = {
   /** Replaces the series name shown in the row. */
@@ -328,20 +340,186 @@ export function formatCustomTooltipTitle(
   defaultTitle: string,
   config?: CustomTooltipConfig,
   /**
-   * The x-axis column. Accepted as a placeholder as well, because writing
-   * `{city}` for an axis named `city` is the natural guess and silently
-   * printing it verbatim is no help.
+   * The x-axis column, or several names for it (its label and its verbose
+   * name). Accepted as a placeholder as well, because writing `{city}` for an
+   * axis named `city` is the natural guess and silently printing it verbatim
+   * is no help.
    */
-  xAxisName?: string,
+  xAxisName?: string | (string | undefined)[],
+  /**
+   * Values for the other columns the title names, as looked up for the
+   * hovered x value by `buildTooltipTitleLookup`.
+   */
+  columnValues?: Record<string, string>,
 ): string {
   const template = config?.title;
   if (!template) {
     return defaultTitle;
   }
-  const substituted = template.replace(TITLE_PLACEHOLDER, defaultTitle);
-  return xAxisName
-    ? substituted.split(`{${xAxisName}}`).join(defaultTitle)
-    : substituted;
+  let substituted = template.replace(TITLE_PLACEHOLDER, defaultTitle);
+  ensureIsArray(xAxisName).forEach(name => {
+    if (name) {
+      substituted = substituted.split(`{${name}}`).join(defaultTitle);
+    }
+  });
+  Object.entries(columnValues ?? {}).forEach(([name, value]) => {
+    substituted = substituted.split(`{${name}}`).join(value);
+  });
+  return substituted;
+}
+
+/**
+ * The columns a title names besides the x axis, `{x}` and `{time}`.
+ *
+ * These are not in the chart's result -- `{postal_code}` on a chart whose axis
+ * is `city` -- so they are fetched by an extra query and looked up by x value.
+ */
+export function getTooltipTitleColumns(
+  config: CustomTooltipConfig | undefined,
+  xAxisNames: (string | undefined)[] = [],
+): string[] {
+  const template = config?.title;
+  if (!template) {
+    return [];
+  }
+  const skip = new Set([...RESERVED_TITLE_NAMES, ...xAxisNames]);
+  const names = new Set<string>();
+  [...template.matchAll(ANY_PLACEHOLDER)].forEach(([, name]) => {
+    if (name.trim() && !skip.has(name)) {
+      names.add(name);
+    }
+  });
+  return [...names];
+}
+
+/**
+ * An extra query listing the distinct (x value, title column...) pairs, under
+ * the chart's own filters, or undefined when the title names no such column.
+ *
+ * Appended after the chart's queries, so it never shifts their positions.
+ */
+export function buildTooltipTitleQuery(
+  formData: QueryFormData,
+  baseQueryObject: QueryObject,
+): QueryObject | undefined {
+  if (!isXAxisSet(formData)) {
+    return undefined;
+  }
+  const columns = getTooltipTitleColumns(
+    parseCustomTooltipConfig(formData.tooltipCustomConfig),
+    [getXAxisLabel(formData)],
+  );
+  if (!columns.length) {
+    return undefined;
+  }
+  return {
+    ...baseQueryObject,
+    // no metrics but a column list: grouped, i.e. distinct combinations
+    columns: [...ensureIsArray(getXAxisColumn(formData)), ...columns],
+    metrics: [],
+    orderby: [],
+    series_columns: [],
+    series_limit: 0,
+    series_limit_metric: undefined,
+    time_offsets: [],
+    post_processing: [],
+    is_timeseries: false,
+  };
+}
+
+/** Looks up the title columns' values for a hovered x value. */
+export type TooltipTitleLookup = (xValue: unknown) => Record<string, string>;
+
+const lookupKey = (value: unknown): string =>
+  value instanceof Date ? String(value.getTime()) : String(value);
+
+const quoteList = (values: Iterable<string>, limit = 5): string => {
+  const list = [...values];
+  const shown = list.slice(0, limit).map(value => `"${value}"`);
+  return list.length > limit ? `${shown.join(', ')}, …` : shown.join(', ');
+};
+
+/**
+ * Index the title query's rows by x value, insisting that each title column
+ * maps one-to-one onto the x axis.
+ *
+ * A title reads as a caption for one x value, so it can only name a column
+ * that has exactly one value there. When a column has several values for one
+ * x value (1-N) or one of its values spans several x values (N-1), no choice
+ * would be right, so this throws and the chart shows the message instead of a
+ * tooltip that quietly picks one.
+ *
+ * Returns undefined when the title names no such column, or the chart ran
+ * before the title did -- the placeholder is then left as written.
+ */
+export function buildTooltipTitleLookup(
+  config: CustomTooltipConfig | undefined,
+  xAxisName: string | undefined,
+  records: Record<string, unknown>[] | undefined,
+  /** Other names the x axis goes by in the title, e.g. its verbose name. */
+  xAxisAliases: (string | undefined)[] = [],
+): TooltipTitleLookup | undefined {
+  const columns = getTooltipTitleColumns(config, [xAxisName, ...xAxisAliases]);
+  if (!xAxisName || !columns.length || !records?.length) {
+    return undefined;
+  }
+  const present = columns.filter(
+    column => column in records[0] && xAxisName in records[0],
+  );
+  if (!present.length) {
+    return undefined;
+  }
+
+  const byX = new Map<string, Record<string, string>>();
+  present.forEach(column => {
+    const valuesByX = new Map<string, Set<string>>();
+    const xsByValue = new Map<string, Set<string>>();
+    records.forEach(record => {
+      const x = lookupKey(record[xAxisName]);
+      const value = String(record[column]);
+      if (!valuesByX.has(x)) valuesByX.set(x, new Set());
+      valuesByX.get(x)!.add(value);
+      if (!xsByValue.has(value)) xsByValue.set(value, new Set());
+      xsByValue.get(value)!.add(x);
+    });
+
+    valuesByX.forEach((values, x) => {
+      if (values.size > 1) {
+        throw new Error(
+          t(
+            'Custom tooltip: {%s} must map one-to-one onto the x axis "%s", ' +
+              'but "%s" has %s values of it (%s).',
+            column,
+            xAxisName,
+            x,
+            values.size,
+            quoteList(values),
+          ),
+        );
+      }
+    });
+    xsByValue.forEach((xs, value) => {
+      if (xs.size > 1) {
+        throw new Error(
+          t(
+            'Custom tooltip: {%s} must map one-to-one onto the x axis "%s", ' +
+              'but its value "%s" belongs to %s of them (%s).',
+            column,
+            xAxisName,
+            value,
+            xs.size,
+            quoteList(xs),
+          ),
+        );
+      }
+    });
+
+    valuesByX.forEach((values, x) => {
+      byX.set(x, { ...byX.get(x), [column]: [...values][0] });
+    });
+  });
+
+  return xValue => byX.get(lookupKey(xValue)) ?? {};
 }
 
 /**

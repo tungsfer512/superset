@@ -68,7 +68,7 @@ whole story.
 
 | Field | Type | Effect |
 |---|---|---|
-| `title` | string | Heading template. `{x}`, `{time}`, or the x-axis column's own name in braces (`{city}` for an axis named `city`) stands for the heading the chart would otherwise show, so it still honors **Tooltip time format**. An unrecognized placeholder is left as written. |
+| `title` | string | Heading template. `{x}`, `{time}`, or the x-axis column's own name in braces (`{city}` for an axis named `city`) stands for the heading the chart would otherwise show, so it still honors **Tooltip time format**. Any other column in braces (`{postal_code}` on an axis of `city`) is looked up per hovered value — see [Other columns in the heading](#other-columns-in-the-heading). |
 | `maxRows` | number | Lists at most this many series; the remainder is summarized as a count. The **Total** row is never trimmed. |
 | `series` | object | Keyed by series name — the label shown in the legend. |
 
@@ -82,6 +82,31 @@ Per series:
 | `format` | string | A [d3 format](https://d3js.org/d3-format) string for that row only, overriding **Number format**. |
 | `hidden` | boolean | Drops the row. |
 | `order` | number | Lower comes first. Series without `order` keep the order the chart already chose, after the ordered ones. |
+
+## Other columns in the heading
+
+The heading can name a column the chart does not plot. With `city` on the x
+axis:
+
+```json
+{ "title": "Thành phố {city} — mã bưu chính {postal_code}" }
+```
+
+The chart then runs one extra query, under the same filters, listing the
+distinct (`city`, `postal_code`) pairs, and fills `{postal_code}` with the value
+for the hovered city. In Explore, typing such a column re-runs the query by
+itself once the name matches a dataset column; the form flags a name that
+matches none.
+
+The column must map **one-to-one** onto the x axis, since a heading can only
+state one value. Otherwise the chart shows an error instead of a tooltip:
+
+- **1-N** — one city has several postal codes: `"Lyon" has 2 values of it`.
+- **N-1** — one postal code is shared by several cities: `its value "69004"
+  belongs to 2 of them`.
+
+Write the x axis itself as `{x}` or its column name; its verbose name is not
+recognized here and would be looked up as a column, which fails the query.
 
 ## Grouping rows into sections
 

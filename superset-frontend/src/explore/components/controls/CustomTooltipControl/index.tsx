@@ -166,41 +166,58 @@ export default function CustomTooltipControl({
   // The chart's dimensions name the groups; its series names are what a
   // per-series override keys on. Both come from the last query response, the
   // same way the series colour control reads them.
-  const { dimensions, seriesNames, xAxisName } = useSelector((state: any) => {
-    const explore = state?.explore ?? {};
-    const formData = explore.form_data ?? {};
-    const response =
-      state?.charts?.[getChartKey(explore)]?.queriesResponse?.[0] ?? {};
-    const rows: any[] = ensureIsArray(response.data);
-    const dims = [
-      ...ensureIsArray(formData.groupby),
-      ...ensureIsArray(formData.dimensions),
-    ]
-      .map(toName)
-      .filter(Boolean);
-    const xCol = toName(formData.x_axis);
-    const exclude = new Set([xCol, ...dims, '__timestamp'].filter(Boolean));
-    const names = new Set<string>();
-    ensureIsArray(response.colnames)
-      .filter(col => !exclude.has(String(col)))
-      .forEach(col => names.add(String(col)));
-    if (dims.length && rows.length) {
-      rows.forEach(row => {
-        const combo = dims
-          .map(dim => row?.[dim])
-          .filter(entry => entry !== undefined && entry !== null)
-          .join(', ');
-        if (combo) {
-          names.add(combo);
-        }
-      });
-    }
-    return {
-      dimensions: dims,
-      seriesNames: Array.from(names),
-      xAxisName: xCol,
-    };
-  });
+  const { dimensions, seriesNames, xAxisName, columnNames } = useSelector(
+    (state: any) => {
+      const explore = state?.explore ?? {};
+      const formData = explore.form_data ?? {};
+      const response =
+        state?.charts?.[getChartKey(explore)]?.queriesResponse?.[0] ?? {};
+      const rows: any[] = ensureIsArray(response.data);
+      const dims = [
+        ...ensureIsArray(formData.groupby),
+        ...ensureIsArray(formData.dimensions),
+      ]
+        .map(toName)
+        .filter(Boolean);
+      const xCol = toName(formData.x_axis);
+      const exclude = new Set([xCol, ...dims, '__timestamp'].filter(Boolean));
+      const names = new Set<string>();
+      ensureIsArray(response.colnames)
+        .filter(col => !exclude.has(String(col)))
+        .forEach(col => names.add(String(col)));
+      if (dims.length && rows.length) {
+        rows.forEach(row => {
+          const combo = dims
+            .map(dim => row?.[dim])
+            .filter(entry => entry !== undefined && entry !== null)
+            .join(', ');
+          if (combo) {
+            names.add(combo);
+          }
+        });
+      }
+      return {
+        dimensions: dims,
+        seriesNames: Array.from(names),
+        xAxisName: xCol,
+        columnNames: ensureIsArray(explore.datasource?.columns)
+          .map((column: any) => column?.column_name)
+          .filter(Boolean) as string[],
+      };
+    },
+  );
+
+  // Placeholders other than the axis are looked up from the dataset; one that
+  // names no column would fail that query, so say so while typing.
+  const unknownTitleNames = useMemo(() => {
+    const skip = new Set(['x', 'time', xAxisName]);
+    const names = [...(settings.title ?? '').matchAll(/\{([^{}]+)\}/g)]
+      .map(([, name]) => name)
+      .filter(name => name.trim() && !skip.has(name));
+    return columnNames.length
+      ? [...new Set(names)].filter(name => !columnNames.includes(name))
+      : [];
+  }, [settings.title, xAxisName, columnNames]);
 
   const groupValues = useMemo(
     () => deriveGroupValues(seriesNames, dimensions, settings.group?.by),
@@ -341,6 +358,14 @@ export default function CustomTooltipControl({
           }
           onChange={event => commit({ ...settings, title: event.target.value })}
         />
+        {unknownTitleNames.length > 0 && (
+          <Invalid>
+            {t(
+              'Not a column of this dataset: %s. Other columns are filled in per hovered value and must map one-to-one onto the x axis.',
+              unknownTitleNames.map(name => `{${name}}`).join(', '),
+            )}
+          </Invalid>
+        )}
       </Field>
 
       <Field>

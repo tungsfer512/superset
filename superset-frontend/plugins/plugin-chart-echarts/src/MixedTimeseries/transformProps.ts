@@ -100,6 +100,7 @@ import {
   groupTooltipRows,
   limitTooltipRows,
   orderTooltipKeys,
+  buildTooltipTitleLookup,
   parseCustomTooltipConfig,
   resolveGroupIndex,
   type TooltipEntry,
@@ -571,6 +572,17 @@ export default function transformProps(
     ensureIsArray(groupby),
     ensureIsArray(groupby).length > 0 ? 1 : 0,
   );
+  // Columns the title names that the chart's result lacks come from an extra
+  // query; this throws when one is not one-to-one with the x axis.
+  const rawXAxisLabel = getXAxisLabel(
+    chartProps.rawFormData as QueryFormData,
+  ) as string;
+  const titleLookup = buildTooltipTitleLookup(
+    customTooltip,
+    rawXAxisLabel,
+    queriesData[2]?.data as Record<string, unknown>[] | undefined,
+    [xAxisLabel],
+  );
   const xAxisFormatter =
     xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
@@ -768,7 +780,8 @@ export default function transformProps(
           formatCustomTooltipTitle(
             tooltipFormatter(xValue),
             customTooltip,
-            xAxisLabel,
+            [xAxisLabel, rawXAxisLabel],
+            titleLookup?.(xValue),
           ),
           limited.focusedRow,
           headerRows,

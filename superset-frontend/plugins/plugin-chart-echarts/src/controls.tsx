@@ -31,6 +31,10 @@ import {
 import { DEFAULT_LEGEND_FORM_DATA, StackControlOptions } from './constants';
 import { DEFAULT_FORM_DATA } from './Timeseries/constants';
 import { defaultXAxis } from './defaults';
+import {
+  getTooltipTitleColumns,
+  parseCustomTooltipConfig,
+} from './utils/customTooltip';
 
 const { legendMargin, legendOrientation, legendType, showLegend } =
   DEFAULT_LEGEND_FORM_DATA;
@@ -257,6 +261,28 @@ const tooltipCustomConfigControl: ControlSetItem = {
     type: 'CustomTooltipControl',
     label: t('Tooltip contents'),
     renderTrigger: true,
+    /**
+     * Most edits only re-render, but a title naming a column the chart did not
+     * query needs the extra lookup query run (see `buildTooltipTitleQuery`).
+     * Explore calls this on every edit: it answers yes only once each newly
+     * named column is a real one, so typing `{postal_code}` letter by letter
+     * does not fire a failing query per keystroke.
+     */
+    queryOnChange: (
+      previous?: string,
+      next?: string,
+      datasource?: { columns?: { column_name?: string }[] },
+    ) => {
+      const before = getTooltipTitleColumns(parseCustomTooltipConfig(previous));
+      const added = getTooltipTitleColumns(
+        parseCustomTooltipConfig(next),
+      ).filter(column => !before.includes(column));
+      const known = datasource?.columns?.map(column => column.column_name);
+      return (
+        added.length > 0 &&
+        (!known || added.every(column => known.includes(column)))
+      );
+    },
     default: '',
     description: t(
       'Rename, reorder, hide or group the rows of the tooltip. The form builds ' +

@@ -40,6 +40,7 @@ import {
   retainFormDataSuffix,
   removeFormDataSuffix,
 } from '../utils/formDataSuffix';
+import { buildTooltipTitleQuery } from '../utils/customTooltip';
 
 export default function buildQuery(formData: QueryFormData) {
   const baseFormData = {
@@ -86,8 +87,19 @@ export default function buildQuery(formData: QueryFormData) {
     }),
   );
 
+  // The title lookup runs under query A's filters, as the tooltip shows A's x
+  // values; transformProps reads it as queriesData[2].
+  const tooltipTitleQuery = buildTooltipTitleQuery(
+    formData,
+    queryContexts[0].queries[0],
+  );
+
   return {
     ...queryContexts[0],
-    queries: [...queryContexts[0].queries, ...queryContexts[1].queries],
+    queries: [
+      ...queryContexts[0].queries,
+      ...queryContexts[1].queries,
+      ...(tooltipTitleQuery ? [tooltipTitleQuery] : []),
+    ],
   };
 }

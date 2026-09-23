@@ -476,7 +476,17 @@ function ExploreViewContainer(props) {
       const displayControlsChanged = changedControlKeys.filter(
         key => props.controls[key].renderTrigger,
       );
-      if (displayControlsChanged.length > 0) {
+      // a display control can still need data the last query did not fetch
+      const needsQuery = displayControlsChanged.some(key =>
+        props.controls[key].queryOnChange?.(
+          previousControls[key].value,
+          props.controls[key].value,
+          props.datasource,
+        ),
+      );
+      if (needsQuery) {
+        onQuery();
+      } else if (displayControlsChanged.length > 0) {
         reRenderChart(displayControlsChanged);
       }
     }

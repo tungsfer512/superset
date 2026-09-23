@@ -17154,3 +17154,12 @@ msgstr "ví dụ Thành phố {%(axis)s}"
 
 msgid "e.g. Ngày {x}"
 msgstr "ví dụ Ngày {x}"
+
+msgid "Custom tooltip: {%s} must map one-to-one onto the x axis \"%s\", but \"%s\" has %s values of it (%s)."
+msgstr "Tooltip tuỳ chỉnh: {%s} phải tương ứng 1-1 với trục X \"%s\", nhưng \"%s\" có %s giá trị (%s)."
+
+msgid "Custom tooltip: {%s} must map one-to-one onto the x axis \"%s\", but its value \"%s\" belongs to %s of them (%s)."
+msgstr "Tooltip tuỳ chỉnh: {%s} phải tương ứng 1-1 với trục X \"%s\", nhưng giá trị \"%s\" thuộc về %s giá trị trục X (%s)."
+
+msgid "Not a column of this dataset: %s. Other columns are filled in per hovered value and must map one-to-one onto the x axis."
+msgstr "Không phải cột của tập dữ liệu: %s. Các cột khác được điền theo giá trị đang trỏ tới và phải tương ứng 1-1 với trục X."
