@@ -17044,8 +17044,8 @@ msgstr "Hiện đang lấy từ GUEST_RLS_STRICT, mặc định là bật. Khi l
 msgid "Custom tooltip"
 msgstr "Tooltip tuỳ chỉnh"
 
-msgid "Dates and times are shown, grouped and filtered in this timezone. Data is stored in UTC and converted when queried."
-msgstr "Ngày giờ được hiển thị, nhóm và lọc theo múi giờ này. Dữ liệu lưu ở UTC và được quy đổi khi truy vấn."
+msgid "Dates and times are shown, grouped and filtered in this timezone, converted from UTC when queried. The default shows them as stored, without conversion."
+msgstr "Ngày giờ được hiển thị, nhóm và lọc theo múi giờ này, quy đổi từ UTC khi truy vấn. Để mặc định thì ngày giờ giữ nguyên như dữ liệu gốc, không quy đổi."
 
 msgid "Display timezone"
 msgstr "Múi giờ hiển thị"
@@ -17065,8 +17065,8 @@ msgstr "Tiêu đề — {x} hoặc {%(axis)s} là giá trị đang trỏ tới"
 msgid "Heading — {x} stands for the hovered value"
 msgstr "Tiêu đề — {x} là giá trị đang trỏ tới"
 
-msgid "Instance default"
-msgstr "Mặc định của hệ thống"
+msgid "Default (no conversion)"
+msgstr "Mặc định (không quy đổi)"
 
 msgid "Keep the full series name in rows"
 msgstr "Giữ nguyên tên chuỗi ở từng dòng"

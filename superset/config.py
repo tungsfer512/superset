@@ -1760,12 +1760,19 @@ DOCUMENTATION_ICON = None  # Recommended size: 16x16
 DEFAULT_RELATIVE_START_TIME = "today"
 DEFAULT_RELATIVE_END_TIME = "today"
 
-# Time zone temporal data should be displayed and filtered in. Superset assumes
-# data at rest is stored in UTC; when this is set to an IANA time zone name
-# (e.g. "Asia/Ho_Chi_Minh"), temporal columns are converted to wall-clock time
-# in that zone *in SQL*, so time grains, time-range filters and chart labels all
-# agree. Relative ranges ("today", "now", "Last week") are resolved in the same
-# zone. `None` keeps the upstream behaviour of passing values through untouched.
+# Switches on displaying and filtering temporal data in a viewer's time zone.
+# Superset assumes data at rest is stored in UTC; when this is set to any IANA
+# time zone name (e.g. "UTC") and a viewer picks a zone -- a user in their
+# profile, or an embedded dashboard with `?timezone=` -- temporal columns are
+# converted to wall-clock time in that zone *in SQL*, so time grains, time-range
+# filters and chart labels all agree. Relative ranges ("today", "now", "Last
+# week") are resolved in the same zone.
+#
+# The zone named here is never applied by itself: a viewer who picked none (a
+# user left on the default, an embedded dashboard without `timezone`, anonymous
+# browsing, tasks with no user) sees the data as stored. `None` keeps the
+# upstream behaviour of passing values through untouched for everyone, whatever
+# they picked.
 #
 # Requires DB engine support; see `utc_to_tz_expression` in
 # `superset/db_engine_specs/`. Unsupported engines log a warning and are left
@@ -1776,11 +1783,12 @@ DEFAULT_RELATIVE_END_TIME = "today"
 # NOTE: SQL Lab runs raw SQL and is deliberately not converted.
 DISPLAY_TIME_ZONE: str | None = None
 
-# Request header carrying the viewer's time zone, overriding the default above
-# for that request only. Embedded dashboards use it: the host application passes
-# `?timezone=Asia/Ho_Chi_Minh` as a URL parameter (like `lang`) and the embedded
-# page then sends this header on every API call it makes, since a cross-origin
-# iframe cannot rely on cookies and its guest user has no stored preference.
+# Request header carrying the viewer's time zone for that request only; without
+# it, an embedded dashboard shows the data as stored. Embedded dashboards use it:
+# the host application passes `?timezone=Asia/Ho_Chi_Minh` as a URL parameter
+# (like `lang`) and the embedded page then sends this header on every API call
+# it makes, since a cross-origin iframe cannot rely on cookies and its guest
+# user has no stored preference.
 # Values are validated against the IANA database, and take part in the query
 # cache key. Like a user preference, this can only choose which zone to render
 # in -- it cannot enable conversion for a database that has opted out.

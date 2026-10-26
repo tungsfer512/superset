@@ -32,7 +32,9 @@ OTHER_TZ = "Europe/Paris"
 HEADER = display_timezone.DEFAULT_HEADER_NAME
 
 
-def _chart_digest(time_zone: str | None) -> str | None:
+def _chart_digest(
+    time_zone: str | None, user_time_zone: str | None = None
+) -> str | None:
     from superset import security_manager
     from superset.models.slice import Slice
     from superset.thumbnails.digest import get_chart_digest
@@ -56,6 +58,9 @@ def _chart_digest(time_zone: str | None) -> str | None:
             return_value=None,
         ),
         patch.object(security_manager, "find_user", return_value=user),
+        patch.object(
+            display_timezone, "_load_user_time_zone", return_value=user_time_zone
+        ),
         override_user(user),
     ):
         display_timezone.clear_user_time_zone_cache()
@@ -63,12 +68,19 @@ def _chart_digest(time_zone: str | None) -> str | None:
 
 
 def test_digest_differs_per_time_zone() -> None:
-    assert _chart_digest(TZ) != _chart_digest(OTHER_TZ)
+    assert _chart_digest(TZ, TZ) != _chart_digest(TZ, OTHER_TZ)
 
 
 def test_digest_is_unchanged_when_the_feature_is_off() -> None:
     """Enabling nothing must not invalidate every existing thumbnail."""
     assert _chart_digest(None) == _chart_digest("")
+    # a preference cannot switch conversion on
+    assert _chart_digest(None, OTHER_TZ) == _chart_digest(None)
+
+
+def test_executor_on_the_default_is_unconverted() -> None:
+    """Its image shows the data as stored, like with the feature off."""
+    assert _chart_digest(TZ) == _chart_digest(None)
 
 
 def test_digest_ignores_the_request_tier() -> None:

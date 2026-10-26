@@ -45,8 +45,9 @@ class UserDAO(BaseDAO[User]):
     def get_display_time_zone(user: User) -> str | None:
         """The user's own display time zone preference, if they set one.
 
-        This is the stored value, not the resolved one: ``None`` means "use the
-        instance default". See ``superset/utils/display_timezone.py``.
+        This is the stored value, not the resolved one: ``None`` means "the
+        default", which shows the data as stored, without conversion. See
+        ``superset/utils/display_timezone.py``.
 
         Guest users (embedded dashboards) have no attribute row -- and are not
         even ORM objects -- so they always report ``None``.

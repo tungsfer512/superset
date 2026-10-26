@@ -51,7 +51,7 @@ export type UiConfigType = {
     /** IANA time zone name that temporal data should be displayed and filtered
      * in, e.g. `Asia/Ho_Chi_Minh`. Requires DISPLAY_TIME_ZONE to be enabled on
      * the Superset instance; the underlying data stays in UTC and is converted
-     * per query. */
+     * per query. Leave it out to show the data as stored, without conversion. */
     timezone?: string;
   };
   showRowLimitWarning?: boolean;

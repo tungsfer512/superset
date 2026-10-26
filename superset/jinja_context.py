@@ -449,7 +449,7 @@ class ExtraCache:
         """The time zone this query renders temporal data in, if any.
 
         Resolved exactly as it is for the columns Superset converts on its own
-        (request, then user preference, then the database's ``Extra``, then
+        (request, then user preference, gated by the database's ``Extra`` and
         ``DISPLAY_TIME_ZONE``), so a virtual dataset that filters in its own SQL
         can convert its bounds without hard-coding a zone -- which would ignore
         the viewer's choice.
@@ -459,7 +459,8 @@ class ExtraCache:
 
             CONVERT_TZ(bound, '{{ display_time_zone() or "UTC" }}', 'UTC')
 
-        ``None`` when conversion is disabled; the ``or "UTC"`` above then makes
+        ``None`` when nothing is converted -- conversion disabled, or a viewer
+        who picked no zone; the ``or "UTC"`` above then makes
         the expression an identity. The name is validated against the IANA
         database before it gets here, so it is safe to interpolate.
 

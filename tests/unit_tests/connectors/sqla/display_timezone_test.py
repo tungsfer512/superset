@@ -16,6 +16,8 @@
 # under the License.
 """End-to-end SQL generated for a dataset when ``DISPLAY_TIME_ZONE`` is set."""
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime
 from unittest import mock
 
@@ -25,9 +27,21 @@ from sqlalchemy.dialects import postgresql
 
 from superset.connectors.sqla.models import SqlaTable, TableColumn
 from superset.models.core import Database
+from superset.utils import display_timezone
 
 TZ = "Asia/Ho_Chi_Minh"
 CONVERTED = "ts AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'"
+HEADER = display_timezone.DEFAULT_HEADER_NAME
+
+
+@contextmanager
+def _viewer_in(time_zone: str) -> Iterator[None]:
+    """Conversion switched on, and a viewer who asked for ``time_zone``."""
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "UTC"}):
+        with current_app.test_request_context(
+            "/api/v1/chart/data", headers={HEADER: time_zone}
+        ):
+            yield
 
 
 @pytest.fixture
@@ -67,7 +81,7 @@ def _sql(dataset: SqlaTable, **query) -> str:
 
 
 def test_time_grain_truncates_in_the_target_zone(dataset: SqlaTable) -> None:
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(
             dataset,
             granularity="ts",
@@ -80,7 +94,7 @@ def test_time_grain_truncates_in_the_target_zone(dataset: SqlaTable) -> None:
 
 
 def test_time_filter_uses_the_converted_column(dataset: SqlaTable) -> None:
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(
             dataset,
             granularity="ts",
@@ -95,35 +109,54 @@ def test_time_filter_uses_the_converted_column(dataset: SqlaTable) -> None:
 
 
 def test_temporal_column_as_a_dimension_is_converted(dataset: SqlaTable) -> None:
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(dataset, columns=["ts"], groupby=["ts"])
     assert CONVERTED in sql
 
 
 def test_date_only_column_is_left_alone(dataset: SqlaTable) -> None:
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(dataset, columns=["day"], groupby=["day"])
     assert "AT TIME ZONE" not in sql
 
 
 def test_non_temporal_column_is_left_alone(dataset: SqlaTable) -> None:
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(dataset, columns=["name"], groupby=["name"])
     assert "AT TIME ZONE" not in sql
 
 
 def test_column_opt_out(dataset: SqlaTable) -> None:
     dataset.columns[0].extra = '{"skip_time_zone_conversion": true}'
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(dataset, columns=["ts"], groupby=["ts"])
     assert "AT TIME ZONE" not in sql
 
 
 def test_database_opt_out(dataset: SqlaTable) -> None:
     dataset.database.extra = '{"display_time_zone": null}'
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(dataset, columns=["ts"], groupby=["ts"])
     assert "AT TIME ZONE" not in sql
+
+
+def test_no_viewer_choice_is_left_unconverted(dataset: SqlaTable) -> None:
+    """A viewer on the default sees the data as stored, not in the configured
+    zone: the setting only switches the feature on."""
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+        sql = _sql(
+            dataset,
+            granularity="ts",
+            extras={"time_grain_sqla": "P1D"},
+            from_dttm=datetime(2026, 8, 21),
+            to_dttm=datetime(2026, 8, 22),
+            columns=["ts"],
+            groupby=["ts"],
+            is_timeseries=True,
+        )
+    assert "AT TIME ZONE" not in sql
+    assert "DATE_TRUNC('day', ts)" in sql
+    assert "ts >= TO_TIMESTAMP('2026-08-21 00:00:00.000000'" in sql
 
 
 def test_disabled_by_default(dataset: SqlaTable) -> None:
@@ -145,7 +178,7 @@ def test_tz_aware_column_is_converted_once(dataset: SqlaTable) -> None:
     would shift it twice. This goes through the same path a real dataset does,
     where the SQLAlchemy type has lost the distinction.
     """
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+    with _viewer_in(TZ):
         sql = _sql(
             dataset,
             granularity="ts_tz",

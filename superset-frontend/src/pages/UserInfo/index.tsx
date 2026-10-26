@@ -203,7 +203,7 @@ export function UserInfo({ user }: { user: UserWithPermissionsAndRoles }) {
                 {user.email}
               </Descriptions.Item>
               <Descriptions.Item label={t('Display timezone')}>
-                {userDetails.displayTimeZone || t('Instance default')}
+                {userDetails.displayTimeZone || t('Default (no conversion)')}
               </Descriptions.Item>
             </Descriptions>
           </Collapse.Panel>

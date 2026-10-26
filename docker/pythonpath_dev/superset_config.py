@@ -236,9 +236,12 @@ HTML_SANITIZATION = False
 BABEL_DEFAULT_LOCALE = os.getenv("BABEL_DEFAULT_LOCALE", "vi")
 BABEL_DEFAULT_TIMEZONE = os.getenv("BABEL_DEFAULT_TIMEZONE", "Asia/Ho_Chi_Minh")
 
-# Data at rest is UTC; charts group, filter and label it in this timezone.
-# Conversion happens in SQL, so time grains, time-range filters and axis labels
-# all agree. Set to an empty string to fall back to raw UTC.
+# Data at rest is UTC; charts group, filter and label it in the timezone each
+# viewer picks (user profile, or `timezone` for embedded dashboards). Conversion
+# happens in SQL, so time grains, time-range filters and axis labels all agree.
+# The zone named here only switches the feature on: a viewer who picked none
+# sees the data as stored. Set to an empty string to turn conversion off for
+# everyone.
 # See docs/docs/configuration/timezones.mdx
 DISPLAY_TIME_ZONE = os.getenv("DISPLAY_TIME_ZONE", "Asia/Ho_Chi_Minh") or None
 

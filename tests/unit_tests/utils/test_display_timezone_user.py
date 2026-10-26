@@ -52,15 +52,18 @@ def test_user_preference_wins_over_the_default(
             assert display_timezone.get_configured_time_zone() == TZ
 
 
-def test_user_without_a_preference_falls_back(
+def test_user_without_a_preference_sees_data_unconverted(
     admin_user: User,  # noqa: F811
     after_each: None,  # noqa: F811
 ) -> None:
+    """Leaving the preference on the default shows the data as stored."""
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
         with override_user(admin_user):
             display_timezone.clear_user_time_zone_cache()
             assert display_timezone.get_user_time_zone() is None
-            assert display_timezone.get_time_zone() == TZ
+            assert display_timezone.get_time_zone() is None
+            # ...while the configured tier is untouched
+            assert display_timezone.get_configured_time_zone() == TZ
 
 
 def test_user_preference_cannot_enable_a_disabled_instance(
@@ -95,16 +98,17 @@ def test_unknown_stored_zone_is_ignored(
     admin_user: User,  # noqa: F811
     after_each: None,  # noqa: F811
 ) -> None:
+    """An unusable name counts as no preference, so nothing is converted."""
     UserDAO.set_display_time_zone(admin_user, "Not/AZone")
     db.session.flush()
 
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
         with override_user(admin_user):
             display_timezone.clear_user_time_zone_cache()
-            assert display_timezone.get_time_zone() == TZ
+            assert display_timezone.get_time_zone() is None
 
 
-def test_no_user_falls_back_to_the_default(
+def test_no_user_sees_data_unconverted(
     admin_user: User,  # noqa: F811
     after_each: None,  # noqa: F811
 ) -> None:
@@ -116,10 +120,10 @@ def test_no_user_falls_back_to_the_default(
         with override_user(None):
             display_timezone.clear_user_time_zone_cache()
             assert display_timezone.get_user_time_zone() is None
-            assert display_timezone.get_time_zone() == TZ
+            assert display_timezone.get_time_zone() is None
 
 
-def test_guest_user_falls_back_to_the_default() -> None:
+def test_guest_user_sees_data_unconverted() -> None:
     """A `GuestUser` is not an ORM row and reports `is_anonymous` as False."""
     from superset.security.guest_token import GuestUser
 
@@ -134,7 +138,7 @@ def test_guest_user_falls_back_to_the_default() -> None:
         with override_user(guest):
             display_timezone.clear_user_time_zone_cache()
             assert display_timezone.get_user_time_zone() is None
-            assert display_timezone.get_time_zone() == TZ
+            assert display_timezone.get_time_zone() is None
 
 
 def test_cache_is_keyed_on_the_user(
@@ -161,7 +165,7 @@ def test_cache_is_keyed_on_the_user(
             assert display_timezone.get_time_zone() == OTHER_TZ
         with override_user(other):
             # no explicit cache clear: the memo must notice the user changed
-            assert display_timezone.get_time_zone() == TZ
+            assert display_timezone.get_time_zone() is None
 
 
 def test_clearing_the_preference(
@@ -208,5 +212,31 @@ def test_dataset_cache_key_differs_per_user(
             default_keys = dataset.get_extra_cache_keys(query_obj)
 
     assert f"tz:{OTHER_TZ}" in user_keys
-    assert f"tz:{TZ}" in default_keys
-    assert user_keys != default_keys
+    assert not any(key.startswith("tz:") for key in default_keys)
+
+
+def test_dataset_cache_key_of_a_user_on_the_default(
+    admin_user: User,  # noqa: F811
+    after_each: None,  # noqa: F811
+) -> None:
+    """Unconverted results are shared with the feature-off key, not the default's."""
+    from superset.connectors.sqla.models import SqlaTable, TableColumn
+    from superset.models.core import Database
+
+    dataset = SqlaTable(
+        table_name="events",
+        database=Database(
+            database_name="pg",
+            sqlalchemy_uri="postgresql://user:password@localhost:5432/db",
+        ),
+        columns=[TableColumn(column_name="ts", type="TIMESTAMP", is_dttm=True)],
+        metrics=[],
+    )
+    query_obj: dict = {"metrics": [], "columns": [], "filter": []}
+
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+        with override_user(admin_user):
+            display_timezone.clear_user_time_zone_cache()
+            keys = dataset.get_extra_cache_keys(query_obj)
+
+    assert not any(key.startswith("tz:") for key in keys)

@@ -23,6 +23,14 @@ from flask import current_app
 from superset.utils import display_timezone
 
 TZ = "Asia/Ho_Chi_Minh"
+HEADER = display_timezone.DEFAULT_HEADER_NAME
+
+
+def _viewer_in(time_zone: str):
+    """A request whose viewer asked for ``time_zone``."""
+    return current_app.test_request_context(
+        "/api/v1/chart/data", headers={HEADER: time_zone}
+    )
 
 
 def _database(extra: dict | None = None) -> mock.Mock:
@@ -36,28 +44,44 @@ def test_get_time_zone_unset() -> None:
         assert display_timezone.get_time_zone() is None
 
 
-def test_get_time_zone_from_config() -> None:
+def test_config_alone_converts_nothing() -> None:
+    """The setting only switches the feature on; a viewer has to pick a zone."""
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
-        assert display_timezone.get_time_zone() == TZ
+        assert display_timezone.get_configured_time_zone() == TZ
+        assert display_timezone.get_time_zone() is None
+        with current_app.test_request_context("/api/v1/chart/data"):
+            assert display_timezone.get_time_zone() is None
+
+
+def test_get_time_zone_follows_the_viewer() -> None:
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "UTC"}):
+        with _viewer_in(TZ):
+            assert display_timezone.get_time_zone() == TZ
 
 
 def test_get_time_zone_unknown_is_ignored() -> None:
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "Not/AZone"}):
-        assert display_timezone.get_time_zone() is None
+        assert display_timezone.get_configured_time_zone() is None
+        with _viewer_in(TZ):
+            assert display_timezone.get_time_zone() is None
 
 
 def test_get_time_zone_database_override() -> None:
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
-        assert display_timezone.get_time_zone(_database()) == TZ
+        assert display_timezone.get_configured_time_zone(_database()) == TZ
         assert (
-            display_timezone.get_time_zone(_database({"display_time_zone": "UTC"}))
+            display_timezone.get_configured_time_zone(
+                _database({"display_time_zone": "UTC"})
+            )
             == "UTC"
         )
         # an explicit null opts the database out entirely
-        assert (
-            display_timezone.get_time_zone(_database({"display_time_zone": None}))
-            is None
-        )
+        with _viewer_in(TZ):
+            assert display_timezone.get_time_zone(_database()) == TZ
+            assert (
+                display_timezone.get_time_zone(_database({"display_time_zone": None}))
+                is None
+            )
 
 
 @pytest.mark.parametrize(
@@ -141,17 +165,19 @@ def test_reference_now_follows_the_display_zone() -> None:
     from superset.utils.date_parser import reference_now
 
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "UTC"}):
-        in_utc = reference_now()
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
-        in_saigon = reference_now()
+        with _viewer_in("UTC"):
+            in_utc = reference_now()
+        with _viewer_in(TZ):
+            in_saigon = reference_now()
     assert round((in_saigon - in_utc).total_seconds() / 60) == 420
 
 
 def test_relative_range_is_midnight_in_the_display_zone() -> None:
     from superset.utils.date_parser import get_since_until
 
-    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
-        since, until = get_since_until("Last day")
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "UTC"}):
+        with _viewer_in(TZ):
+            since, until = get_since_until("Last day")
 
     today = display_timezone.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
     assert until == today
@@ -197,4 +223,6 @@ def test_a_stored_alias_still_resolves() -> None:
     """A preference saved before this instance knew better must keep working."""
     assert display_timezone.is_known_time_zone("Greenwich")
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "Greenwich"}):
-        assert display_timezone.get_time_zone() == "Etc/GMT"
+        assert display_timezone.get_configured_time_zone() == "Etc/GMT"
+        with _viewer_in("Asia/Saigon"):
+            assert display_timezone.get_time_zone() == "Asia/Ho_Chi_Minh"

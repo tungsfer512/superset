@@ -43,7 +43,7 @@ export type User = {
   username: string;
   loginCount?: number;
   // IANA name of the timezone this user's temporal data is rendered in; empty
-  // when the instance default applies
+  // on the default, which shows the data as stored, without conversion
   displayTimeZone?: string;
 };
 

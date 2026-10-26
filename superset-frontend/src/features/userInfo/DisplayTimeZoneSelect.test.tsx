@@ -48,9 +48,9 @@ test('shows the selected zone', async () => {
   expect(await screen.findByText(new RegExp(TZ))).toBeInTheDocument();
 });
 
-test('falls back to the instance default when no value is set', () => {
+test('falls back to the default when no value is set', () => {
   render(<DisplayTimeZoneSelect />);
-  expect(screen.getByText('Instance default')).toBeInTheDocument();
+  expect(screen.getByText('Default (no conversion)')).toBeInTheDocument();
 });
 
 test('offers the zones the server accepts, not the browser list', async () => {
@@ -88,6 +88,6 @@ test('still renders the default option when the request fails', async () => {
   await open();
 
   expect(
-    await screen.findByRole('option', { name: 'Instance default' }),
+    await screen.findByRole('option', { name: 'Default (no conversion)' }),
   ).toBeInTheDocument();
 });

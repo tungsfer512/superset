@@ -29,7 +29,7 @@ import { NATIVE_FILTER_PREFIX } from 'src/dashboard/components/nativeFilters/Fil
  * in the bootstrap config. The API calls made from here carry no URL parameters
  * of their own, so it travels on as a header and the backend converts temporal
  * columns to that zone in SQL. An absent or rejected value yields no header,
- * leaving the instance default in place.
+ * so the data is shown as stored, without conversion.
  */
 export const getDisplayTimeZoneHeaders = (
   config: {

@@ -111,7 +111,8 @@ def _adjust_string_with_time_zone(unique_string: str, executor: str) -> str:
         display_timezone.clear_user_time_zone_cache()
         time_zone = (
             display_timezone.get_user_time_zone()
-            or display_timezone.get_configured_time_zone()
+            if display_timezone.get_configured_time_zone()
+            else None
         )
     display_timezone.clear_user_time_zone_cache()
 

@@ -110,6 +110,13 @@ def test_request_zone_wins_over_a_user_preference(
                 assert display_timezone.get_time_zone() == OTHER_TZ
 
 
+def test_no_request_zone_converts_nothing() -> None:
+    """An embedded dashboard given no ``timezone`` shows the data as stored."""
+    with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
+        with current_app.test_request_context("/api/v1/chart/data"):
+            assert display_timezone.get_time_zone() is None
+
+
 def test_unknown_request_zone_is_ignored() -> None:
     """The value is client-supplied, so it must be validated."""
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": TZ}):
@@ -117,7 +124,7 @@ def test_unknown_request_zone_is_ignored() -> None:
             "/api/v1/chart/data", headers={HEADER: "Not/AZone"}
         ):
             assert display_timezone.get_request_time_zone() is None
-            assert display_timezone.get_time_zone() == TZ
+            assert display_timezone.get_time_zone() is None
 
 
 def test_request_zone_cannot_enable_a_disabled_instance() -> None:
@@ -163,8 +170,8 @@ def test_dataset_cache_key_differs_per_request_zone() -> None:
             default_keys = dataset.get_extra_cache_keys(query_obj)
 
     assert f"tz:{OTHER_TZ}" in embedded_keys
-    assert f"tz:{TZ}" in default_keys
-    assert embedded_keys != default_keys
+    # unconverted results share the key they had with the feature off
+    assert not any(key.startswith("tz:") for key in default_keys)
 
 
 def test_generated_sql_uses_the_request_zone() -> None:

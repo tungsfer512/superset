@@ -61,10 +61,10 @@ logger = logging.getLogger(__name__)
 def reference_now() -> datetime:
     """Reference point for relative expressions such as ``now`` or ``today``.
 
-    When ``DISPLAY_TIME_ZONE`` is set, this is the wall clock in that zone, so
-    that relative ranges line up with the temporal columns, which are converted
-    to the same zone in SQL. Otherwise it falls back to the module-level
-    ``datetime.now()``, preserving upstream behaviour.
+    When the viewer's data is converted to a display time zone, this is the wall
+    clock in that zone, so that relative ranges line up with the temporal
+    columns, which are converted to the same zone in SQL. Otherwise it falls
+    back to the module-level ``datetime.now()``, preserving upstream behaviour.
     """
     if time_zone := get_display_time_zone():
         return display_time_zone_now(time_zone)

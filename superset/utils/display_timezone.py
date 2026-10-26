@@ -17,25 +17,29 @@
 """Helpers for the ``DISPLAY_TIME_ZONE`` setting.
 
 Superset assumes temporal data is stored in UTC.  When ``DISPLAY_TIME_ZONE`` is
-set, temporal columns are converted to wall-clock time in that time zone *in
-SQL*, so that grouping (time grains), filtering (time ranges) and rendering all
-agree on what "a day" means.  Values then travel to the browser as naive local
-wall clock, which is exactly how the frontend already renders them (d3
-``utcFormat`` and ECharts ``useUTC: true``).
+set and a viewer picks a zone, temporal columns are converted to wall-clock time
+in that zone *in SQL*, so that grouping (time grains), filtering (time ranges)
+and rendering all agree on what "a day" means.  Values then travel to the
+browser as naive local wall clock, which is exactly how the frontend already
+renders them (d3 ``utcFormat`` and ECharts ``useUTC: true``).
 
-The zone is resolved in four tiers, most specific first:
+Nothing is converted unless a zone is explicitly asked for, in one of two ways,
+most specific first:
 
 1. the zone the request asserts, for embedded dashboards whose guest viewer has
    no stored preference (``?timezone=`` plus a matching header);
-2. the current user's own choice, stored on ``user_attribute``;
-3. the target database's ``Extra``, which may also opt the database out;
-4. the ``DISPLAY_TIME_ZONE`` setting.
+2. the current user's own choice, stored on ``user_attribute``.
 
-Tiers 3 and 4 decide *whether* to convert at all -- a database holding
-non-UTC data opts out there, and neither a request nor a user preference can
-re-enable it.  Tiers 1 and 2 only pick which zone to render in.  Because the
-resolved zone is part of the query cache key, two viewers in different zones
-never share cached results.
+Without either -- a user left on the default, an embedded dashboard given no
+``timezone``, anonymous browsing, tasks with no user -- the data is shown
+exactly as stored.
+
+Whether conversion is allowed at all is decided by the target database's
+``Extra`` and then the ``DISPLAY_TIME_ZONE`` setting: a database holding non-UTC
+data opts out there, and neither a request nor a user preference can re-enable
+it.  The zone named there only switches the feature on; it is never applied by
+itself.  Because the resolved zone is part of the query cache key, two viewers
+in different zones never share cached results.
 """
 
 from __future__ import annotations
@@ -227,8 +231,9 @@ def validate_time_zone(time_zone: Any, source: str = CONFIG_KEY) -> str | None:
 def get_configured_time_zone(database: Database | None = None) -> str | None:
     """The display time zone configured for a database, ignoring user choice.
 
-    This decides *whether* conversion happens at all: a database whose data is
-    not stored in UTC opts out here, and no user preference may re-enable it.
+    This only decides *whether* conversion may happen at all: a database whose
+    data is not stored in UTC opts out here, and no user preference may
+    re-enable it. The zone itself is never applied; see :func:`get_time_zone`.
 
     :param database: database the query targets, if any
     :return: an IANA time zone name, or ``None`` when conversion is disabled
@@ -265,7 +270,7 @@ def get_request_time_zone() -> str | None:
     stored preference. The host application therefore states the zone
     explicitly: as a ``?timezone=`` parameter on the embedded page (the same way
     ``lang`` works), and as a header on the API calls that page makes
-    afterwards.
+    afterwards. A host that passes no zone gets the data as stored.
 
     The value is client-supplied, so it is validated against the known IANA
     names and, like a user preference, can only choose *which* zone to render
@@ -284,7 +289,8 @@ def _current_user_id() -> int | None:
     Anonymous users have none, and neither do guest users (embedded
     dashboards): a ``GuestUser`` is not an ORM object at all -- note it reports
     ``is_anonymous`` as ``False`` -- so it is excluded explicitly rather than
-    left to the ``id`` check below. Both fall back to the configured default.
+    left to the ``id`` check below. Both see the data as stored, unless the
+    request asserts a zone.
     """
     user = g.get("user")
     if user is None:
@@ -345,17 +351,18 @@ def get_time_zone(database: Database | None = None) -> str | None:
     """Resolve the display time zone for a query.
 
     Resolution order: the zone asserted by the request (embedded dashboards),
-    then the current user's choice, then the database's ``Extra`` override, then
-    the ``DISPLAY_TIME_ZONE`` setting. The first two only select *which* zone to
-    render in -- neither can enable conversion for a database that has opted
-    out, whose data may not be UTC at all.
+    then the current user's choice. Without either, nothing is converted and the
+    data is shown as stored -- the configured zone is never used as a fallback.
+    Neither can enable conversion for a database that has opted out (or an
+    instance where ``DISPLAY_TIME_ZONE`` is unset), whose data may not be UTC
+    at all.
 
     :param database: database the query targets, if any
-    :return: an IANA time zone name, or ``None`` when conversion is disabled
+    :return: an IANA time zone name, or ``None`` when nothing is converted
     """
-    if (configured := get_configured_time_zone(database)) is None:
+    if get_configured_time_zone(database) is None:
         return None
-    return get_request_time_zone() or get_user_time_zone() or configured
+    return get_request_time_zone() or get_user_time_zone()
 
 
 def clear_user_time_zone_cache() -> None:

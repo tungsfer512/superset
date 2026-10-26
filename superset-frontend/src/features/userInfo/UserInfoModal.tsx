@@ -21,9 +21,7 @@ import { FormModal, FormItem, Input } from '@superset-ui/core/components';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { User } from 'src/types/bootstrapTypes';
 import { BaseUserListModalProps, FormValues } from '../users/types';
-import DisplayTimeZoneSelect, {
-  INSTANCE_DEFAULT,
-} from './DisplayTimeZoneSelect';
+import DisplayTimeZoneSelect, { NO_CONVERSION } from './DisplayTimeZoneSelect';
 
 export interface UserInfoModalProps extends BaseUserListModalProps {
   isEditMode?: boolean;
@@ -46,7 +44,7 @@ function UserInfoModal({
     ? {
         first_name: user?.firstName,
         last_name: user?.lastName,
-        display_time_zone: user?.displayTimeZone ?? INSTANCE_DEFAULT,
+        display_time_zone: user?.displayTimeZone ?? NO_CONVERSION,
       }
     : {};
   const handleFormSubmit = async (values: FormValues) => {
@@ -90,10 +88,14 @@ function UserInfoModal({
         name="display_time_zone"
         label={t('Display timezone')}
         help={t(
-          'Dates and times are shown, grouped and filtered in this timezone. Data is stored in UTC and converted when queried.',
+          'Dates and times are shown, grouped and filtered in this timezone, converted from UTC when queried. The default shows them as stored, without conversion.',
         )}
       >
-        <DisplayTimeZoneSelect />
+        <DisplayTimeZoneSelect
+          // the modal body scrolls, so a popup inside it is clipped when it
+          // opens upwards from this last field
+          getPopupContainer={trigger => trigger.closest('.ant-modal-content')}
+        />
       </FormItem>
     </>
   );

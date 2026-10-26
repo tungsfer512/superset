@@ -80,5 +80,5 @@ def test_no_timezone_parameter(rendered_bootstrap) -> None:
     with mock.patch.dict(current_app.config, {"DISPLAY_TIME_ZONE": "UTC"}):
         bootstrap = rendered_bootstrap("/embedded/some-uuid")
 
-    # empty means "send no header", leaving the instance default in place
+    # empty means "send no header", so the data is shown as stored
     assert bootstrap["config"]["DISPLAY_TIME_ZONE"] == ""

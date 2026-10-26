@@ -19,9 +19,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { SupersetClient, t } from '@superset-ui/core';
-import { Select } from '@superset-ui/core/components';
+import { Select, type SelectProps } from '@superset-ui/core/components';
 
-export const INSTANCE_DEFAULT = '';
+// the empty preference: data is shown as stored, without conversion
+export const NO_CONVERSION = '';
 
 interface TimeZone {
   name: string;
@@ -31,6 +32,7 @@ interface TimeZone {
 export interface DisplayTimeZoneSelectProps {
   value?: string;
   onChange?: (value: string) => void;
+  getPopupContainer?: SelectProps['getPopupContainer'];
 }
 
 /**
@@ -46,6 +48,7 @@ export interface DisplayTimeZoneSelectProps {
 export default function DisplayTimeZoneSelect({
   value,
   onChange,
+  getPopupContainer,
 }: DisplayTimeZoneSelectProps) {
   const [zones, setZones] = useState<TimeZone[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +74,7 @@ export default function DisplayTimeZoneSelect({
 
   const options = useMemo(
     () => [
-      { label: t('Instance default'), value: INSTANCE_DEFAULT },
+      { label: t('Default (no conversion)'), value: NO_CONVERSION },
       ...zones.map(({ name, offset }) => ({
         label: `${name} (UTC${offset})`,
         value: name,
@@ -84,13 +87,12 @@ export default function DisplayTimeZoneSelect({
     <Select
       ariaLabel={t('Display timezone')}
       options={options}
-      value={value ?? INSTANCE_DEFAULT}
-      onChange={selected =>
-        onChange?.((selected as string) ?? INSTANCE_DEFAULT)
-      }
-      placeholder={t('Instance default')}
+      value={value ?? NO_CONVERSION}
+      onChange={selected => onChange?.((selected as string) ?? NO_CONVERSION)}
+      placeholder={t('Default (no conversion)')}
       loading={loading}
       showSearch
+      getPopupContainer={getPopupContainer}
     />
   );
 }

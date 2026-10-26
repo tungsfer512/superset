@@ -29,8 +29,8 @@ last_name_description = "The current user's last name"
 password_description = "The current user's password for authentication"  # noqa: S105
 display_time_zone_description = (
     "IANA time zone name temporal data is displayed and filtered in for this "
-    "user, e.g. `Asia/Ho_Chi_Minh`. An empty string clears the preference, "
-    "falling back to the instance default."
+    "user, e.g. `Asia/Ho_Chi_Minh`. An empty string clears the preference: "
+    "temporal data is then shown as stored, without conversion."
 )
 
 
